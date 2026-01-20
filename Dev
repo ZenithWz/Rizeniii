@@ -2535,11 +2535,11 @@ local Discord_Info = i:AddSection("discord server And information");
 -- Secção de Configurações manuais
 local ConfigSection = c:AddSection("Manual Save")
 
-
+ConfigSection:AddSeperator("Config")
 
 ConfigSection:AddButton({
     Title = "Reset Config",
-    Description = "Apaga o ficheiro de save e volta ao padrão",
+    Description = "",
     Callback = function()
         -- Usa a variável FullPath que foi definida lá no topo do script
         if isfile and isfile(FullPath) then
@@ -3960,6 +3960,7 @@ _G.AutoQuestComplete = false
 _G.AutoSellFish = false
 _G.AutoSkillZ = false
 
+TT:AddSeperator("Fishing")
 
 -- 1. SELEÇÃO DE VARA
 TT:AddDropdown({
@@ -5308,7 +5309,7 @@ b:AddDropdown({
 
 -- Toggle de Auto Farm (Material)
 b:AddToggle({
-	Title = "Auto Farm",
+	Title = "Start Farm",
 	Description = "",
 	-- 1. Carrega se o farm de material estava ligado
 	Default = GetSetting("AutoMaterial_Save", false),
@@ -5361,6 +5362,8 @@ spawn(function()
 	end;
 end);
 
+
+if World3 then
 b:AddSeperator("Mastery")
 
 local islands = { "Cake", "Bone" }
