@@ -157,7 +157,7 @@ function I:NewWindow(config)
 
         local TabWrapper = {}
 
-        -- Função para criar Seções (Redz V5 não tem seção agrupada, usamos Paragraph como divisor)
+        -- Função para criar Seções
         function TabWrapper:AddSection(sectionName)
             Tab:AddParagraph(sectionName, "")
 
@@ -218,9 +218,9 @@ function I:NewWindow(config)
                 return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")
             end
 
-            -- Separador (Usando Paragraph vazio)
+            -- Separador (Agora como Section conforme solicitado)
             function SectionWrapper:AddSeperator(text)
-                Tab:AddParagraph("--- " .. text .. " ---", "")
+                Tab:AddSection(text)
             end
 
             -- Label
@@ -255,6 +255,7 @@ function I:NewWindow(config)
 
     return WindowWrapper
 end
+
 
 
 if World1 then
