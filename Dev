@@ -9159,7 +9159,6 @@ task.spawn(function()
 	end
 end)
 
-end
 if World1 or World2 then
 W:AddSeperator("only in Sea 3");
 end
