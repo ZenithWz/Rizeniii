@@ -8777,15 +8777,16 @@ spawn(function()
 	end;
 end);
 end
+
 if World1 or World2 then
 nn:AddSeperator("only in Sea 3");
 end
 if World3 then
-W:AddSeperator("Dojo Quest & Drago Race");
+nn:AddSeperator("Draco Race");
 
-W:AddToggle({
+nn:AddToggle({
 	Title = "Auto Dragon Hunter",
-	Description = "turn on for farm blaze ember + auto collect blaze ember",
+	Description = "",
 	Default = false,
 	Callback = function(I)
 		_G.FarmBlazeEM = I;
@@ -8910,9 +8911,8 @@ spawn(function()
 		end;
 	end;
 end);
-W:AddSeperator("Draco Trial");
 
-W:AddToggle({
+nn:AddToggle({
 	Title = "Auto Draco V1",
 	Description = "",
 	Default = false,
@@ -8939,7 +8939,7 @@ spawn(function()
 		end);
 	end;
 end);
-W:AddToggle({
+nn:AddToggle({
 	Title = "Auto Draco V2",
 	Description = "",
 	Default = false,
@@ -8979,7 +8979,7 @@ spawn(function()
 		end;
 	end;
 end);
-W:AddToggle({
+nn:AddToggle({
 	Title = "Auto Draco V3",
 	Description = "",
 	Default = false,
@@ -9005,7 +9005,7 @@ spawn(function()
 	end;
 end);
 
-W:AddToggle({
+nn:AddToggle({
 	Title = "Auto to train race draco",
 	Description = "",
 	Default = false,
@@ -9039,6 +9039,7 @@ spawn(function()
 		end);
 	end;
 end);
+
 
 end
 if World1 or World2 then
