@@ -1279,6 +1279,7 @@ task.spawn(function()
 				end;
 
 			else
+				-- Lógica para devolver colisão e parar
 				local e = I.Character;
 				if e then
 					for _, v in pairs(e:GetChildren()) do
@@ -1298,7 +1299,7 @@ end);
 
 local plr = game.Players.LocalPlayer
 
--- Identificação do Mundo (Opcional para uso global, mas já incluso na func abaixo)
+-- Identificação do Mundo
 local World1, World2, World3 = false, false, false
 if game.PlaceId == 2753915549 or game.PlaceId == 85211729168715 then
     World1 = true
@@ -1310,7 +1311,6 @@ end
 
 function requestEntrance(v402)
     game.ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance", v402)
-    -- Ajuste visual após pedir entrada
     if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
         local l_HumanoidRootPart_3 = plr.Character.HumanoidRootPart
         l_HumanoidRootPart_3.CFrame = l_HumanoidRootPart_3.CFrame + Vector3.new(0, 50, 0)
@@ -1322,7 +1322,7 @@ function CheckNearestTeleporter(v393)
     local l_Position_1 = v393.Position
     local l_huge_0 = math.huge
     local v396 = nil -- Posição do Portal
-    local v397 = nil -- Nome do Portal (Necessário para o requestEntrance)
+    local v397 = nil -- Nome do Portal
     local l_PlaceId_1 = game.PlaceId
     local v398 = {}
     
@@ -1334,10 +1334,10 @@ function CheckNearestTeleporter(v393)
                     ["Hydra Island"] = Vector3.new(5657.88623046875, 1013.0790405273438, -335.4996337890625),
                     Mansion = Vector3.new(-12462, 375, -7552),
                     Castle = Vector3.new(-5036, 315, -3179),
-                    ["Dimensional Shift"] = Vector3.new(-2097.3447265625, 4776.24462890625, -15013.4990234375),
+                    -- ["Dimensional Shift"] REMOVIDO
                     ["Beautiful Pirate"] = Vector3.new(5319, 23, -93),
                     ["Beautiful Room"] = Vector3.new(5314.58203, 22.5364361, -125.942276, 1, 2.14762768E-8, -1.99111154E-13, -2.14762768E-8, 1, -3.0510602E-8, 1.98455903E-13, 3.0510602E-8, 1),
-                    ["Temple of Time"] = Vector3.new(28286, 14897, 103)
+                    -- ["Temple of Time"] REMOVIDO
                 }
             end
         else -- World 2
@@ -1354,24 +1354,23 @@ function CheckNearestTeleporter(v393)
             Sky3Exit = Vector3.new(-4607, 874, -1667),
             UnderWater = Vector3.new(61163, 11, 1819),
             ["Underwater City"] = Vector3.new(61165.19140625, 0.18704631924629211, 1897.379150390625),
-            ["Pirate Village"] = Vector3.new(-1242.4625244140625, 4.787059783935547, 3901.282958984375),
+            -- ["Pirate Village"] REMOVIDO
             UnderwaterExit = Vector3.new(4050, -1, -1814)
         }
     end
 
-    -- Loop modificado para capturar a Chave (Nome) e o Valor (Posição)
     for k, v400 in pairs(v398) do
         local l_Magnitude_1 = (v400 - l_Position_1).Magnitude
         if l_Magnitude_1 < l_huge_0 then
             l_huge_0 = l_Magnitude_1
-            v396 = v400 -- Posição
-            v397 = k    -- Nome
+            v396 = v400 
+            v397 = k    
         end
     end
     
     if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
         if l_huge_0 <= (l_Position_1 - plr.Character.HumanoidRootPart.Position).Magnitude then
-            return v396, v397 -- Retorna Posição e Nome
+            return v396, v397 
         else
             return nil, nil
         end
@@ -1380,7 +1379,7 @@ function CheckNearestTeleporter(v393)
 end
 
 -- =======================
--- TWEEN AJUSTADO (COM PORTAL E DISTÂNCIA)
+-- TWEEN AJUSTADO
 -- =======================
 
 getgenv().TweenSpeedFar = 300   
@@ -1394,61 +1393,52 @@ _tp = function(I)
 
     local HRP = e.HumanoidRootPart;  
     
-    -- 1. Verifica Portais ANTES de começar o tween
-    -- Se existir um portal que deixa mais perto, usa ele.
+    -- Checa portal
     local PortalPos, PortalName = CheckNearestTeleporter(I)
-    
     if PortalPos and PortalName then
-        -- Usa o portal
         requestEntrance(PortalName)
-        
-        -- Atualiza a posição da Part C e do Jogador para a saída do portal
-        -- Isso evita que o tween tente voar da posição antiga
         HRP.CFrame = CFrame.new(PortalPos)
         C.CFrame = CFrame.new(PortalPos)
-        task.wait(0.2) -- Pequeno delay para processar o TP
+        task.wait(0.2)
     end
 
-    -- Desativar farm enquanto tweena  
     shouldTween = true  
-    getgenv().OnFarm = false  
+    getgenv().OnFarm = false -- Mantém false enquanto viaja
 
-    -- Garantir que não está ancorado  
     if HRP.Anchored then  
         HRP.Anchored = false  
         task.wait()  
     end  
 
-    -- Recalcula a distância (se usou portal, a distância agora é menor)
     local dist = (I.Position - HRP.Position).Magnitude  
-
-    -- ===============================  
-    --  SE ESTIVER ATÉ 15 STUDS → USA A VELOCIDADE DE PERTO
-    --  CASO CONTRÁRIO → USA A VELOCIDADE PADRÃO
-    -- ===============================  
     local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
 
     local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)  
     local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })  
 
-    -- Caso esteja sentado  
     if e.Humanoid.Sit == true then  
         C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)  
     end  
 
     tween:Play()  
 
-    -- Anti travamento / controle  
+    -- Monitoramento CORRIGIDO para parar corretamente
     task.spawn(function()  
         while tween.PlaybackState == Enum.PlaybackState.Playing do  
             if not shouldTween then  
                 tween:Cancel()  
-                break  
+                getgenv().OnFarm = false -- FORÇA PARADA
+                return -- Sai da função para não reativar o OnFarm
             end  
-            task.wait(.1)  
+            task.wait()  
         end  
 
-        getgenv().OnFarm = true  
+        -- Só ativa o Farm se o tween completou E se o usuário ainda quer farmar
+        if shouldTween and tween.PlaybackState == Enum.PlaybackState.Completed then
+             getgenv().OnFarm = true
+        else
+             getgenv().OnFarm = false
+        end
     end)
 end
 
