@@ -1287,140 +1287,73 @@ task.spawn(function()
 	end;
 end);
 
-getgenv().TweenSpeedFar = 300
-getgenv().TweenSpeedNear = 600
+-- =======================
+-- TWEEN AJUSTADO POR DISTÂNCIA
+-- =======================
 
-function CheckNearestTeleporter(v393)
-    local l_Position_1 = v393.Position
-    local l_huge_0 = math.huge
-    local v396 = nil
-    local l_PlaceId_1 = game.PlaceId
-    local v398 = {}
-    if l_PlaceId_1 ~= 85211729168715 then
-        if l_PlaceId_1 ~= 79091703265657 then
-            if l_PlaceId_1 == 100117331123089 then
-                v398 = {
-                    ["Floating Turtle"] = Vector3.new(-12462, 375, -7552),
-                    ["Hydra Island"] = Vector3.new(5657.88623046875, 1013.0790405273438, -335.4996337890625),
-                    Mansion = Vector3.new(-12462, 375, -7552),
-                    Castle = Vector3.new(-5036, 315, -3179),
-                    ["Beautiful Pirate"] = Vector3.new(5319, 23, -93),
-                    ["Beautiful Room"] = Vector3.new(5314.58203, 22.5364361, -125.942276, 1, 2.14762768E-8, -1.99111154E-13, -2.14762768E-8, 1, -3.0510602E-8, 1.98455903E-13, 3.0510602E-8, 1)
-                }
-            end
-        else
-            v398 = {
-                ["Swan Mansion"] = Vector3.new(-390, 332, 673),
-                ["Swan Room"] = Vector3.new(2285, 15, 905),
-                ["Cursed Ship"] = Vector3.new(923, 126, 32852),
-                ["Zombie Island"] = Vector3.new(-6509, 83, -133)
-            }
-        end
-    else
-        v398 = {
-            Sky3 = Vector3.new(-7894, 5547, -380),
-            Sky3Exit = Vector3.new(-4607, 874, -1667),
-            UnderWater = Vector3.new(61163, 11, 1819),
-            ["Underwater City"] = Vector3.new(61165.19140625, 0.18704631924629211, 1897.379150390625),
-            UnderwaterExit = Vector3.new(4050, -1, -1814)
-        }
-    end
-    for v399, v400 in pairs(v398) do
-        local l_Magnitude_1 = (v400 - l_Position_1).Magnitude
-        if l_Magnitude_1 < l_huge_0 then
-            l_huge_0 = l_Magnitude_1
-            v396 = {pos = v400, name = v399}
-        end
-    end
-    if l_huge_0 <= (l_Position_1 - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude then
-        return v396
-    else
-        return nil
-    end
-end
-
-function requestEntrance(v402)
-    game.ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance", v402)
-    local l_HumanoidRootPart_3 = game.Players.LocalPlayer.Character.HumanoidRootPart
-    l_HumanoidRootPart_3.CFrame = l_HumanoidRootPart_3.CFrame + Vector3.new(0, 50, 0)
-    task.wait(0.5)
-end
+-- [[ VARIÁVEIS PARA O SEU INPUT ]] --
+getgenv().TweenSpeedFar = 300   -- Velocidade Padrão (Longe)
+getgenv().TweenSpeedNear = 600  -- Velocidade Boost (Perto <= 15 studs)
 
 _tp = function(I)
-	local e = plr.Character;
-	if not e or not e:FindFirstChild("HumanoidRootPart") then
-		return;
-	end;
+local e = plr.Character;
+if not e or not e:FindFirstChild("HumanoidRootPart") then
+return;
+end;
 
-	local HRP = e.HumanoidRootPart;
+local HRP = e.HumanoidRootPart;  
 
-	shouldTween = true
-	getgenv().OnFarm = false
+-- Desativar farm enquanto tweena  
+shouldTween = true  
+getgenv().OnFarm = false  
 
-	if HRP.Anchored then
-		HRP.Anchored = false
-		task.wait()
-	end
+-- Garantir que não está ancorado  
+if HRP.Anchored then  
+	HRP.Anchored = false  
+	task.wait()  
+end  
 
-	local nearestTeleporter = CheckNearestTeleporter(I)
-	
-	if nearestTeleporter then
-		local dist = (nearestTeleporter.pos - HRP.Position).Magnitude
-		local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
-		local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)
-		local tween = game:GetService("TweenService"):Create(C, info, { CFrame = CFrame.new(nearestTeleporter.pos) })
+local dist = (I.Position - HRP.Position).Magnitude  
 
-		if e.Humanoid.Sit == true then
-			C.CFrame = CFrame.new(C.Position.X, nearestTeleporter.pos.Y, C.Position.Z)
-		end
+-- ===============================  
+--  SE ESTIVER ATÉ 15 STUDS → USA A VELOCIDADE DE PERTO
+--  CASO CONTRÁRIO → USA A VELOCIDADE PADRÃO
+-- ===============================  
+local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
 
-		tween:Play()
-		
-		task.spawn(function()
-			while tween.PlaybackState == Enum.PlaybackState.Playing do
-				if not shouldTween then
-					tween:Cancel()
-					break
-				end
-				task.wait(.1)
-			end
-		end)
-		
-		tween.Completed:Wait()
-		requestEntrance(nearestTeleporter.name)
-	end
+local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)  
+local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })  
 
-	local dist = (I.Position - HRP.Position).Magnitude
-	local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
-	local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)
-	local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })
+-- Caso esteja sentado  
+if e.Humanoid.Sit == true then  
+	C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)  
+end  
 
-	if e.Humanoid.Sit == true then
-		C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)
-	end
+tween:Play()  
 
-	tween:Play()
+-- Anti travamento / controle  
+task.spawn(function()  
+	while tween.PlaybackState == Enum.PlaybackState.Playing do  
+		if not shouldTween then  
+			tween:Cancel()  
+			break  
+		end  
+		task.wait(.1)  
+	end  
 
-	task.spawn(function()
-		while tween.PlaybackState == Enum.PlaybackState.Playing do
-			if not shouldTween then
-				tween:Cancel()
-				break
-			end
-			task.wait(.1)
-		end
+	getgenv().OnFarm = true  
+end)
 
-		getgenv().OnFarm = true
-	end)
 end
 
 TeleportToTarget = function(I)
-	_tp(I)
+_tp(I)
 end
 
 notween = function(I)
-	plr.Character.HumanoidRootPart.CFrame = I
+plr.Character.HumanoidRootPart.CFrame = I
 end
+
 
 function BTP(I)
 	local e = game.Players.LocalPlayer;
@@ -4614,15 +4547,23 @@ b:AddDropdown({
     Default = "Melee",
     Multi = false,
     Callback = function(I)
-        _G.ChooseWP = I
+        -- Se o M1 Fruit estiver ligado, ele força Blox Fruit ignorando a escolha manual
+        if _G.UseM1Fruit then
+            _G.ChooseWP = "Blox Fruit"
+        else
+            _G.ChooseWP = I
+        end
     end,
 })
 
 spawn(function()
     while wait(Sec) do
         pcall(function()
+            -- Força Blox Fruit se o toggle estiver ativo
+            local currentWeapon = _G.UseM1Fruit and "Blox Fruit" or _G.ChooseWP
+            
             for _, e in pairs(plr.Backpack:GetChildren()) do
-                if e.ToolTip == _G.ChooseWP then
+                if e.ToolTip == currentWeapon then
                     if plr.Backpack:FindFirstChild(e.Name) then
                         _G.SelectWeapon = e.Name
                     end
@@ -4631,7 +4572,6 @@ spawn(function()
         end)
     end
 end)
-
 
 -- VARIAVEIS GLOBAIS
 _G.SelectedFarmMode = "Level"
@@ -10269,6 +10209,19 @@ end)
 
 A:AddSeperator("Sea Events Selection")
 
+-- // TOGGLE M1 FRUIT // --
+A:AddToggle({
+    Title = "Use M1 Fruit",
+    Description = "Disables skills and sets weapon to Blox Fruit",
+    Default = false,
+    Callback = function(Value)
+        _G.UseM1Fruit = Value
+        if Value then
+            _G.ChooseWP = "Blox Fruit"
+        end
+    end
+})
+
 -- Tabela de Configuração: { Nome no Menu, Variável Global, Mundos Permitidos }
 local SeaEventsConfig = {
     -- Eventos disponíveis no Sea 2 e 3
@@ -10440,6 +10393,9 @@ _G.SelectedSkills = {
 
 -- Função OTIMIZADA para usar todas as skills de uma categoria antes de sair
 local function ExecuteSkills(category)
+    -- CANCELA O USO DE SKILLS SE O M1 ESTIVER ATIVO
+    if _G.UseM1Fruit then return end 
+
     if _G.SelectedSkills[category] then
         weaponSc(category) -- Garante que equipou a arma
         task.wait(0.2) -- Espera equipar
@@ -10474,6 +10430,9 @@ task.spawn(function()
                         if K.Name == enemyData.Name and G.Alive(K) then
                             repeat
                                 task.wait()
+                                -- Equipar arma mesmo se skills estiverem em off
+                                if _G.UseM1Fruit then weaponSc("Blox Fruit") end
+                                
                                 if enemyData.KillType == "Sea" then
                                     G.KillSea(K, enemyData.Flag)
                                 else
@@ -10497,11 +10456,11 @@ task.spawn(function()
                             
                             if plr:DistanceFromCharacter(e.HumanoidRootPart.CFrame.Position) <= 500 then
                                 MousePos = e.HumanoidRootPart.Position
-                                if CheckF() then
-                                    -- Se estiver transformado, foca só em Blox Fruit
+                                if _G.UseM1Fruit then
+                                    weaponSc("Blox Fruit")
+                                elseif CheckF() then
                                     ExecuteSkills("Blox Fruit")
                                 else
-                                    -- Sequência completa: Melee -> Sword -> Fruit -> Gun
                                     ExecuteSkills("Melee")
                                     ExecuteSkills("Sword")
                                     ExecuteSkills("Blox Fruit")
@@ -10526,7 +10485,9 @@ task.spawn(function()
                             
                             if plr:DistanceFromCharacter(e.HumanoidRootPart.CFrame.Position) <= 500 then
                                 MousePos = segment.Position
-                                if CheckF() then
+                                if _G.UseM1Fruit then
+                                    weaponSc("Blox Fruit")
+                                elseif CheckF() then
                                     ExecuteSkills("Blox Fruit")
                                 else
                                     ExecuteSkills("Melee")
@@ -10559,7 +10520,9 @@ task.spawn(function()
                                 
                                 if plr:DistanceFromCharacter(e.Engine.CFrame.Position) <= boat.Dist then
                                     MousePos = e.Engine.Position
-                                    if CheckF() then
+                                    if _G.UseM1Fruit then
+                                        weaponSc("Blox Fruit")
+                                    elseif CheckF() then
                                         ExecuteSkills("Blox Fruit")
                                     else
                                         ExecuteSkills("Melee")
@@ -10577,6 +10540,8 @@ task.spawn(function()
         end)
     end
 end)
+
+
 
 if game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
 zu:AddSeperator("Frozen Dimension");
