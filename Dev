@@ -6048,20 +6048,10 @@ local function RefreshBosses()
         table.sort(LiveBosses)
         BossDropdown:Refresh(LiveBosses, true)  
     else 
-        BossDropdown:Refresh({"Nenhum Boss Encontrado"}, true) 
+        BossDropdown:Refresh({"None"}, true) 
     end  
 end
 
--- 3. Cria o Botão (Chama a função acima)
-outros:AddButton({
-    Title = "Refresh Boss List",
-    Description = "",
-    Callback = RefreshBosses -- Chama a função criada
-})
-
-task.spawn(function()
-RefreshBosses()
-end)
 
 outros:AddToggle({
     Title = "Auto Farm Boss Select",
