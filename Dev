@@ -5363,7 +5363,6 @@ spawn(function()
 end);
 
 
-if World3 then
 b:AddSeperator("Mastery")
 
 local islands = { "Cake", "Bone" }
