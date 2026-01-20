@@ -9838,7 +9838,14 @@ spawn(function()
 		end;
 	end;
 end); 
-
+zu:AddToggle({
+	Title = "Auto Attack Leviathan",
+	Description = "",
+	Default = false,
+	Callback = function(I)
+		_G.Leviathan1 = I;
+	end,
+});
 zu:AddSeperator("Kitsune Island");
 zu:AddToggle({
     Title = "Auto Find Kitsune Island",
@@ -9978,6 +9985,7 @@ spawn(function()
 	end;
 end);
 
+end
 p:AddSeperator("Raid");
 e = {
 		"Flame",
@@ -10040,7 +10048,7 @@ spawn(function()
 end);
 p:AddToggle({
 	Title = "Buy Chip With Fruit",
-	Description = "",
+	Description = "Use your lowest fruit in your bag",
 	Default = false,
 	Callback = function(state)
 		_G.AutoBuyChip = state
@@ -10277,6 +10285,15 @@ local function RefreshPlayerList()
     PlayerDropdown:Refresh(NewPlayers, true)
 end
 
+-- 3. Cria o Botão (Usa a função acima)
+E:AddButton({
+    Title = "Refresh Player List",
+    Description = "",
+    Callback = RefreshPlayerList
+});
+
+-- 4. EXECUTA A FUNÇÃO AUTOMATICAMENTE AGORA!
+task.spawn(RefreshPlayerList)
 
 
 E:AddToggle({
