@@ -1291,13 +1291,6 @@ end)
 getgenv().TweenSpeedFar = 300
 getgenv().TweenSpeedNear = 600
 
-function requestEntrance(v402)
-    game.ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance", v402)
-    local l_HumanoidRootPart_3 = game.Players.LocalPlayer.Character.HumanoidRootPart
-    l_HumanoidRootPart_3.CFrame = l_HumanoidRootPart_3.CFrame + Vector3.new(0, 50, 0)
-    task.wait(0.5)
-end
-
 function CheckNearestTeleporter(v393)
     local l_Position_1 = v393.Position
     local l_huge_0 = math.huge
@@ -1347,61 +1340,56 @@ function CheckNearestTeleporter(v393)
     end
 end
 
+function requestEntrance(v402)
+    game.ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance", v402)
+    local l_HumanoidRootPart_3 = game.Players.LocalPlayer.Character.HumanoidRootPart
+    l_HumanoidRootPart_3.CFrame = l_HumanoidRootPart_3.CFrame + Vector3.new(0, 50, 0)
+    task.wait(0.5)
+end
+
 _tp = function(I)
-    local function PerformTween(TargetCF)
-        local e = plr.Character
-        if not e or not e:FindFirstChild("HumanoidRootPart") then
-            return
-        end
+    local e = plr.Character
+    if not e or not e:FindFirstChild("HumanoidRootPart") then
+        return
+    end
 
-        local HRP = e.HumanoidRootPart
-        shouldTween = true
-        getgenv().OnFarm = false
+    local HRP = e.HumanoidRootPart
+    shouldTween = true
+    getgenv().OnFarm = false
 
-        if HRP.Anchored then
-            HRP.Anchored = false
-            task.wait()
-        end
+    if HRP.Anchored then
+        HRP.Anchored = false
+        task.wait()
+    end
 
-        local dist = (TargetCF.Position - HRP.Position).Magnitude
-        local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
-        local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)
-        local tween = game:GetService("TweenService"):Create(C, info, { CFrame = TargetCF })
+    local bestPortal = CheckNearestTeleporter(I)
+    if bestPortal then
+        requestEntrance(bestPortal)
+        C.CFrame = HRP.CFrame
+        task.wait(0.1)
+    end
 
-        if e.Humanoid.Sit == true then
-            C.CFrame = CFrame.new(C.Position.X, TargetCF.Position.Y, C.Position.Z)
-        end
+    local dist = (I.Position - HRP.Position).Magnitude
+    local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
+    local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)
+    local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })
 
-        tween:Play()
+    if e.Humanoid.Sit == true then
+        C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)
+    end
 
-        local tweenActive = true
-        local monitor = task.spawn(function()
-            while tween.PlaybackState == Enum.PlaybackState.Playing do
-                if not shouldTween then
-                    tween:Cancel()
-                    tweenActive = false
-                    break
-                end
-                task.wait(0.1)
+    tween:Play()
+
+    task.spawn(function()
+        while tween.PlaybackState == Enum.PlaybackState.Playing do
+            if not shouldTween then
+                tween:Cancel()
+                break
             end
-            tweenActive = false
-        end)
-
-        while tween.PlaybackState == Enum.PlaybackState.Playing and shouldTween do
-            task.wait()
+            task.wait(.1)
         end
-    end
-
-    local bypassSpot = CheckNearestTeleporter(I)
-    if bypassSpot then
-        PerformTween(CFrame.new(bypassSpot))
-        if shouldTween then
-            requestEntrance(bypassSpot)
-        end
-    end
-
-    PerformTween(I)
-    getgenv().OnFarm = true
+        getgenv().OnFarm = true
+    end)
 end
 
 TeleportToTarget = function(I)
@@ -1411,6 +1399,7 @@ end
 notween = function(I)
     plr.Character.HumanoidRootPart.CFrame = I
 end
+
 
 
 
