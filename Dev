@@ -1,7 +1,7 @@
 repeat task.wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
-local FolderName = "Diamond"
+local FolderName = "Night Mystic"
 local FileName = "Settings.json"
 local FullPath = FolderName .. "/" .. FileName
 
@@ -124,7 +124,7 @@ Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
 -- [[ 1. CARREGAMENTO DA NOVA UI (REDZ V5) ]] --
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithWz/Rizeniii/refs/heads/main/Library"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/redz-V5-remake/main.luau"))()
 
 -- [[ 2. ADAPTADOR ATUALIZADO (NIGHT MYSTIC -> REDZ V5) ]] --
 local I = {}
@@ -2482,21 +2482,21 @@ task.spawn(function()
 end)
 
 -- TABS (somente nomes alterados)
-local i        = V:T("info / Discord","rbxassetid://10723415903")
-local server   = V:T("Status And Server","rbxassetid://122223674767625")
-local g        = V:T("Shop","rbxassetid://134556077676632")
-local y        = V:T("Main Farm","rbxassetid://127561653320876")
+local i        = V:T("info / Discord","rbxassetid://10709819149")
+local server   = V:T("Status And Server","rbxassetid://10747382504")
+local g        = V:T("Shop","rbxassetid://10734952479")
+local y        = V:T("Main","rbxassetid://10723407389")
 local CS_Tab   = V:T("Farm Mastery","rbxassetid://10709782497")
-local x        = V:T("Farm Others","rbxassetid://72448332143088")
+local x        = V:T("Sub Farming","rbxassetid://72448332143088")
 local t        = V:T("Sea Events","rbxassetid://96788654458681")
 local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
 local v        = V:T("Dojo Quest & Drago Race","rbxassetid://91920478152016")
 local VI       = V:T("Visuals & ESP","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
 local l        = V:T("Teleport","rbxassetid://10734886004")
-local R        = V:T("Get Items & Upgrade","rbxassetid://10709782582")
+local R        = V:T("Get Items & Upgrade","rbxassetid://10734975692")
 local B        = V:T("Raid & Fruit","rbxassetid://10709790875")
-local c        = V:T("Settings & Misc","rbxassetid://127147149367603")
+local c        = V:T("Settings & Misc","rbxassetid://10734950309")
 
 -- SECTIONS (somente nomes alterados)
 local b    = y:AddSection("Auto Farm main");
