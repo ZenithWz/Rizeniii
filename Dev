@@ -1219,74 +1219,73 @@ Hop = function()
 			end;
 		end);
 	end;
-local plr = game.Players.LocalPlayer
-local C = Instance.new("Part", workspace)
-C.Size = Vector3.new(1, 1, 1)
-C.Name = "Rip_Indra"
-C.Anchored = true
-C.CanCollide = false
-C.CanTouch = false
-C.Transparency = 1
+local C = Instance.new("Part", workspace);
+C.Size = Vector3.new(1, 1, 1);
+C.Name = "Rip_Indra";
+C.Anchored = true;
+C.CanCollide = false;
+C.CanTouch = false;
+C.Transparency = 1;
 
-local M = workspace:FindFirstChild(C.Name)
+local M = workspace:FindFirstChild(C.Name);
 if M and M ~= C then
-	M:Destroy()
-end
+	M:Destroy();
+end;
 
 task.spawn(function()
 	while task.wait() do
 		if C and C.Parent == workspace then
 			if shouldTween then
-				(getgenv()).OnFarm = true
+				(getgenv()).OnFarm = true;
 			else
-				(getgenv()).OnFarm = false
-			end
+				(getgenv()).OnFarm = false;
+			end;
 		else
-			(getgenv()).OnFarm = false
-		end
-	end
-end)
+			(getgenv()).OnFarm = false;
+		end;
+	end;
+end);
 
 task.spawn(function()
-	local I = game.Players.LocalPlayer
-	repeat task.wait() until I.Character and I.Character.PrimaryPart
+	local I = game.Players.LocalPlayer;
+	repeat task.wait() until I.Character and I.Character.PrimaryPart;
 
-	C.CFrame = I.Character.PrimaryPart.CFrame
+	C.CFrame = I.Character.PrimaryPart.CFrame;
 
 	while task.wait() do
 		pcall(function()
 			if (getgenv()).OnFarm then
 				if C and C.Parent == workspace then
-					local e = I.Character and I.Character.PrimaryPart
+					local e = I.Character and I.Character.PrimaryPart;
 					if e and (e.Position - C.Position).Magnitude <= 200 then
-						e.CFrame = C.CFrame
+						e.CFrame = C.CFrame;
 					else
-						C.CFrame = e.CFrame
-					end
-				end
+						C.CFrame = e.CFrame;
+					end;
+				end;
 
-				local e = I.Character
+				local e = I.Character;
 				if e then
 					for _, v in pairs(e:GetChildren()) do
 						if v:IsA("BasePart") then
-							v.CanCollide = false
-						end
-					end
-				end
+							v.CanCollide = false;
+						end;
+					end;
+				end;
 
 			else
-				local e = I.Character
+				local e = I.Character;
 				if e then
 					for _, v in pairs(e:GetChildren()) do
 						if v:IsA("BasePart") then
-							v.CanCollide = true
-						end
-					end
-				end
-			end
-		end)
-	end
-end)
+							v.CanCollide = true;
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
 
 getgenv().TweenSpeedFar = 300
 getgenv().TweenSpeedNear = 600
@@ -1326,11 +1325,11 @@ function CheckNearestTeleporter(v393)
             UnderwaterExit = Vector3.new(4050, -1, -1814)
         }
     end
-    for _, v400 in pairs(v398) do
+    for v399, v400 in pairs(v398) do
         local l_Magnitude_1 = (v400 - l_Position_1).Magnitude
         if l_Magnitude_1 < l_huge_0 then
             l_huge_0 = l_Magnitude_1
-            v396 = v400
+            v396 = {pos = v400, name = v399}
         end
     end
     if l_huge_0 <= (l_Position_1 - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude then
@@ -1348,62 +1347,80 @@ function requestEntrance(v402)
 end
 
 _tp = function(I)
-    local e = plr.Character
-    if not e or not e:FindFirstChild("HumanoidRootPart") then
-        return
-    end
+	local e = plr.Character;
+	if not e or not e:FindFirstChild("HumanoidRootPart") then
+		return;
+	end;
 
-    local HRP = e.HumanoidRootPart
-    shouldTween = true
-    getgenv().OnFarm = false
+	local HRP = e.HumanoidRootPart;
 
-    if HRP.Anchored then
-        HRP.Anchored = false
-        task.wait()
-    end
+	shouldTween = true
+	getgenv().OnFarm = false
 
-    local bestPortal = CheckNearestTeleporter(I)
-    if bestPortal then
-        requestEntrance(bestPortal)
-        C.CFrame = HRP.CFrame
-        task.wait(0.1)
-    end
+	if HRP.Anchored then
+		HRP.Anchored = false
+		task.wait()
+	end
 
-    local dist = (I.Position - HRP.Position).Magnitude
-    local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
-    local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)
-    local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })
+	local nearestTeleporter = CheckNearestTeleporter(I)
+	
+	if nearestTeleporter then
+		local dist = (nearestTeleporter.pos - HRP.Position).Magnitude
+		local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
+		local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)
+		local tween = game:GetService("TweenService"):Create(C, info, { CFrame = CFrame.new(nearestTeleporter.pos) })
 
-    if e.Humanoid.Sit == true then
-        C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)
-    end
+		if e.Humanoid.Sit == true then
+			C.CFrame = CFrame.new(C.Position.X, nearestTeleporter.pos.Y, C.Position.Z)
+		end
 
-    tween:Play()
+		tween:Play()
+		
+		task.spawn(function()
+			while tween.PlaybackState == Enum.PlaybackState.Playing do
+				if not shouldTween then
+					tween:Cancel()
+					break
+				end
+				task.wait(.1)
+			end
+		end)
+		
+		tween.Completed:Wait()
+		requestEntrance(nearestTeleporter.name)
+	end
 
-    task.spawn(function()
-        while tween.PlaybackState == Enum.PlaybackState.Playing do
-            if not shouldTween then
-                tween:Cancel()
-                break
-            end
-            task.wait(.1)
-        end
-        getgenv().OnFarm = true
-    end)
+	local dist = (I.Position - HRP.Position).Magnitude
+	local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
+	local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)
+	local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })
+
+	if e.Humanoid.Sit == true then
+		C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)
+	end
+
+	tween:Play()
+
+	task.spawn(function()
+		while tween.PlaybackState == Enum.PlaybackState.Playing do
+			if not shouldTween then
+				tween:Cancel()
+				break
+			end
+			task.wait(.1)
+		end
+
+		getgenv().OnFarm = true
+	end)
 end
 
 TeleportToTarget = function(I)
-    _tp(I)
+	_tp(I)
 end
 
 notween = function(I)
-    plr.Character.HumanoidRootPart.CFrame = I
+	plr.Character.HumanoidRootPart.CFrame = I
 end
-
-
-
-
-
 
 function BTP(I)
 	local e = game.Players.LocalPlayer;
