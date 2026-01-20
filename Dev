@@ -474,7 +474,7 @@ G.DistH = function(I, e)
 		return (Root.Position - (I:FindFirstChild("HumanoidRootPart")).Position).Magnitude > e;
 	end;
 -- ALTURA ÚNICA AJUSTÁVEL DO MOB
-_G.MobHeight = _G.MobHeight or 20
+_G.MobHeight = _G.MobHeight or 25
 
 G.Kill = function(I, e)
     if not (I and e) then return end
@@ -5760,28 +5760,7 @@ end);
 end
 T:AddSeperator("Settings");
 
-T:AddButton({
-    Title = "Stop Tween",
-    Description = "Para o movimento imediatamente",
-    Callback = function()
-        -- Cancela a variável global
-        if getgenv().currentTween then
-            pcall(function() getgenv().currentTween:Cancel() end)
-            getgenv().currentTween = nil
-        end
-        
-        getgenv().IsTweening = false
-        
-        -- Para o personagem fisicamente
-        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
-            -- Remove BodyVelocity se existir
-            if game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyClip") then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.BodyClip:Destroy()
-            end
-        end
-    end
-})
+
 
 T:AddToggle({
 	Title = "Auto Attack",
@@ -5799,7 +5778,7 @@ T:AddToggle({
 T:AddToggle({
     Title = "Bring Mobs",
     Description = "",
-    Default = GetSetting("BringMobs_Save", false),
+    Default = GetSetting("BringMobs_Save", true),
     Callback = function(I)
         _G.BringMobsUser = I
         _G.SaveData["BringMobs_Save"] = I
@@ -5807,18 +5786,6 @@ T:AddToggle({
     end,
 })
 
-T:AddToggle({
-	Title = "Safe Mode",
-	Description = "turn on for safe ur health if low",
-	-- 1. Carrega o estado salvo
-	Default = GetSetting("SafeMode_Save", false),
-	Callback = function(I)
-		_G.Safemode = I
-        -- 2. Salva
-        _G.SaveData["SafeMode_Save"] = I
-        SaveSettings()
-	end,
-})
 
 T:AddToggle({
 	Title = "Auto Active Haki",
@@ -5901,19 +5868,7 @@ spawn(function()
 		end);
 	end;
 end);
-T:AddToggle({
-	Title = "Anti AFK",
-	Description = "",
-	Default = true,
-	Callback = function(I)
-		_G.AntiAFK = I;
-	end,
-});
-plr.Idled:connect(function()
-	vim2:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame);
-	wait(1);
-	vim2:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame);
-end);
+
 T:AddToggle({
 	Title = "Disable Notify",
 	Description = "",
@@ -5962,7 +5917,7 @@ T:AddInput({
 T:AddInput({
     Title = "Select Farm Height",
     Description = "",
-    PlaceHolder = "20",
+    PlaceHolder = "25",
     Default = tostring(_G.MobHeight),
     Callback = function(Value)
         local num = tonumber(Value)
@@ -8555,14 +8510,7 @@ h:AddSeperator("only in Sea 2 upgrade to Race v4");
 end
 if World3 then
 nn:AddSeperator("Trials Quests / Misc V4");
-local K5 = nn:AddParagraph({ Title = " Tiers V4 Status ", Content = "" });
-spawn(function()
-	pcall(function()
-		while wait(.2) do
-			K5:SetDesc(" Tiers - V4  :" .. (" " .. plr.Data.Race.C.Value));
-		end;
-	end);
-end);
+
 nn:AddToggle({
 	Title = "Auto Look At Moon",
 	Description = "",
@@ -8585,30 +8533,10 @@ task.spawn(function()
 		end;
 	end;
 end);
+
 nn:AddToggle({
-	Title = "Auto Pull Lever",
+	Title = "Auto Train Race",
 	Description = "",
-	Default = false,
-	Callback = function(I)
-		_G.Lver = I;
-	end,
-});
-spawn(function()
-	while wait(Sec) do
-		if _G.Lver then
-			pcall(function()
-				for I, e in pairs(workspace.Map["Temple of Time"]:GetDescendants()) do
-					if e.Name == "ProximityPrompt" then
-						fireproximityprompt(e, math.huge);
-					end;
-				end;
-			end);
-		end;
-	end;
-end);
-nn:AddToggle({
-	Title = "Auto Train V4",
-	Description = "turn on for farm tier + auto upgrade your tier level",
 	Default = false,
 	Callback = function(I)
 		_G.AcientOne = I;
@@ -8681,47 +8609,8 @@ nn:AddButton({
     end 
 });
 
-nn:AddButton({
-    Title = "Teleport to the top of the big tree",
-    Description = " ", 
-    Callback = function()
-        local TweenService = game:GetService("TweenService")
-        local ply = game.Players.LocalPlayer
-        if ply.Character and ply.Character:FindFirstChild("HumanoidRootPart") then
-            local Root = ply.Character.HumanoidRootPart
-            local TargetCFrame = CFrame.new(3026.89453125, 2281.022705078125, -7328.96630859375)
-            
-            -- Configuração de Velocidade (300 é a padrão do seu script)
-            local Speed = 300 
-            local Distance = (Root.Position - TargetCFrame.Position).Magnitude
-            local Time = Distance / Speed
-            
-            local TweenInfo = TweenInfo.new(Time, Enum.EasingStyle.Linear)
-            local Tween = TweenService:Create(Root, TweenInfo, {CFrame = TargetCFrame})
-            
-            -- Ativa Noclip para não travar
-            for _, v in pairs(ply.Character:GetDescendants()) do
-                if v:IsA("BasePart") then v.CanCollide = false end
-            end
-            
-            Tween:Play()
-            
-            -- Restaura colisão ao terminar (opcional)
-            Tween.Completed:Connect(function()
-               if ply.Character and ply.Character:FindFirstChild("HumanoidRootPart") then
-                   ply.Character.HumanoidRootPart.CanCollide = true
-               end
-            end)
-        end
-    end
-})
 
-nn:AddButton({ Title = "Teleport to Ancient One", Description = "", Callback = function()
-		notween(CFrame.new(28981.552734375, 14888.426757812, -120.24584960938));
-	end });
-nn:AddButton({ Title = "Teleport to Ancient Clock", Description = "", Callback = function()
-		notween(CFrame.new(29549, 15069, -88));
-	end });
+
 nn:AddToggle({
 	Title = "Auto Teleport to Race Doors",
 	Description = "",
@@ -8860,8 +8749,8 @@ spawn(function()
 	end;
 end);
 nn:AddToggle({
-	Title = "Auto Kill Player After Trial",
-	Description = "turn on for kill player after the race trials",
+	Title = "Auto Kill Players In Trial",
+	Description = "",
 	Default = false,
 	Callback = function(I)
 		_G.Defeating = I;
@@ -8893,110 +8782,7 @@ nn:AddSeperator("only in Sea 3");
 end
 if World3 then
 W:AddSeperator("Dojo Quest & Drago Race");
-W:AddToggle({
-	Title = "Auto Dojo Trainer",
-	Description = "turn on for do dojo belt quest white to black",
-	Default = false,
-	Callback = function(I)
-		_G.Dojoo = I;
-	end,
-});
-function printBeltName(I)
-	if type(I) == "table" and I.Quest.BeltName then
-		return I.Quest.BeltName;
-	end;
-end;
-spawn(function()
-	while wait(Sec) do
-		if _G.Dojoo then
-			pcall(function()
-				local I = { [1] = { NPC = "Dojo Trainer", Command = "RequestQuest" } };
-				local e = (replicated.Modules.Net:FindFirstChild("RF/InteractDragonQuest")):InvokeServer(unpack(I));
-				local K = printBeltName(e);
-				if debug == false and (not e and not K) then
-					_tp(CFrame.new(5865.0234375, 1208.3154296875, 871.15185546875));
-					debug = true;
-				elseif debug == true and ((CFrame.new(5865.0234375, 1208.3154296875, 871.15185546875)).Position - plr.Character.HumanoidRootPart.Position).Magnitude <= 50 then
-					if K == "White" then
-						local I = GetConnectionEnemies("Skull Slayer");
-						if I then
-							repeat
-								task.wait();
-								G.Kill(I, _G.Dojoo);
-							until not e or not _G.Dojoo or not G.Alive(I);
-						else
-							_tp(CFrame.new(-16759.58984375, 71.283767700195, 1595.3399658203));
-						end;
-					elseif K == "Yellow" then
-						repeat
-							task.wait();
-							_G.SeaBeast1 = true;
-							_G.TerrorShark = true;
-							_G.Shark = true;
-							_G.Piranha = true;
-							_G.MobCrew = true;
-							_G.FishBoat = true;
-							_G.SailBoats = true;
-						until not _G.Dojoo or not e;
-						_G.SeaBeast1 = false;
-						_G.TerrorShark = false;
-						_G.Shark = false;
-						_G.Piranha = false;
-						_G.MobCrew = false;
-						_G.FishBoat = false;
-						_G.SailBoats = false;
-					elseif K == "Green" then
-						repeat
-							task.wait();
-							_G.SailBoats = true;
-						until not _G.Dojoo or not e;
-						_G.SailBoats = false;
-					elseif K == "Purple" then
-						repeat
-							task.wait();
-							_G.FarmEliteHunt = true;
-						until not _G.Dojoo or not e;
-						_G.FarmEliteHunt = false;
-					elseif K == "Red" then
-						repeat
-							task.wait();
-							_G.SailBoats = true;
-							_G.FishBoat = true;
-						until not _G.Dojoo or not e;
-						_G.SailBoats = false;
-						_G.FishBoat = false;
-					elseif K == "Black" then
-						repeat
-							task.wait();
-							if workspace.Map:FindFirstChild("PrehistoricIsland") or workspace._WorldOrigin.Locations:FindFirstChild("Prehistoric Island") then
-								_G.Prehis_Find = true;
-								if workspace.Map.PrehistoricIsland.Core.ActivationPrompt:FindFirstChild("ProximityPrompt", true) then
-									_G.Prehis_Skills = false;
-									_G.Prehis_Find = true;
-								else
-									_G.Prehis_Skills = true;
-									_G.Prehis_Find = false;
-								end;
-							else
-								_G.Prehis_Find = true;
-								_G.Prehis_Skills = false;
-							end;
-						until not _G.Dojoo or not e;
-						_G.Prehis_Find = false;
-						_G.Prehis_Skills = false;
-					elseif K == "Orange" or K == "Blue" then
-						return nil;
-					end;
-				end;
-				if not e then
-					debug = false;
-					local I = { [1] = { NPC = "Dojo Trainer", Command = "ClaimQuest" } };
-					(replicated.Modules.Net:FindFirstChild("RF/InteractDragonQuest")):InvokeServer(unpack(I));
-				end;
-			end);
-		end;
-	end;
-end);
+
 W:AddToggle({
 	Title = "Auto Dragon Hunter",
 	Description = "turn on for farm blaze ember + auto collect blaze ember",
