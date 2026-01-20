@@ -123,25 +123,26 @@ Marines = function()
 Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
--- [[ 1. CARREGAMENTO DA NOVA UI (redz-V5) ]] --
+-- [[ 1. CARREGAMENTO DA NOVA UI (REDZ V5) ]] --
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/redz-V5-remake/main.luau"))()
 
--- [[ 2. ADAPTADOR (CONVERSOR PARA REDZ-V5) ]] --
+-- [[ 2. ADAPTADOR ATUALIZADO (NIGHT MYSTIC -> REDZ V5) ]] --
 local I = {}
 
 function I:NewWindow(config)
-    -- Cria a janela principal
+    -- Cria a janela principal Redz V5
     local Window = Library:MakeWindow({
-        Title = config.Title or "Night Mystic",
-        SubTitle = config.SubTitle or "by araujozwx & Maurozzx",
+        Title = "Night Mystic",
+        SubTitle = "by araujozwx & Maurozzx",
         ScriptFolder = "redz-library-V5"
     })
 
-    -- Adiciona o minimizador padrão (Mobile/PC)
-    Window:NewMinimizer({
+    -- Configuração do Botão de Minimizar (Padrão)
+    local Minimizer = Window:NewMinimizer({
         KeyCode = Enum.KeyCode.LeftControl
-    }):CreateMobileMinimizer({
-        Image = "rbxassetid://0",
+    })
+    Minimizer:CreateMobileMinimizer({
+        Image = "rbxassetid://105245380363493", -- Usando seu ID de ícone
         BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     })
 
@@ -156,15 +157,13 @@ function I:NewWindow(config)
 
         local TabWrapper = {}
 
-        -- Função para criar Seções
-        -- Nota: A redz-V5 não usa seções separadas por objeto, 
-        -- então o Adaptador apenas desenha um cabeçalho e continua na mesma aba.
+        -- Função para criar Seções (Redz V5 não tem seção agrupada, usamos Paragraph como divisor)
         function TabWrapper:AddSection(sectionName)
-            Tab:AddParagraph(sectionName, "") -- Simula o título da seção
+            Tab:AddParagraph(sectionName, "")
 
             local SectionWrapper = {}
 
-            -- Toggle
+            -- Toggle (Interruptor)
             function SectionWrapper:AddToggle(config)
                 return Tab:AddToggle({
                     Name = config.Title,
@@ -173,7 +172,7 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Button
+            -- Button (Botão)
             function SectionWrapper:AddButton(config)
                 return Tab:AddButton({
                     Name = config.Title,
@@ -198,38 +197,44 @@ function I:NewWindow(config)
                     Name = config.Title,
                     Min = config.Min or 0,
                     Max = config.Max or 100,
-                    Increment = 1,
                     Default = config.Default or 0,
+                    Increment = config.Increment or 1,
                     Callback = config.Callback
                 })
             end
 
-            -- Input (Transformado em TextBox)
+            -- Input (TextBox)
             function SectionWrapper:AddInput(config)
                 return Tab:AddTextBox({
                     Name = config.Title,
                     Default = config.Default or "",
-                    Placeholder = config.PlaceHolder or "Digite algo...",
+                    Placeholder = config.PlaceHolder or "Digite aqui...",
                     Callback = config.Callback
                 })
             end
 
-            -- Paragraph
+            -- Paragraph (Texto)
             function SectionWrapper:AddParagraph(config)
-                return Tab:AddParagraph(config.Title, config.Desc or config.Content or "")
+                return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")
             end
 
-            -- Label (Usando Paragraph simples)
+            -- Separador (Usando Paragraph vazio)
+            function SectionWrapper:AddSeperator(text)
+                Tab:AddParagraph("--- " .. text .. " ---", "")
+            end
+
+            -- Label
             function SectionWrapper:AddLabel(text)
                 return Tab:AddParagraph(text, "")
             end
 
-            -- Discord
+            -- Discord Invite
             function SectionWrapper:AddDiscord(title, link)
                 Tab:AddDiscordInvite({
                     Title = title,
                     Invite = "https://discord.gg/" .. (link:gsub("https://discord.gg/", "")),
-                    Description = "Junte-se ao nosso servidor oficial."
+                    Description = "Entre no nosso servidor!",
+                    Logo = "rbxassetid://105245380363493"
                 })
             end
 
@@ -238,20 +243,18 @@ function I:NewWindow(config)
         return TabWrapper
     end
 
-    -- Notificações globais
+    -- Sistema de Notificação
     function WindowWrapper:Notify(config)
         Window:Notify({
             Title = config.Title or "Notificação",
             Content = config.Content or config.Text or "",
-            Duration = config.Duration or 5
+            Duration = config.Duration or 5,
+            Image = config.Image or "rbxassetid://10734953451"
         })
     end
 
     return WindowWrapper
 end
-
-
-return I
 
 
 if World1 then
