@@ -1235,6 +1235,9 @@ if M and M ~= C then
 	M:Destroy();
 end;
 
+-- Variável Global para controlar o Tween Ativo
+getgenv().ActiveTween = nil
+
 -- Loop de verificação de Status (OnFarm)
 task.spawn(function()
 	while task.wait() do
@@ -1243,6 +1246,11 @@ task.spawn(function()
 				(getgenv()).OnFarm = true;
 			else
 				(getgenv()).OnFarm = false;
+                -- Garante que se desativar, o tween para imediatamente
+                if getgenv().ActiveTween then
+                    getgenv().ActiveTween:Cancel()
+                    getgenv().ActiveTween = nil
+                end
 			end;
 		else
 			(getgenv()).OnFarm = false;
@@ -1334,10 +1342,8 @@ function CheckNearestTeleporter(v393)
                     ["Hydra Island"] = Vector3.new(5657.88623046875, 1013.0790405273438, -335.4996337890625),
                     Mansion = Vector3.new(-12462, 375, -7552),
                     Castle = Vector3.new(-5036, 315, -3179),
-                    -- ["Dimensional Shift"] REMOVIDO
                     ["Beautiful Pirate"] = Vector3.new(5319, 23, -93),
                     ["Beautiful Room"] = Vector3.new(5314.58203, 22.5364361, -125.942276, 1, 2.14762768E-8, -1.99111154E-13, -2.14762768E-8, 1, -3.0510602E-8, 1.98455903E-13, 3.0510602E-8, 1),
-                    -- ["Temple of Time"] REMOVIDO
                 }
             end
         else -- World 2
@@ -1354,7 +1360,6 @@ function CheckNearestTeleporter(v393)
             Sky3Exit = Vector3.new(-4607, 874, -1667),
             UnderWater = Vector3.new(61163, 11, 1819),
             ["Underwater City"] = Vector3.new(61165.19140625, 0.18704631924629211, 1897.379150390625),
-            -- ["Pirate Village"] REMOVIDO
             UnderwaterExit = Vector3.new(4050, -1, -1814)
         }
     end
@@ -1379,13 +1384,23 @@ function CheckNearestTeleporter(v393)
 end
 
 -- =======================
--- TWEEN AJUSTADO
+-- TWEEN CORRIGIDO (PARA IMEDIATAMENTE)
 -- =======================
 
 getgenv().TweenSpeedFar = 300   
 getgenv().TweenSpeedNear = 600  
 
 _tp = function(I)
+    -- Verificação de segurança: Se a opção estiver desligada, nem começa
+    if not shouldTween then
+        if getgenv().ActiveTween then
+            getgenv().ActiveTween:Cancel()
+            getgenv().ActiveTween = nil
+        end
+        getgenv().OnFarm = false
+        return
+    end
+
     local e = plr.Character;
     if not e or not e:FindFirstChild("HumanoidRootPart") then
         return;
@@ -1402,8 +1417,14 @@ _tp = function(I)
         task.wait(0.2)
     end
 
+    -- Cancela qualquer Tween anterior antes de criar um novo
+    if getgenv().ActiveTween then
+        getgenv().ActiveTween:Cancel()
+        getgenv().ActiveTween = nil
+    end
+
     shouldTween = true  
-    getgenv().OnFarm = false -- Mantém false enquanto viaja
+    getgenv().OnFarm = false -- Pausa o farm visual enquanto viaja (evita glitches)
 
     if HRP.Anchored then  
         HRP.Anchored = false  
@@ -1415,6 +1436,9 @@ _tp = function(I)
 
     local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)  
     local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })  
+    
+    -- Registra o Tween atual na variável global
+    getgenv().ActiveTween = tween
 
     if e.Humanoid.Sit == true then  
         C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)  
@@ -1422,18 +1446,22 @@ _tp = function(I)
 
     tween:Play()  
 
-    -- Monitoramento CORRIGIDO para parar corretamente
-    task.spawn(function()  
-        while tween.PlaybackState == Enum.PlaybackState.Playing do  
-            if not shouldTween then  
-                tween:Cancel()  
-                getgenv().OnFarm = false -- FORÇA PARADA
-                return -- Sai da função para não reativar o OnFarm
-            end  
-            task.wait()  
-        end  
+    -- Monitoramento Aprimorado
+    task.spawn(function()
+        while tween.PlaybackState == Enum.PlaybackState.Playing do
+            -- Se a opção for desativada DURANTE o voo
+            if not shouldTween then
+                tween:Cancel()
+                if getgenv().ActiveTween == tween then
+                    getgenv().ActiveTween = nil
+                end
+                getgenv().OnFarm = false
+                return
+            end
+            task.wait()
+        end
 
-        -- Só ativa o Farm se o tween completou E se o usuário ainda quer farmar
+        -- Só ativa o OnFarm se o tween completou E a opção ainda está ativa
         if shouldTween and tween.PlaybackState == Enum.PlaybackState.Completed then
              getgenv().OnFarm = true
         else
@@ -1451,6 +1479,7 @@ notween = function(I)
         plr.Character.HumanoidRootPart.CFrame = I
     end
 end
+
 
 
 function BTP(I)
