@@ -6447,7 +6447,7 @@ spawn(function()
 		end);
 	end;
 end);
-outros:AddSeperator("Elite Quests");
+outros:AddSeperator("Elite Quest");
 
 outros:AddToggle({
 	Title = "Auto Elite Hunter",
@@ -6492,7 +6492,7 @@ spawn(function()
 	end;
 end);
 outros:AddToggle({
-    Title = "Stop when got God's Chalice",
+    Title = "Stop when got God Chalice",
     Description = "",
     -- 1. Carrega o estado salvo ou inicia como true (padrão do seu script)
     Default = GetSetting("StopChalice_Save", true),
@@ -6517,107 +6517,7 @@ spawn(function()
 		end;
 	end;
 end);
-outros:AddToggle({
-	Title = "Auto Tushita Sword",
-	Description = "",
-	Default = false,
-	Callback = function(I)
-		_G.Auto_Tushita = I;
-	end,
-});
-spawn(function()
-	while wait(Sec) do
-		pcall(function()
-			if _G.Auto_Tushita then
-				if workspace.Map.Turtle:FindFirstChild("TushitaGate") then
-					if not GetBP("Holy Torch") then
-						_tp(CFrame.new(5148.03613, 162.352493, 910.548218));
-						wait(.7);
-					else
-						EquipWeapon("Holy Torch");
-						task.wait(1);
-						repeat
-							task.wait();
-							_tp(CFrame.new(-10752, 417, -9366));
-						until not _G.Auto_Tushita or ((CFrame.new(-10752, 417, -9366)).Position - plr.Character.HumanoidRootPart.Position).Magnitude <= 10;
-						wait(.7);
-						repeat
-							task.wait();
-							_tp(CFrame.new(-11672, 334, -9474));
-						until not _G.Auto_Tushita or ((CFrame.new(-11672, 334, -9474)).Position - plr.Character.HumanoidRootPart.Position).Magnitude <= 10;
-						wait(.7);
-						repeat
-							task.wait();
-							_tp(CFrame.new(-12132, 521, -10655));
-						until not _G.Auto_Tushita or ((CFrame.new(-12132, 521, -10655)).Position - plr.Character.HumanoidRootPart.Position).Magnitude <= 10;
-						wait(.7);
-						repeat
-							task.wait();
-							_tp(CFrame.new(-13336, 486, -6985));
-						until not _G.Auto_Tushita or ((CFrame.new(-13336, 486, -6985)).Position - plr.Character.HumanoidRootPart.Position).Magnitude <= 10;
-						wait(.7);
-						repeat
-							task.wait();
-							_tp(CFrame.new(-13489, 332, -7925));
-						until not _G.Auto_Tushita or ((CFrame.new(-13489, 332, -7925)).Position - plr.Character.HumanoidRootPart.Position).Magnitude <= 10;
-					end;
-				else
-					local I = GetConnectionEnemies("Longma");
-					if I then
-						repeat
-							task.wait();
-							G.Kill(I, _G.Auto_Tushita);
-						until I.Humanoid.Health <= 0 or not _G.Auto_Tushita or not I.Parent;
-					else
-						if replicated:FindFirstChild("Longma") then
-							_tp((replicated:FindFirstChild("Longma")).HumanoidRootPart.CFrame * CFrame.new(0, 40, 0));
-						end;
-					end;
-				end;
-			end;
-		end);
-	end;
-end);
--- AUTO YAMA (EXATAMENTE COMO VOCÊ ENVIou)
-outros:AddToggle({
-    Title = "Auto Yama Sword",
-    Description = "",
-    -- 1. Carrega o estado salvo ou false por padrão
-    Default = GetSetting("AutoYama_Save", false),
-    Callback = function(I)
-        _G.Auto_Yama = I
-        
-        -- 2. Guarda na tabela de salvamento
-        _G.SaveData["AutoYama_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
-        SaveSettings()
-    end,
-})
-spawn(function()
-    while wait(Sec) do
-        pcall(function()
-            if _G.Auto_Yama then
-                if replicated.Remotes.CommF_:InvokeServer("EliteHunter", "Progress") < 30 then
-                    _G.FarmEliteHunt = true;
-                elseif replicated.Remotes.CommF_:InvokeServer("EliteHunter", "Progress") > 30 then
-                    _G.FarmEliteHunt = false;
-                    if (workspace.Map.Waterfall.SealedKatana.Handle.Position - plr.Character.HumanoidRootPart.Position).Magnitude >= 20 then
-                        _tp(workspace.Map.Waterfall.SealedKatana.Handle.CFrame);
-                        local I = GetConnectionEnemies("Ghost");
-                        if I then
-                            repeat
-                                wait();
-                                G.Kill(I, _G.Auto_Yama);
-                            until I.Humanoid.Health <= 0 or not I.Parent or not _G.Auto_Yama;
-                            fireclickdetector(workspace.Map.Waterfall.SealedKatana.Handle.ClickDetector);
-                        end;
-                    end;
-                end;
-            end;
-        end);
-    end;
-end);
+
 end
 if World2 or World3 then
 -- SECTION BUSO/AURA COLOURS
