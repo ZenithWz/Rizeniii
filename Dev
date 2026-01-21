@@ -1,7 +1,7 @@
 repeat task.wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
-local FolderName = "Night Mystic"
+local FolderName = "Diamond Hub Bf"
 local FileName = "Settings.json"
 local FullPath = FolderName .. "/" .. FileName
 
@@ -3124,151 +3124,71 @@ if World3 then
 end
 
 
-VI_S:AddSeperator("Fontes");
+VI_S:AddSeperator("Fontes")
 
-local currentFont = Enum.Font.Arial -- Fonte padrão inicial
+local PlayerGui = game.Players.LocalPlayer.PlayerGui
 
-local function ApplyGlobalFont(fontEnum)
-    currentFont = fontEnum
+local currentFont = Enum.Font.Arial
+local fontEnabled = false
 
-    -- Aplica a fonte para todos os objetos existentes
-    for _, obj in ipairs(game.Players.LocalPlayer.PlayerGui:GetDescendants()) do
+local Fonts = {
+    ["Amatic SC"] = Enum.Font.AmaticSC,
+    ["Antique"] = Enum.Font.Antique,
+    ["Arcade"] = Enum.Font.Arcade,
+    ["Arial"] = Enum.Font.Arial,
+    ["Arial Bold"] = Enum.Font.ArialBold,
+    ["Bangers"] = Enum.Font.Bangers,
+    ["Bodoni"] = Enum.Font.Bodoni,
+    ["Cartoon"] = Enum.Font.Cartoon,
+    ["Code"] = Enum.Font.Code,
+    ["Creepster"] = Enum.Font.Creepster,
+    ["Denk One"] = Enum.Font.DenkOne,
+    ["Fondamento"] = Enum.Font.Fondamento,
+    ["Fredoka One"] = Enum.Font.FredokaOne,
+    ["Garamond"] = Enum.Font.Garamond,
+    ["Gotham"] = Enum.Font.Gotham
+}
+
+local function ApplyFont()
+    if not fontEnabled then return end
+
+    for _, obj in ipairs(PlayerGui:GetDescendants()) do
         if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
-            obj.Font = fontEnum
+            obj.Font = currentFont
         end
     end
 end
 
--- Observa novos objetos adicionados futuramente
-game.Players.LocalPlayer.PlayerGui.DescendantAdded:Connect(function(obj)
-    if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+-- Aplicar em objetos novos
+PlayerGui.DescendantAdded:Connect(function(obj)
+    if fontEnabled and (obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox")) then
         obj.Font = currentFont
     end
 end)
 
-VI_S:AddButton({
-    Title = "Fonte: Amatic SC",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.AmaticSC)
+-- Dropdown de fontes
+VI_S:AddDropdown({
+    Title = "Selecionar Fonte",
+    Values = table.keys(Fonts),
+    Default = "Arial",
+    Callback = function(value)
+        currentFont = Fonts[value]
+        ApplyFont()
     end
 })
 
+-- Button para ativar/desativar
 VI_S:AddButton({
-    Title = "Fonte: Antique",
-    Description = "",
+    Title = "Font Change",
     Callback = function()
-        ApplyGlobalFont(Enum.Font.Antique)
+        fontEnabled = not fontEnabled
+        ApplyFont()
     end
 })
 
-VI_S:AddButton({
-    Title = "Fonte: Arcade",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Arcade)
-    end
-})
+VI_S:AddSeperator("Fps");
 
 VI_S:AddButton({
-    Title = "Fonte: Arial",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Arial)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Arial Bold",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.ArialBold)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Bangers",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Bangers)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Bodoni",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Bodoni)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Cartoon",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Cartoon)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Code",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Code)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Creepster",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Creepster)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Denk One",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.DenkOne)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Fondamento",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Fondamento)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Fredoka One",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.FredokaOne)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Garamond",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Garamond)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Gotham",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Gotham)
-    end
-})
-
-kk:AddSeperator("Fps");
-
-kk:AddButton({
     Title = "Stretch the screen",
     Description = "",
     Callback = function()
@@ -3299,7 +3219,7 @@ kk:AddButton({
         getgenv().gg_scripters = "Aori0001"
     end
 })
-kk:AddButton({ Title = "Fps Boost", Description = "", Callback = function()
+VI_S:AddButton({ Title = "Fps Boost", Description = "", Callback = function()
 		LowCpu();
 	end });
 
