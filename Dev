@@ -2482,18 +2482,22 @@ task.spawn(function()
 end)
 
 -- TABS (somente nomes alterados)
-local i        = V:T("Home","rbxassetid://10723415903")
+local i        = V:T("Discord","rbxassetid://10723415903")
 
 local g        = V:T("Shop","rbxassetid://10734952479")
 local y        = V:T("Main","rbxassetid://10723407389")
 
-local x        = V:T("Sub Farming","rbxassetid://10734975486")
+local x        = V:T("Quests/Boss","rbxassetid://10734975692")
 local t        = V:T("Sea Events","rbxassetid://10747376931")
+local l        = V:T("Island","rbxassetid://10734910680")
+
+
+
 local m        = V:T("Race","rbxassetid://10734951847")
 
 local VI       = V:T("Visuals And ESP","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
-local l        = V:T("Island","rbxassetid://10734910680")
+
 local R        = V:T("Get Items And Upgrade","rbxassetid://10734975692")
 local B        = V:T("Raid & Fruit","rbxassetid://10709790875")
 local c        = V:T("Settings And Misc","rbxassetid://10734950309")
