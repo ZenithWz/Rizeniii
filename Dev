@@ -123,32 +123,27 @@ Marines = function()
 Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
--- [[ 1. CARREGAMENTO DA NOVA UI (REDZ V5) ]] --
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/redz-V5-remake/main.luau"))()
 
--- [[ 2. ADAPTADOR ATUALIZADO (NIGHT MYSTIC -> REDZ V5) ]] --
 local I = {}
 
 function I:NewWindow(config)
-    -- Cria a janela principal Redz V5
     local Window = Library:MakeWindow({
         Title = "Diamond Hub : Blox Fruits",
         SubTitle = "By MikasaZx",
         ScriptFolder = "redz-library-V5"
     })
 
-    -- Configuração do Botão de Minimizar (Padrão)
     local Minimizer = Window:NewMinimizer({
         KeyCode = Enum.KeyCode.LeftControl
     })
     Minimizer:CreateMobileMinimizer({
-        Image = "rbxassetid://", -- Usando seu ID de ícone
+        Image = "rbxassetid://135264546140981",
         BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     })
 
     local WindowWrapper = {}
 
-    -- Função para criar Abas (T)
     function WindowWrapper:T(name, iconId)
         local Tab = Window:MakeTab({
             Title = name,
@@ -157,11 +152,9 @@ function I:NewWindow(config)
 
         local TabWrapper = {}
 
-        -- Função para criar Seções (Corrigido: não cria mais Paragraph automático)
         function TabWrapper:AddSection(sectionName)
             local SectionWrapper = {}
 
-            -- Toggle (Interruptor)
             function SectionWrapper:AddToggle(config)
                 return Tab:AddToggle({
                     Name = config.Title,
@@ -170,7 +163,6 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Button (Botão)
             function SectionWrapper:AddButton(config)
                 return Tab:AddButton({
                     Name = config.Title,
@@ -178,7 +170,6 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Dropdown
             function SectionWrapper:AddDropdown(config)
                 return Tab:AddDropdown({
                     Name = config.Title,
@@ -189,7 +180,6 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Slider
             function SectionWrapper:AddSlider(config)
                 return Tab:AddSlider({
                     Name = config.Title,
@@ -201,7 +191,6 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Input (TextBox)
             function SectionWrapper:AddInput(config)
                 return Tab:AddTextBox({
                     Name = config.Title,
@@ -211,28 +200,24 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Paragraph (Texto)
             function SectionWrapper:AddParagraph(config)
                 return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")
             end
 
-            -- Separador (Usando a função Section da UI)
             function SectionWrapper:AddSeperator(text)
                 Tab:AddSection(text)
             end
 
-            -- Label
             function SectionWrapper:AddLabel(text)
                 return Tab:AddParagraph(text, "")
             end
 
-            -- Discord Invite
             function SectionWrapper:AddDiscord(title, link)
                 Tab:AddDiscordInvite({
-                    Title = title,
+                    Title = "Diamond Hub Discord",
                     Invite = "https://discord.gg/" .. (link:gsub("https://discord.gg/", "")),
-                    Description = "Entre no nosso servidor!",
-                    Logo = "rbxassetid://105245380363493"
+                    Description = "Join Diamond Hub Server Discord",
+                    Logo = "rbxassetid://135264546140981"
                 })
             end
 
@@ -241,13 +226,12 @@ function I:NewWindow(config)
         return TabWrapper
     end
 
-    -- Sistema de Notificação
     function WindowWrapper:Notify(config)
         Window:Notify({
-            Title = config.Title or "Notificação",
+            Title = "Diamond Hub",
             Content = config.Content or config.Text or "",
             Duration = config.Duration or 5,
-            Image = config.Image or "rbxassetid://10734953451"
+            Image = "rbxassetid://135264546140981"
         })
     end
 
