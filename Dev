@@ -4258,19 +4258,6 @@ end)
 
 Discord_Info:AddDiscord("Night Mystic", "gkud3frejh")
 
-Discord_Info:AddSeperator("information")
-
-Discord_Info:AddParagraph({
-    Title = "Script Information",
-    Content = [[Credits to Astral Hub for the reference to 
-the base structure, used with the developer's permission.
-The project has been extensively modified, reworked, and expanded with new systems.]]
-})
-
-Discord_Info:AddParagraph({
-    Title = "Thank you X2Velaric and x2Moodz", 
-    Content = "ﾠ" -- Adicionei um espaço só por segurança, mas vazio deve funcionar
-})
 
 b:AddSeperator("Farming")
 b:AddDropdown({
@@ -4298,7 +4285,6 @@ spawn(function()
     end
 end)
 
--- VARIAVEIS GLOBAIS
 _G.SelectedFarmMode = "Level"
 _G.StartFarm = false
 _G.Level = false
@@ -4307,11 +4293,9 @@ _G.AutoFarmNear = false
 _G.AcceptQuest = false
 _G.MaxFarmDistance = 325
 
--- Variáveis de controle
 local CurrentMobLevel = nil
 local TELEPORT_DISTANCE_THRESHOLD = 15 
 
--- Função auxiliar para teleporte condicional
 local function TeleportConditional(hrp, targetCFrame, threshold)
     if not hrp or not targetCFrame then return end
     local dist = (targetCFrame.Position - hrp.Position).Magnitude  
@@ -4320,32 +4304,23 @@ local function TeleportConditional(hrp, targetCFrame, threshold)
     end
 end
 
-----------------------------------------------------------------------------
--- 1. UI: DROPDOWN + TOGGLES
-----------------------------------------------------------------------------
-
 b:AddDropdown({
     Title = "Select Farm Mode",
     Values = {"Level", "Bone", "Near"},
-    Default = GetSetting("SelectedFarmMode_Save", "Level"),
+    Default = "Level",
     Callback = function(v)
         _G.SelectedFarmMode = v
-        _G.SaveData["SelectedFarmMode_Save"] = v
-        SaveSettings()
     end
 })
 
 b:AddToggle({
     Title = "Start Farm",
-    Default = GetSetting("StartFarm_Save", false),
+    Default = false,
     Callback = function(v)
         _G.StartFarm = v
-
-        -- Reset total das variáveis de controle
         _G.Level = false  
         _G.AutoFarm_Bone = false  
         _G.AutoFarmNear = false
-
         if v then  
             if _G.SelectedFarmMode == "Level" then  
                 _G.Level = true  
@@ -4355,40 +4330,27 @@ b:AddToggle({
                 _G.AutoFarmNear = true
             end  
         end
-
-        _G.SaveData["StartFarm_Save"] = v
-        SaveSettings()
     end
 })
 
 b:AddToggle({
     Title = "Accept Quests",
-    Default = GetSetting("AcceptQuest_Save", false),
+    Default = false,
     Callback = function(v)
         _G.AcceptQuest = v
-        _G.SaveData["AcceptQuest_Save"] = v
-        SaveSettings()
     end
 })
-
-----------------------------------------------------------------------------
--- 2. SISTEMA NEAR FARM (MATAR MAIS PRÓXIMO)
-----------------------------------------------------------------------------
 
 spawn(function()
     while task.wait() do
         pcall(function()
             if not _G.AutoFarmNear or not _G.StartFarm then return end
-
             local Plr = game.Players.LocalPlayer
             local Char = Plr.Character or Plr.CharacterAdded:Wait()
             local Root = Char:FindFirstChild("HumanoidRootPart")
             if not Root then return end
-
             local ClosestEnemy = nil
             local ShortestDistance = math.huge
-
-            -- Procura no Workspace
             if workspace:FindFirstChild("Enemies") then
                 for _, e in pairs(workspace.Enemies:GetChildren()) do
                     if e:FindFirstChild("Humanoid") and e:FindFirstChild("HumanoidRootPart") and e.Humanoid.Health > 0 then
@@ -4400,8 +4362,6 @@ spawn(function()
                     end
                 end
             end
-
-            -- Procura no ReplicatedStorage (caso spawn demore)
             if not ClosestEnemy and game.ReplicatedStorage:FindFirstChild("Enemies") then
                 for _, e in pairs(game.ReplicatedStorage.Enemies:GetChildren()) do
                     if e:IsA("Model") and e:FindFirstChild("Humanoid") then
@@ -4410,7 +4370,6 @@ spawn(function()
                     end
                 end
             end
-
             if ClosestEnemy and (ShortestDistance <= _G.MaxFarmDistance) then
                 repeat
                     task.wait()
@@ -4423,10 +4382,6 @@ spawn(function()
     end
 end)
 
-----------------------------------------------------------------------------
--- 3. SISTEMA BONE FARM
-----------------------------------------------------------------------------
-
 spawn(function()
     while task.wait() do
         if _G.AutoFarm_Bone and _G.StartFarm then
@@ -4434,11 +4389,9 @@ spawn(function()
                 local plr = game.Players.LocalPlayer  
                 local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")  
                 if not hrp then return end  
-                
                 local QuestUI = plr.PlayerGui.Main.Quest      
                 local MOBS = {"Reborn Skeleton", "Living Zombie", "Demonic Soul", "Posessed Mummy"}
                 local npcPos = CFrame.new(-9516.99, 172.01, 6078.46)
-
                 if _G.AcceptQuest and not QuestUI.Visible then      
                     local distToNPC = (npcPos.Position - hrp.Position).Magnitude
                     if distToNPC > 5 then
@@ -4470,7 +4423,6 @@ spawn(function()
                         end      
                         return closest      
                     end      
-
                     local mob = GetClosestMob()      
                     if mob then      
                         _tp(mob.PrimaryPart.CFrame)      
@@ -4485,12 +4437,7 @@ spawn(function()
     end
 end)
 
-----------------------------------------------------------------------------
--- 4. SISTEMA LEVEL FARM
-----------------------------------------------------------------------------
-
 local CurrentMob = nil
-
 local function GetNearestMob(TargetName)
     local plr = game.Players.LocalPlayer
     local Root = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
@@ -10035,40 +9982,13 @@ D:AddButton({ Title = "Buy Soru", Description = "", Callback = function()
 D:AddButton({ Title = "Buy Ken", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("KenTalk", "Buy");
 	end });
-D:AddSeperator("Fighting - Style");
-D:AddButton({ Title = "Buy Black Leg", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyBlackLeg");
-	end });
-D:AddButton({ Title = "Buy Electro", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyElectro");
-	end });
-D:AddButton({ Title = "Buy Fishman Karate", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyFishmanKarate");
-	end });
-D:AddButton({ Title = "Buy DragonClaw", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BlackbeardReward", "DragonClaw", "2");
-	end });
-D:AddButton({ Title = "Buy Superhuman", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuySuperhuman");
-	end });
-D:AddButton({ Title = "Buy Death Step", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyDeathStep");
-	end });
-D:AddButton({ Title = "Buy Sharkman Karate", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuySharkmanKarate");
-	end });
-D:AddButton({ Title = "Buy ElectricClaw", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyElectricClaw");
-	end });
-D:AddButton({ Title = "Buy DragonTalon", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyDragonTalon");
-	end });
-D:AddButton({ Title = "Buy Godhuman", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyGodhuman");
-	end });
-D:AddButton({ Title = "Buy SanguineArt", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuySanguineArt");
-	end });
+D:AddSeperator("Fighting Style");
+
+D:AddParagraph({
+    Title = "Coming Soon", 
+    Content = "This feature is under development and will be available soon." -- Adicionei um espaço só por segurança, mas vazio deve funcionar
+})
+
 D:AddSeperator("Accessory");
 D:AddButton({ Title = "Buy Tomoe Ring", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("BuyItem", "Tomoe Ring");
