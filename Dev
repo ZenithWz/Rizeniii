@@ -3124,88 +3124,63 @@ if World3 then
 end
 
 
-VI_S:AddSeperator("Fontes")
+local currentFont = Enum.Font.Arial
+local fontChangingEnabled = false -- Controle do Toggle
 
-local PlayerGui = game.Players.LocalPlayer.PlayerGui
-
--- MAPA DE FONTES
-local FontMap = {
-    ["Amatic SC"] = Enum.Font.AmaticSC,
-    ["Antique"] = Enum.Font.Antique,
-    ["Arcade"] = Enum.Font.Arcade,
-    ["Arial"] = Enum.Font.Arial,
-    ["Arial Bold"] = Enum.Font.ArialBold,
-    ["Bangers"] = Enum.Font.Bangers,
-    ["Bodoni"] = Enum.Font.Bodoni,
-    ["Cartoon"] = Enum.Font.Cartoon,
-    ["Code"] = Enum.Font.Code,
-    ["Creepster"] = Enum.Font.Creepster,
-    ["Denk One"] = Enum.Font.DenkOne,
-    ["Fondamento"] = Enum.Font.Fondamento,
-    ["Fredoka One"] = Enum.Font.FredokaOne,
-    ["Garamond"] = Enum.Font.Garamond,
-    ["Gotham"] = Enum.Font.Gotham
-}
-
--- ESTADOS SALVOS
-_G.FontEnabled = GetSetting("UI_FontEnabled", false)
-_G.SelectedFont = GetSetting("UI_SelectedFont", "Arial")
-
--- FUNÇÃO DE APLICAÇÃO
-local function ApplyFont()
-    if not _G.FontEnabled then return end
-
-    local fontEnum = FontMap[_G.SelectedFont]
-    if not fontEnum then return end
-
-    for _, obj in ipairs(PlayerGui:GetDescendants()) do
-        if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
-            obj.Font = fontEnum
-        end
+-- Função para aplicar a fonte em tudo
+local function ApplyGlobalFont()
+    if not fontChangingEnabled then return end -- Só aplica se o Toggle estiver ON
+    
+    for _, obj in ipairs(game.Players.LocalPlayer.PlayerGui:GetDescendants()) do  
+        if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then  
+            obj.Font = currentFont  
+        end  
     end
 end
 
--- APLICAR EM OBJETOS NOVOS
-PlayerGui.DescendantAdded:Connect(function(obj)
-    if _G.FontEnabled and (obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox")) then
-        local fontEnum = FontMap[_G.SelectedFont]
-        if fontEnum then
-            obj.Font = fontEnum
-        end
+-- Observador para novos objetos (Respeita o Toggle)
+game.Players.LocalPlayer.PlayerGui.DescendantAdded:Connect(function(obj)
+    if fontChangingEnabled and (obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox")) then
+        obj.Font = currentFont
     end
 end)
 
--- DROPDOWN DE SELEÇÃO
-VI_S:AddDropdown({
-    Title = "Select Font",
-    Description = "",
-    Values = table.keys(FontMap),
-    Default = _G.SelectedFont,
+-- 1. SEPARADOR
+VI_S:AddSeperator("Configurações de Texto");
+
+-- 2. TOGGLE PARA ATIVAR/DESATIVAR
+VI_S:AddToggle({
+    Title = "Ativar Troca de Fonte",
+    Description = "Aplica a fonte selecionada em toda a interface",
+    Default = false,
     Callback = function(Value)
-        _G.SelectedFont = Value
-        _G.SaveData["UI_SelectedFont"] = Value
-        SaveSettings()
-        ApplyFont()
+        fontChangingEnabled = Value
+        if fontChangingEnabled then
+            ApplyGlobalFont() -- Aplica imediatamente ao ligar
+        end
     end
 })
 
-VI_S:AddToggle({
-    Title = "Enable Global Font",
-    Description = "",
-    Default = GetSetting("UI_FontEnabled", false),
-    Callback = function(I)
-        _G.FontEnabled = I
-        _G.SaveData["UI_FontEnabled"] = I
-        SaveSettings()
-        ApplyFont()
-    end,
-});
-
--- APLICA AUTOMATICAMENTE AO CARREGAR
-task.spawn(function()
-    task.wait(0.3)
-    ApplyFont()
-end)
+-- 3. DROPDOWN DE FONTES
+VI_S:AddDropdown({
+    Title = "Selecionar Fonte",
+    Description = "Escolha o estilo da letra",
+    Values = {
+        "Arial", "ArialBold", "AmaticSC", "Antique", "Arcade", 
+        "Bangers", "Bodoni", "Cartoon", "Code", "Creepster", 
+        "DenkOne", "Fondamento", "FredokaOne", "Garamond", "Gotham"
+    },
+    Default = "Arial",
+    Callback = function(Value)
+        -- Converte a string do Dropdown para o Enum.Font do Roblox
+        currentFont = Enum.Font[Value]
+        
+        -- Se o toggle estiver ligado, já atualiza as fontes na hora
+        if fontChangingEnabled then
+            ApplyGlobalFont()
+        end
+    end
+})
 
 kk:AddSeperator("Fps");
 
