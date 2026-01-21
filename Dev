@@ -123,48 +123,46 @@ Marines = function()
 Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
--- [[ 1. CARREGAMENTO DA NOVA UI (REDZ V5) ]] --
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/redz-V5-remake/main.luau"))()
+-- [[ 1. CARREGAMENTO DA UI FLUENT ]] --
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
--- [[ 2. ADAPTADOR ATUALIZADO (NIGHT MYSTIC -> REDZ V5) ]] --
+-- [[ 2. ADAPTADOR ATUALIZADO (NIGHT MYSTIC -> FLUENT) ]] --
 local I = {}
 
 function I:NewWindow(config)
-    -- Cria a janela principal Redz V5
-    local Window = Library:MakeWindow({
+    local Window = Fluent:CreateWindow({
         Title = "Diamond Hub : Blox Fruits",
         SubTitle = "By MikasaZx",
-        ScriptFolder = "redz-library-V5"
-    })
-
-    -- Configuração do Botão de Minimizar (Padrão)
-    local Minimizer = Window:NewMinimizer({
-        KeyCode = Enum.KeyCode.LeftControl
-    })
-    Minimizer:CreateMobileMinimizer({
-        Image = "rbxassetid://", -- Usando seu ID de ícone
-        BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        TabWidth = 160,
+        Size = UDim2.fromOffset(580, 460),
+        Acrylic = true,
+        Theme = "Dark",
+        MinimizeKey = Enum.KeyCode.LeftControl
     })
 
     local WindowWrapper = {}
 
     -- Função para criar Abas (T)
     function WindowWrapper:T(name, iconId)
-        local Tab = Window:MakeTab({
+        local Tab = Window:AddTab({
             Title = name,
-            Icon = iconId or "home"
+            Icon = iconId or ""
         })
 
         local TabWrapper = {}
 
-        -- Função para criar Seções (Corrigido: não cria mais Paragraph automático)
+        -- Função para criar Seções
         function TabWrapper:AddSection(sectionName)
+            if sectionName and sectionName ~= "" then
+                Tab:AddSection(sectionName)
+            end
+
             local SectionWrapper = {}
 
             -- Toggle (Interruptor)
             function SectionWrapper:AddToggle(config)
-                return Tab:AddToggle({
-                    Name = config.Title,
+                return Tab:AddToggle(config.Title, {
+                    Title = config.Title,
                     Default = config.Default or false,
                     Callback = config.Callback
                 })
@@ -173,38 +171,39 @@ function I:NewWindow(config)
             -- Button (Botão)
             function SectionWrapper:AddButton(config)
                 return Tab:AddButton({
-                    Name = config.Title,
+                    Title = config.Title,
+                    Description = config.Desc or "",
                     Callback = config.Callback
                 })
             end
 
             -- Dropdown
             function SectionWrapper:AddDropdown(config)
-                return Tab:AddDropdown({
-                    Name = config.Title,
-                    Options = config.Values or config.Options,
+                return Tab:AddDropdown(config.Title, {
+                    Title = config.Title,
+                    Values = config.Values or config.Options or {},
                     Default = config.Default,
-                    MultiSelect = config.Multi or false,
+                    Multi = config.Multi or false,
                     Callback = config.Callback
                 })
             end
 
             -- Slider
             function SectionWrapper:AddSlider(config)
-                return Tab:AddSlider({
-                    Name = config.Title,
+                return Tab:AddSlider(config.Title, {
+                    Title = config.Title,
                     Min = config.Min or 0,
                     Max = config.Max or 100,
                     Default = config.Default or 0,
-                    Increment = config.Increment or 1,
+                    Rounding = config.Increment or 1,
                     Callback = config.Callback
                 })
             end
 
             -- Input (TextBox)
             function SectionWrapper:AddInput(config)
-                return Tab:AddTextBox({
-                    Name = config.Title,
+                return Tab:AddInput(config.Title, {
+                    Title = config.Title,
                     Default = config.Default or "",
                     Placeholder = config.PlaceHolder or "Digite aqui...",
                     Callback = config.Callback
@@ -213,26 +212,38 @@ function I:NewWindow(config)
 
             -- Paragraph (Texto)
             function SectionWrapper:AddParagraph(config)
-                return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")
+                return Tab:AddParagraph({
+                    Title = config.Title or "Info",
+                    Content = config.Desc or config.Content or ""
+                })
             end
 
-            -- Separador (Usando a função Section da UI)
+            -- Separador
             function SectionWrapper:AddSeperator(text)
                 Tab:AddSection(text)
             end
 
             -- Label
             function SectionWrapper:AddLabel(text)
-                return Tab:AddParagraph(text, "")
+                return Tab:AddParagraph({
+                    Title = text,
+                    Content = ""
+                })
             end
 
-            -- Discord Invite
+            -- Discord Invite (Adaptado para botão/dialog)
             function SectionWrapper:AddDiscord(title, link)
-                Tab:AddDiscordInvite({
+                Tab:AddButton({
                     Title = title,
-                    Invite = "https://discord.gg/" .. (link:gsub("https://discord.gg/", "")),
-                    Description = "Entre no nosso servidor!",
-                    Logo = "rbxassetid://105245380363493"
+                    Description = "Copiar link do Discord",
+                    Callback = function()
+                        setclipboard("https://discord.gg/" .. (link:gsub("https://discord.gg/", "")))
+                        Fluent:Notify({
+                            Title = "Discord",
+                            Content = "Link copiado para a área de transferência!",
+                            Duration = 5
+                        })
+                    end
                 })
             end
 
@@ -243,11 +254,10 @@ function I:NewWindow(config)
 
     -- Sistema de Notificação
     function WindowWrapper:Notify(config)
-        Window:Notify({
+        Fluent:Notify({
             Title = config.Title or "Notificação",
             Content = config.Content or config.Text or "",
-            Duration = config.Duration or 5,
-            Image = config.Image or "rbxassetid://10734953451"
+            Duration = config.Duration or 5
         })
     end
 
