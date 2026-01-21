@@ -6520,7 +6520,6 @@ spawn(function()
 	end;
 end);
 
-end
 if World2 or World3 then
 -- SECTION BUSO/AURA COLOURS
 outros:AddSeperator("Aura Colours");
