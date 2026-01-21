@@ -2483,7 +2483,7 @@ end)
 
 -- TABS (somente nomes alterados)
 local i        = V:T("Home","rbxassetid://10723415903")
-local server   = V:T("Status And Server","rbxassetid://10747382504")
+
 local g        = V:T("Shop","rbxassetid://10734952479")
 local y        = V:T("Main","rbxassetid://10723407389")
 
@@ -2501,7 +2501,6 @@ local c        = V:T("Settings And Misc","rbxassetid://10734950309")
 -- SECTIONS (somente nomes alterados)
 local b    = y:AddSection("Auto Farm main");
 
-local serverSection = server:AddSection("Server Options");
 
 local D    = g:AddSection("Shop, Styles & Accessories");
 
@@ -2563,107 +2562,6 @@ ConfigSection:AddButton({
 
 
 
-serverSection:AddSeperator("Server - Function");
-
-serverSection:AddButton({ Title = "Rejoin Server", Description = "", Callback = function()
-    (game:GetService("TeleportService")):Teleport(game.PlaceId, game.Players.LocalPlayer);
-end });
-
-serverSection:AddButton({ Title = "Hop Server", Description = "", Callback = function()
-    Hop();
-end });
-
-serverSection:AddButton({ Title = "Hop Server with a few people", Description = "", Callback = function()
-    local I = game:GetService("HttpService");
-    local e = game:GetService("TeleportService");
-    local K = "https://games.roblox.com/v1/games/";
-    local n = game.PlaceId;
-    local d = K .. (n .. "/servers/Public?sortOrder=Asc&limit=100");
-    function ListServers(e)
-        local K = game:HttpGet(d .. (e and "&cursor=" .. e or ""));
-        return I:JSONDecode(K);
-    end;
-    local z, H;
-    repeat
-        local I = ListServers(H);
-        z = I.data[1];
-        H = I.nextPageCursor;
-    until z;
-    e:TeleportToPlaceInstance(n, z.id, plr);
-end });
-
-serverSection:AddButton({ Title = "Hop Sever with low ping", Description = "", Callback = function()
-    local I = game:GetService("HttpService");
-    local e = game:GetService("TeleportService");
-    local K = game:GetService("Stats");
-    local function n(e, K)
-        local n = string.format("https://games.roblox.com/v1/games/%d/servers/Public?limit=%d", e, K);
-        local d, z = pcall(function()
-            return I:JSONDecode(game:HttpGet(n));
-        end);
-        if d and (z and z.data) then
-            return z.data;
-        end;
-        return nil;
-    end;
-    local d = game.PlaceId;
-    local z = 100;
-    local H = n(d, z);
-    if not H then
-        return;
-    end;
-    local F = H[1];
-    for I, e in pairs(H) do
-        if e.ping < F.ping and e.maxPlayers > e.playing then
-            F = e;
-        end;
-    end;
-    local Q = .5;
-    task.wait(Q);
-    local X = 100;
-    local P = K.Network.ServerStatsItem;
-    local w = P["Data Ping"]:GetValueString();
-    local O = tonumber(w:match("(%d+)"));
-    if O >= X then
-        e:TeleportToPlaceInstance(d, F.id);
-    end;
-end });
-
-serverSection:AddInput({
-    Title = "JobID",
-    Description = "",
-    PlaceHolder = "",
-    Default = "",
-    Callback = function(I)
-        _G.JobId = I;
-    end,
-});
-
-spawn(function()
-    while wait(Sec) do
-        if _G.JobId then
-            pcall(function()
-                local I;
-                I = plr.OnTeleport:Connect(function(e)
-                    if e == Enum.TeleportState.Failed then
-                        I:Disconnect();
-                        if workspace:FindFirstChild("Message") then
-                            workspace.Message:Destroy();
-                        end;
-                    end;
-                end);
-            end);
-        end;
-    end;
-end);
-
-serverSection:AddButton({ Title = "Join Server", Description = "", Callback = function()
-    replicated.__ServerBrowser:InvokeServer("teleport", _G.JobId);
-end });
-
-serverSection:AddButton({ Title = "Copy JobID Server", Description = "", Callback = function()
-    setclipboard(tostring(game.JobId));
-end });
 
 function isnil(I)
 	return I == nil;
@@ -3614,81 +3512,7 @@ spawn(function()
 	end
 end)
 end
-serverSection:AddSeperator("Server - Status");
 
--- Sistema Time Zone
-local Time = serverSection:AddParagraph({Title = "Time Zone", Desc = ""})
-function UpdateOS()
-    local date = os.date("*t")
-    local hour = date.hour % 24
-    local ampm = hour < 12 and "AM" or "PM"
-    local timezone = string.format("%02i:%02i:%02i %s", ((hour - 1) % 12) + 1, date.min, date.sec, ampm)
-    local datetime = string.format("%02d/%02d/%04d", date.day, date.month, date.year)
-    local LocalizationService = game:GetService("LocalizationService")
-    local Players = game:GetService("Players")
-    local player = Players.LocalPlayer
-    local result, code = pcall(function()
-        return LocalizationService:GetCountryRegionForPlayerAsync(player)
-    end)
-    Time:SetDesc(datetime .. " - " .. timezone .. " [ " .. (code or "??") .. " ]")
-end
-spawn(function()
-    while wait() do
-        UpdateOS()
-        game:GetService("RunService").RenderStepped:Wait()
-    end
-end)
-
--- Sistema Game Time
-local Timmessss = serverSection:AddParagraph({Title = "Time", Desc = ""})
-function UpdateTime()
-    local GameTime = math.floor(workspace.DistributedGameTime + 0.5)
-    local Hour = math.floor(GameTime / (60 ^ 2)) % 24
-    local Minute = math.floor(GameTime / 60) % 60
-    local Second = GameTime % 60
-    Timmessss:SetDesc(Hour .. " Hour (h) " .. Minute .. " Minute (m) " .. Second .. " Second (s)")
-end
-spawn(function()
-    while wait() do
-        UpdateTime()
-    end
-end)
-
--- Sistema de Verificação de Ilhas
-local function CheckIsland(name, folder, childName)
-    local p = serverSection:AddParagraph({Title = name, Desc = "Status: "})
-    spawn(function()
-        pcall(function()
-            while wait() do
-                if folder:FindFirstChild(childName) then
-                    p:SetDesc('✅️')
-                else
-                    p:SetDesc('❌️')
-                end
-            end
-        end)
-    end)
-end
-
-CheckIsland("Mirage Island", game.Workspace._WorldOrigin.Locations, "Mirage Island")
-CheckIsland("Kitsune Island", game.Workspace.Map, "KitsuneIsland")
-CheckIsland("Prehistoric Island", game.Workspace._WorldOrigin.Locations, "Prehistoric Island")
-CheckIsland("Frozen Dimension", game.Workspace._WorldOrigin.Locations, "Frozen Dimension")
-
-
-
-
-
-
-serverSection:AddSeperator("Place id");
-
--- Paragraph que mostra o PlaceId atual
-local PlaceInfo = serverSection:AddParagraph({
-    Title = "PlaceId",
-    Content = ""
-})
-
-PlaceInfo:SetDesc("Current PlaceId: " .. tostring(game.PlaceId))
 
 -- ROOT FIX: sempre atualizar o HRP quando o player respawnar
 local Root
@@ -4034,6 +3858,60 @@ end)
 
 
 Discord_Info:AddDiscord("Night Mystic", "gkud3frejh")
+
+Discord_Info:AddSeperator("Server - Status");
+
+-- Sistema Time Zone
+local Time = Discord_Info:AddParagraph({Title = "Time Zone", Desc = ""})
+function UpdateOS()
+    local date = os.date("*t")
+    local hour = date.hour % 24
+    local ampm = hour < 12 and "AM" or "PM"
+    local timezone = string.format("%02i:%02i:%02i %s", ((hour - 1) % 12) + 1, date.min, date.sec, ampm)
+    local datetime = string.format("%02d/%02d/%04d", date.day, date.month, date.year)
+    local LocalizationService = game:GetService("LocalizationService")
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    local result, code = pcall(function()
+        return LocalizationService:GetCountryRegionForPlayerAsync(player)
+    end)
+    Time:SetDesc(datetime .. " - " .. timezone .. " [ " .. (code or "??") .. " ]")
+end
+spawn(function()
+    while wait() do
+        UpdateOS()
+        game:GetService("RunService").RenderStepped:Wait()
+    end
+end)
+
+-- Sistema Game Time
+local Timmessss = Discord_Info:AddParagraph({Title = "Time", Desc = ""})
+function UpdateTime()
+    local GameTime = math.floor(workspace.DistributedGameTime + 0.5)
+    local Hour = math.floor(GameTime / (60 ^ 2)) % 24
+    local Minute = math.floor(GameTime / 60) % 60
+    local Second = GameTime % 60
+    Timmessss:SetDesc(Hour .. " Hour (h) " .. Minute .. " Minute (m) " .. Second .. " Second (s)")
+end
+spawn(function()
+    while wait() do
+        UpdateTime()
+    end
+end)
+
+
+
+
+
+Discord_Info:AddSeperator("Place id");
+
+-- Paragraph que mostra o PlaceId atual
+local PlaceInfo = Discord_Info:AddParagraph({
+    Title = "PlaceId",
+    Content = ""
+})
+
+PlaceInfo:SetDesc("Current PlaceId: " .. tostring(game.PlaceId))
 
 
 b:AddSeperator("Farming")
