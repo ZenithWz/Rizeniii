@@ -6195,9 +6195,81 @@ end)
 
 
 
+
+outros:AddSeperator("Elite Quest");
+
+outros:AddToggle({
+	Title = "Auto Elite Hunter",
+	Description = "",
+	-- 1. Carrega o estado salvo ou false por padrão
+	Default = GetSetting("AutoEliteQuest_Save", false),
+	Callback = function(I)
+		_G.FarmEliteHunt = I
+        
+        -- 2. Guarda na tabela de salvamento
+        _G.SaveData["AutoEliteQuest_Save"] = I
+        
+        -- 3. Salva no arquivo Settings.json
+        SaveSettings()
+	end,
+})
+spawn(function()
+	while wait(Sec) do
+		pcall(function()
+			if _G.FarmEliteHunt then
+				if plr.PlayerGui.Main.Quest.Visible == true then
+					if string.find(plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Diablo") or string.find(plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Urban") or string.find(plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Deandre") then
+						for I, e in pairs(replicated:GetChildren()) do
+							if string.find(e.Name, "Diablo") or string.find(e.Name, "Urban") or string.find(e.Name, "Deandre") then
+								_tp(e.HumanoidRootPart.CFrame);
+							end;
+						end;
+						for I, e in pairs(Enemies:GetChildren()) do
+							if (string.find(e.Name, "Diablo") or string.find(e.Name, "Urban") or string.find(e.Name, "Deandre")) and G.Alive(e) then
+								repeat
+									wait();
+									G.Kill(e, _G.FarmEliteHunt);
+								until not _G.FarmEliteHunt or plr.PlayerGui.Main.Quest.Visible == false or not e.Parent or e.Humanoid.Health <= 0;
+							end;
+						end;
+					end;
+				else
+					replicated.Remotes.CommF_:InvokeServer("EliteHunter");
+				end;
+			end;
+		end);
+	end;
+end);
+outros:AddToggle({
+    Title = "Stop when got God Chalice",
+    Description = "",
+    -- 1. Carrega o estado salvo ou inicia como true (padrão do seu script)
+    Default = GetSetting("StopChalice_Save", true),
+    Callback = function(I)
+        _G.StopWhenChalice = I
+        
+        -- 2. Guarda na tabela de salvamento
+        _G.SaveData["StopChalice_Save"] = I
+        
+        -- 3. Salva no arquivo Settings.json
+        SaveSettings()
+    end,
+})
+spawn(function()
+	while wait(.2) do
+		if _G.StopWhenChalice and _G.FarmEliteHunt then
+			pcall(function()
+				if GetBP("God\'s Chalice") or GetBP("Sweet Chalice") or GetBP("Fist of Darkness") then
+					_G.FarmEliteHunt = false;
+				end;
+			end);
+		end;
+	end;
+end);
+
 outros:AddSeperator("Quests");
 outros:AddToggle({
-    Title = "Auto Farm Observation",
+    Title = "Auto Farm Haki Obs",
     Description = "",
     -- 1. Carrega o estado salvo ou false por padrão
     Default = GetSetting("AutoObsFarm_Save", false),
@@ -6285,7 +6357,7 @@ spawn(function()
 end);
 if World3 then
 outros:AddToggle({
-	Title = "Auto Observation V2",
+	Title = "Auto Haki Obs V2",
 	Description = "",
 	-- 1. Carrega se estava ligado ou desligado ao abrir o script
 	Default = GetSetting("AutoKenV2_Save", false),
@@ -6447,110 +6519,13 @@ spawn(function()
 		end);
 	end;
 end);
-outros:AddSeperator("Elite Quest");
-
-outros:AddToggle({
-	Title = "Auto Elite Hunter",
-	Description = "",
-	-- 1. Carrega o estado salvo ou false por padrão
-	Default = GetSetting("AutoEliteQuest_Save", false),
-	Callback = function(I)
-		_G.FarmEliteHunt = I
-        
-        -- 2. Guarda na tabela de salvamento
-        _G.SaveData["AutoEliteQuest_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
-        SaveSettings()
-	end,
-})
-spawn(function()
-	while wait(Sec) do
-		pcall(function()
-			if _G.FarmEliteHunt then
-				if plr.PlayerGui.Main.Quest.Visible == true then
-					if string.find(plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Diablo") or string.find(plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Urban") or string.find(plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Deandre") then
-						for I, e in pairs(replicated:GetChildren()) do
-							if string.find(e.Name, "Diablo") or string.find(e.Name, "Urban") or string.find(e.Name, "Deandre") then
-								_tp(e.HumanoidRootPart.CFrame);
-							end;
-						end;
-						for I, e in pairs(Enemies:GetChildren()) do
-							if (string.find(e.Name, "Diablo") or string.find(e.Name, "Urban") or string.find(e.Name, "Deandre")) and G.Alive(e) then
-								repeat
-									wait();
-									G.Kill(e, _G.FarmEliteHunt);
-								until not _G.FarmEliteHunt or plr.PlayerGui.Main.Quest.Visible == false or not e.Parent or e.Humanoid.Health <= 0;
-							end;
-						end;
-					end;
-				else
-					replicated.Remotes.CommF_:InvokeServer("EliteHunter");
-				end;
-			end;
-		end);
-	end;
-end);
-outros:AddToggle({
-    Title = "Stop when got God Chalice",
-    Description = "",
-    -- 1. Carrega o estado salvo ou inicia como true (padrão do seu script)
-    Default = GetSetting("StopChalice_Save", true),
-    Callback = function(I)
-        _G.StopWhenChalice = I
-        
-        -- 2. Guarda na tabela de salvamento
-        _G.SaveData["StopChalice_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
-        SaveSettings()
-    end,
-})
-spawn(function()
-	while wait(.2) do
-		if _G.StopWhenChalice and _G.FarmEliteHunt then
-			pcall(function()
-				if GetBP("God\'s Chalice") or GetBP("Sweet Chalice") or GetBP("Fist of Darkness") then
-					_G.FarmEliteHunt = false;
-				end;
-			end);
-		end;
-	end;
-end);
 
 end
 if World2 or World3 then
 -- SECTION BUSO/AURA COLOURS
-outros:AddSeperator("Buso/Aura Colours");
+outros:AddSeperator("Aura Colours");
 
-outros:AddToggle({
-    Title = "Teleport Barista Haki",
-    Description = "",
-    -- 1. Carrega se estava ligado ou desligado ao abrir o script
-    Default = GetSetting("TpBarista_Save", false),
-    Callback = function(I)
-        _G.Tp_MasterA = I
-        
-        -- 2. Guarda na tabela de salvamento
-        _G.SaveData["TpBarista_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
-        SaveSettings()
-    end,
-})
-spawn(function()
-    while wait() do
-        if _G.Tp_MasterA then
-            pcall(function()
-                for _, e in pairs(replicated.NPCs:GetChildren()) do
-                    if e.Name == "Barista Cousin" then
-                        _tp(e.HumanoidRootPart.CFrame);
-                    end;
-                end;
-            end);
-        end;
-    end;
-end);
+
 
 outros:AddButton({
     Title = "Buy Buso Colors",
