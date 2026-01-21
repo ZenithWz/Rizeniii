@@ -690,47 +690,47 @@ statsSetings = function(I, e)
 
 
 local TweenService = game:GetService("TweenService")
-local _B = true -- Variável de controle externa
 
-BringEnemy = function()
-    if not _B then return end
+local BRING_TIME = 3
+local RELEASE_TIME = 5
+local RANGE = 300
 
-    -- Loop principal do ciclo
-    task.spawn(function()
-        while _B do
-            -- FASE 1: Puxar Mobs (Duração: 3 segundos)
-            local startTime = tick()
-            while tick() - startTime < 3 do
-                for _, e in pairs(workspace.Enemies:GetChildren()) do
-                    -- Verifica se é um mob válido, se está vivo e se NÃO é Boss
-                    if e:FindFirstChild("Humanoid") and e.Humanoid.Health > 0 and not e:FindFirstChild("IsBoss") and not e:GetAttribute("IsBoss") then
-                        local primaryPart = e.PrimaryPart
-                        if primaryPart and (primaryPart.Position - PosMon).Magnitude <= 300 then
-                            
-                            -- Movimentação Suave com Tween
-                            local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-                            local goal = {CFrame = CFrame.new(PosMon)}
-                            local tween = TweenService:Create(primaryPart, tweenInfo, goal)
-                            tween:Play()
+local bringing = true
 
-                            -- Mantém a rede de simulação para o jogador (opcional dependendo do exploit)
-                            if plr then
-                                plr.SimulationRadius = math.huge
-                            end
-                        end
-                    end
-                end
-                task.wait(0.1) -- Delay curto para atualização do Tween durante os 3s
-            end
+task.spawn(function()
+	while true do
+		bringing = true
+		task.wait(BRING_TIME)
+		bringing = false
+		task.wait(RELEASE_TIME)
+	end
+end)
 
-            -- FASE 2: Descanso/Release (Duração: 5 segundos ou mais)
-            task.wait(5) 
-        end
-    end)
+BringEnemy = function(PosMon)
+	if not _B then return end
+
+	for _, e in pairs(workspace.Enemies:GetChildren()) do
+		local humanoid = e:FindFirstChild("Humanoid")
+		local root = e:FindFirstChild("HumanoidRootPart") or e.PrimaryPart
+
+		if humanoid and root and humanoid.Health > 0 then
+			if e:FindFirstChild("IsBoss") then
+				continue
+			end
+
+			if (root.Position - PosMon).Magnitude <= RANGE then
+				if bringing then
+					local tween = TweenService:Create(
+						root,
+						TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+						{CFrame = CFrame.new(PosMon)}
+					)
+					tween:Play()
+				end
+			end
+		end
+	end
 end
-
--- Para iniciar a função:
--- BringEnemy()
 
 Useskills = function(I, e)
 		if I == "Melee" then
@@ -9564,7 +9564,7 @@ Y:AddButton({ Title = "Teleport Sea 2", Description = "", Callback = function()
 Y:AddButton({ Title = "Teleport Sea 3", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("TravelZou");
 	end });
-Y:AddSeperator("Travel - Island")
+Y:AddSeperator("Island")
 
 -- Lista de Ilhas
 Location = {}
