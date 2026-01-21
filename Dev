@@ -137,10 +137,25 @@ function I:NewWindow(config)
     local Minimizer = Window:NewMinimizer({
         KeyCode = Enum.KeyCode.LeftControl
     })
-    Minimizer:CreateMobileMinimizer({
+
+    local MobileButton = Minimizer:CreateMobileMinimizer({
         Image = "rbxassetid://135264546140981",
-        BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     })
+
+    if MobileButton then
+        MobileButton.Size = UDim2.new(0, 70, 0, 70)
+
+        local UICorner = Instance.new("UICorner")
+        UICorner.CornerRadius = UDim.new(1, 0)
+        UICorner.Parent = MobileButton
+
+        local UIStroke = Instance.new("UIStroke")
+        UIStroke.Thickness = 2
+        UIStroke.Color = Color3.fromRGB(0, 0, 0)
+        UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        UIStroke.Parent = MobileButton
+    end
 
     local WindowWrapper = {}
 
@@ -237,6 +252,7 @@ function I:NewWindow(config)
 
     return WindowWrapper
 end
+
 
 
 
