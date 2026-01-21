@@ -123,145 +123,134 @@ Marines = function()
 Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
--- [[ 1. CARREGAMENTO DA SUA UI ]] --
--- SUBSTITUA O LINK ABAIXO PELO SEU LINK RAW DO 'ID THEME'
-local ModernUI_URL = "https://pastefy.app/VUXe3E6G/raw" 
-local Library = loadstring(game:HttpGet(ModernUI_URL))()
+-- [[ 1. CARREGAMENTO DA NOVA UI (REDZ V5) ]] --
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/redz-V5-remake/main.luau"))()
 
--- [[ 2. ADAPTADOR (NIGHT MYSTIC -> MODERN UI ATUALIZADA) ]] --
+-- [[ 2. ADAPTADOR ATUALIZADO (NIGHT MYSTIC -> REDZ V5) ]] --
 local I = {}
 
 function I:NewWindow(config)
-    -- Cria a janela principal usando a ModernUI
-    local Window = Library.new({
-        Title = "Diamond Hub",
+    -- Cria a janela principal Redz V5
+    local Window = Library:MakeWindow({
+        Title = "Diamond Hub : Blox Fruits",
         SubTitle = "By MikasaZx",
-        Icon = {"rbxassetid://0"}, 
-        IconFPS = 0
+        ScriptFolder = "redz-library-V5"
+    })
+
+    -- Configuração do Botão de Minimizar (Padrão)
+    local Minimizer = Window:NewMinimizer({
+        KeyCode = Enum.KeyCode.LeftControl
+    })
+    Minimizer:CreateMobileMinimizer({
+        Image = "rbxassetid://", -- Usando seu ID de ícone
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     })
 
     local WindowWrapper = {}
 
-    -- Função para criar Abas
+    -- Função para criar Abas (T)
     function WindowWrapper:T(name, iconId)
-        local Tab = Window:CreateTab({
-            Name = name,
-            Icon = iconId or "rbxassetid://7733960981"
+        local Tab = Window:MakeTab({
+            Title = name,
+            Icon = iconId or "home"
         })
 
         local TabWrapper = {}
 
-        -- Função para criar Seções
+        -- Função para criar Seções (Corrigido: não cria mais Paragraph automático)
         function TabWrapper:AddSection(sectionName)
-            -- Cria o cabeçalho visual da seção
-            Window:AddSection(Tab, { Name = sectionName })
-
             local SectionWrapper = {}
 
             -- Toggle (Interruptor)
             function SectionWrapper:AddToggle(config)
-                return Window:AddToggle(Tab, {
+                return Tab:AddToggle({
                     Name = config.Title,
-                    Default = config.Default,
+                    Default = config.Default or false,
                     Callback = config.Callback
                 })
             end
 
             -- Button (Botão)
             function SectionWrapper:AddButton(config)
-                return Window:AddButton(Tab, {
+                return Tab:AddButton({
                     Name = config.Title,
                     Callback = config.Callback
                 })
             end
 
-            -- Dropdown (Lista de seleção)
+            -- Dropdown
             function SectionWrapper:AddDropdown(config)
-                if config.Multi then
-                    return Window:AddMultiDropdown(Tab, {
-                        Name = config.Title,
-                        Options = config.Values,
-                        Default = config.Default,
-                        Callback = config.Callback
-                    })
-                else
-                    return Window:AddDropdown(Tab, {
-                        Name = config.Title,
-                        Options = config.Values,
-                        Default = config.Default,
-                        Callback = config.Callback
-                    })
-                end
+                return Tab:AddDropdown({
+                    Name = config.Title,
+                    Options = config.Values or config.Options,
+                    Default = config.Default,
+                    MultiSelect = config.Multi or false,
+                    Callback = config.Callback
+                })
             end
 
-            -- Slider (Barra de valor)
+            -- Slider
             function SectionWrapper:AddSlider(config)
-                return Window:AddSlider(Tab, {
+                return Tab:AddSlider({
                     Name = config.Title,
                     Min = config.Min or 0,
                     Max = config.Max or 100,
                     Default = config.Default or 0,
+                    Increment = config.Increment or 1,
                     Callback = config.Callback
                 })
             end
 
-            -- Input (Caixa de Texto) -> AGORA USA A FUNÇÃO NATIVA DA UI!
+            -- Input (TextBox)
             function SectionWrapper:AddInput(config)
-                return Window:AddInput(Tab, {
+                return Tab:AddTextBox({
                     Name = config.Title,
-                    Default = config.Default,
-                    PlaceHolder = config.PlaceHolder,
+                    Default = config.Default or "",
+                    Placeholder = config.PlaceHolder or "Digite aqui...",
                     Callback = config.Callback
                 })
             end
 
-            -- Paragraph (Texto de Status) -> AGORA USA A FUNÇÃO NATIVA!
+            -- Paragraph (Texto)
             function SectionWrapper:AddParagraph(config)
-                return Window:AddParagraph(Tab, {
-                    Name = config.Title,
-                    Content = config.Desc or config.Content
-                })
+                return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")
             end
 
-            -- Separator (Separador visual)
+            -- Separador (Usando a função Section da UI)
             function SectionWrapper:AddSeperator(text)
-                Window:AddSection(Tab, {Name = text})
+                Tab:AddSection(text)
             end
-            
-            -- Label (Texto simples)
+
+            -- Label
             function SectionWrapper:AddLabel(text)
-                 return Window:AddParagraph(Tab, {
-                    Name = text,
-                    Content = ""
+                return Tab:AddParagraph(text, "")
+            end
+
+            -- Discord Invite
+            function SectionWrapper:AddDiscord(title, link)
+                Tab:AddDiscordInvite({
+                    Title = title,
+                    Invite = "https://discord.gg/" .. (link:gsub("https://discord.gg/", "")),
+                    Description = "Entre no nosso servidor!",
+                    Logo = "rbxassetid://105245380363493"
                 })
             end
-
-            --  Button (Botão especial)
-            function SectionWrapper:AddDiscord(title, link)
-    -- Chama a nova função que criamos na UI
-           if Window.AddDiscord then
-           Window:AddDiscord(Tab, {
-            Title = title,
-            Invite = link
-        })
-    else
-         -- Fallback caso a UI não tenha atualizado
-          Window:AddButton(Tab, {
-            Name = "Join " .. title,
-            Callback = function() setclipboard("https://discord.gg/"..link) end
-        })
-    end
-end
-
-function WindowWrapper:Notify(notificationConfig)
-    Window:Notify(notificationConfig)
-end
-
 
             return SectionWrapper
         end
         return TabWrapper
     end
+
+    -- Sistema de Notificação
+    function WindowWrapper:Notify(config)
+        Window:Notify({
+            Title = config.Title or "Notificação",
+            Content = config.Content or config.Text or "",
+            Duration = config.Duration or 5,
+            Image = config.Image or "rbxassetid://10734953451"
+        })
+    end
+
     return WindowWrapper
 end
 
@@ -3686,154 +3675,10 @@ CheckIsland("Kitsune Island", game.Workspace.Map, "KitsuneIsland")
 CheckIsland("Prehistoric Island", game.Workspace._WorldOrigin.Locations, "Prehistoric Island")
 CheckIsland("Frozen Dimension", game.Workspace._WorldOrigin.Locations, "Frozen Dimension")
 
--- Sistema Cake Prince Kill
-local MobCakePrince = serverSection:AddParagraph({Title = "Dimension Killed", Desc = ""})
-spawn(function()
-    while wait() do
-        pcall(function()
-            local response = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CakePrinceSpawner")
-            local len = string.len(response)
-            if len == 88 then
-                MobCakePrince:SetDesc("Kill : " .. string.sub(response, 39, 41))
-            elseif len == 87 then
-                MobCakePrince:SetDesc("Kill : " .. string.sub(response, 39, 40))
-            elseif len == 86 then
-                MobCakePrince:SetDesc("Kill : " .. string.sub(response, 39, 39) .. " ")
-            else
-                MobCakePrince:SetDesc("Cake Prince : ✅️")
-            end
-        end)
-    end
-end)
 
--- Sistema Tyrant of the Skies
-local TyrantStatus = serverSection:AddParagraph({Title = "Tyrant of the Skies", Desc = "Status: "})
-spawn(function()
-    pcall(function()
-        while wait() do
-            if game:GetService("Workspace").Enemies:FindFirstChild("Tyrant of the Skies") then
-                TyrantStatus:SetDesc("Status : ✅️")
-            else
-                TyrantStatus:SetDesc("Status : ❌️")
-            end
-        end
-    end)
-end)
 
--- Sistema Rip_Indra
-local CheckRip = serverSection:AddParagraph({Title = "Rip_Indra", Desc = "Status: "})
-spawn(function()
-    while wait() do
-        pcall(function()
-            if game:GetService("ReplicatedStorage"):FindFirstChild("rip_indra True Form") 
-            or game:GetService("Workspace").Enemies:FindFirstChild("rip_indra") then
-                CheckRip:SetDesc("Status : ✅️")
-            else
-                CheckRip:SetDesc("Status : ❌️")
-            end
-        end)
-    end
-end)
 
--- Sistema Dough King
-local CheckDoughKing = serverSection:AddParagraph({Title = "Dough King", Desc = "Status: "})
-spawn(function()
-    while wait() do
-        pcall(function()
-            if game:GetService("ReplicatedStorage"):FindFirstChild("Dough King") 
-            or game:GetService("Workspace").Enemies:FindFirstChild("Dough King") then
-                CheckDoughKing:SetDesc("Status : ✅️")
-            else
-                CheckDoughKing:SetDesc("Status : ❌️")
-            end
-        end)
-    end
-end)
 
--- Sistema Elite Hunter
-local EliteHunter = serverSection:AddParagraph({Title = "Elite Hunter", Desc = "Status: "})
-spawn(function()
-    while wait() do
-        pcall(function()
-            local rs = game:GetService("ReplicatedStorage")
-            local ws = game:GetService("Workspace").Enemies
-            local progress = rs.Remotes.CommF_:InvokeServer("EliteHunter", "Progress")
-            if rs:FindFirstChild("Diablo") or rs:FindFirstChild("Deandre") or rs:FindFirstChild("Urban")
-            or ws:FindFirstChild("Diablo") or ws:FindFirstChild("Deandre") or ws:FindFirstChild("Urban") then
-                EliteHunter:SetDesc("Status : ✅️ | Killed: " .. progress)
-            else
-                EliteHunter:SetDesc("Status : ❌️ | Killed: " .. progress)
-            end
-        end)
-    end
-end)
-
--- Sistema Pull Lever
-local Pullever = serverSection:AddParagraph({Title = "Pull Lever", Desc = "Status: "})
-spawn(function()
-    while wait() do
-        pcall(function()
-            if game.ReplicatedStorage.Remotes.CommF_:InvokeServer("CheckTempleDoor") then
-                Pullever:SetDesc("✅")
-            else
-                Pullever:SetDesc("❌")
-            end
-        end)
-    end
-end)
-
--- Sistema Full Moon
-local FM = serverSection:AddParagraph({Title = "Full Moon", Desc = ""})
-spawn(function()
-    while wait() do
-        pcall(function()
-            local moonId = game:GetService("Lighting").Sky.MoonTextureId
-            if moonId == "http://www.roblox.com/asset/?id=9709149431" then
-                FM:SetDesc("Moon: 5/5")
-            elseif moonId == "http://www.roblox.com/asset/?id=9709149052" then
-                FM:SetDesc("Moon: 4/5")
-            elseif moonId == "http://www.roblox.com/asset/?id=9709143733" then
-                FM:SetDesc("Moon: 3/5")
-            elseif moonId == "http://www.roblox.com/asset/?id=9709150401" then
-                FM:SetDesc("Moon: 2/5")
-            elseif moonId == "http://www.roblox.com/asset/?id=9709149680" then
-                FM:SetDesc("Moon: 1/5")
-            else
-                FM:SetDesc("Moon: 0/5")
-            end
-        end)
-    end
-end)
-
--- Sistema Legendary Sword
-local LegendarySword = serverSection:AddParagraph({Title = "Legendary Sword", Desc = "Status: "})
-spawn(function()
-    pcall(function()
-        while wait() do
-            local rs = game:GetService("ReplicatedStorage").Remotes.CommF_
-            if rs:InvokeServer("LegendarySwordDealer", "1") then
-                LegendarySword:SetDesc("Shisui")
-            elseif rs:InvokeServer("LegendarySwordDealer", "2") then
-                LegendarySword:SetDesc("Wando")
-            elseif rs:InvokeServer("LegendarySwordDealer", "3") then
-                LegendarySword:SetDesc("Saddi")
-            else
-                LegendarySword:SetDesc("Not Found Legend Swords")
-            end
-        end
-    end)
-end)
-
--- Sistema Bone
-local Bone = serverSection:AddParagraph({Title = "Bone", Desc = ""})
-spawn(function()
-    pcall(function()
-        while wait() do
-            local bones = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Bones", "Check")
-            Bone:SetDesc("You Have : " .. tostring(bones) .. " Bones")
-        end
-    end)
-end)
 
 serverSection:AddSeperator("Place id");
 
@@ -9537,6 +9382,60 @@ E:AddInput({
         end
     end
 })
+
+Y:AddSeperator("Island Stats");
+
+-- Mirage Island
+local MirageParagraph = Y:AddParagraph({
+    Title = "Mirage Island",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Mirage Island") ~= nil
+        MirageParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+-- Kitsune Island
+local KitsuneParagraph = Y:AddParagraph({
+    Title = "Kitsune Island",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace.Map:FindFirstChild("KitsuneIsland") ~= nil
+        KitsuneParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+-- Prehistoric Island
+local PrehistoricParagraph = Y:AddParagraph({
+    Title = "Prehistoric Island",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Prehistoric Island") ~= nil
+        PrehistoricParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+-- Frozen Dimension
+local FrozenParagraph = Y:AddParagraph({
+    Title = "Frozen Dimension",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Frozen Dimension") ~= nil
+        FrozenParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
 
 Y:AddSeperator("Worlds");
 Y:AddButton({ Title = "Teleport Sea 1", Description = "", Callback = function()
