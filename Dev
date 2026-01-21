@@ -134,8 +134,8 @@ function I:NewWindow(config)
         Title = "Diamond Hub : Blox Fruits",
         SubTitle = "By MikasaZx",
         TabWidth = 160,
-        Size = UDim2.fromOffset(580, 460),
-        Acrylic = true,
+        Size = UDim2.fromOffset(480, 430),
+        Acrylic = false,
         Theme = "Dark",
         MinimizeKey = Enum.KeyCode.LeftControl
     })
