@@ -4148,43 +4148,59 @@ end)
 
 b:AddSeperator("statistics point")
 
-_G.StatsList = {} -- Lista de stats selecionados
-_G.StatsPointsAmount = 1 -- Quantidade de pontos
+-- ESTADOS
+_G.StatsList = GetSetting("SelectedStats_Save", {})
+_G.StatsPointsAmount = GetSetting("StatsAmount_Save", 1)
+_G.AutoAddStats = GetSetting("AutoStats_Save", false)
 
--- 1. Slider para escolher a quantidade de pontos
+-- TOGGLE - ATIVAR / DESATIVAR
+b:AddToggle({
+    Title = "Auto Add Stats Points",
+    Description = "",
+    Default = _G.AutoAddStats,
+    Callback = function(I)
+        _G.AutoAddStats = I
+        _G.SaveData["AutoStats_Save"] = I
+        SaveSettings()
+    end,
+});
+
+-- SLIDER - QUANTIDADE DE PONTOS
 b:AddSlider({
     Title = "Points Amount",
     Min = 1,
     Max = 100,
-    Default = GetSetting("StatsAmount_Save", 1),
+    Default = _G.StatsPointsAmount,
     Callback = function(Value)
-        -- CORREÇÃO AQUI: Arredonda o valor para garantir que seja um número inteiro
-        local valorInteiro = math.floor(Value) 
-        
+        local valorInteiro = math.floor(Value)
+
         _G.StatsPointsAmount = valorInteiro
         _G.SaveData["StatsAmount_Save"] = valorInteiro
         SaveSettings()
     end
 })
 
--- 2. Multi Dropdown para escolher os Stats (Mantém igual)
+-- MULTI DROPDOWN - STATS
 b:AddDropdown({
     Title = "Select Stats to Upgrade",
     Values = {"Melee", "Defense", "Sword", "Gun", "Fruit"},
-    Multi = true, 
-    Default = GetSetting("SelectedStats_Save", {}),
+    Multi = true,
+    Default = _G.StatsList,
     Callback = function(Selected)
-        _G.StatsList = Selected 
+        _G.StatsList = Selected
         _G.SaveData["SelectedStats_Save"] = Selected
         SaveSettings()
     end
 })
 
--- 3. Loop Único Otimizado para Distribuir Pontos
+-- LOOP ÚNICO CONTROLADO PELO TOGGLE
 task.spawn(function()
-    while task.wait(0.2) do 
+    while task.wait(0.2) do
+        if not _G.AutoAddStats then
+            continue
+        end
+
         pcall(function()
-            -- Mapeamento dos nomes
             local StatMap = {
                 ["Melee"] = "Melee",
                 ["Defense"] = "Defense",
@@ -4193,19 +4209,19 @@ task.spawn(function()
                 ["Fruit"] = "Demon Fruit"
             }
 
-            -- Garante que a quantidade é um número válido e inteiro antes de enviar
             local amount = tonumber(_G.StatsPointsAmount) or 1
             amount = math.floor(amount)
 
-            local points = game.Players.LocalPlayer.Data.Points.Value
-            
+            local player = game.Players.LocalPlayer
+            local points = player.Data.Points.Value
+
             if points > 0 then
                 for statName, isActive in pairs(_G.StatsList) do
                     if isActive then
                         local internalName = StatMap[statName]
                         if internalName then
-                            -- Usa a variável 'amount' que garantimos ser inteira
-                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AddPoint", internalName, amount)
+                            game:GetService("ReplicatedStorage")
+                                .Remotes.CommF_:InvokeServer("AddPoint", internalName, amount)
                         end
                     end
                 end
@@ -4213,7 +4229,6 @@ task.spawn(function()
         end)
     end
 end)
-
 b:AddSeperator("Other")
 
 
