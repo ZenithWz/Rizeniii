@@ -9,7 +9,7 @@ if makefolder and not isfolder(FolderName) then makefolder(FolderName) end
 
 _G.SaveData = {}
 
--- Esta é a função que o botão vai chamar)
+-- Esta é a função que o botão vai chamar
 function SaveSettings()
     if writefile then
         local json = HttpService:JSONEncode(_G.SaveData)
@@ -133,7 +133,7 @@ function I:NewWindow(config)
     -- Cria a janela principal Redz V5
     local Window = Library:MakeWindow({
         Title = "Diamond Hub : Blox Fruits",
-        SubTitle = "By MikasaZx",
+        SubTitle = "By Anonymous",
         ScriptFolder = "redz-library-V5"
     })
 
@@ -142,7 +142,7 @@ function I:NewWindow(config)
         KeyCode = Enum.KeyCode.LeftControl
     })
     Minimizer:CreateMobileMinimizer({
-        Image = "rbxassetid://", -- Usando seu ID de ícone
+        Image = "rbxassetid://105245380363493", -- Usando seu ID de ícone
         BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     })
 
@@ -9552,7 +9552,7 @@ RunService.RenderStepped:Connect(function()
 	else
 		stopRender()
 	end
-end
+end)
 
 E:AddSeperator("Speed/Jump");
 local RunService = game:GetService("RunService")
@@ -9664,7 +9664,7 @@ Y:AddButton({ Title = "Teleport Sea 2", Description = "", Callback = function()
 Y:AddButton({ Title = "Teleport Sea 3", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("TravelZou");
 	end });
-Y:AddSeperator("Island")
+Y:AddSeperator("Travel - Island")
 
 -- Lista de Ilhas
 Location = {}
@@ -9851,7 +9851,23 @@ spawn(function()
 		end);
 	end;
 end);
-
+p:AddToggle({
+	Title = "Auto Drop Fruit",
+	Description = "Automatic drop devil fruit",
+	Default = false,
+	Callback = function(I)
+		_G.DropFruit = I;
+	end,
+});
+spawn(function()
+	while wait(Sec) do
+		if _G.DropFruit then
+			pcall(function()
+				DropFruits();
+			end);
+		end;
+	end;
+end);
 p:AddToggle({
     Title = "Auto Store Fruit",
     Description = "Automatic store devil fruit",
@@ -9879,7 +9895,7 @@ end);
 
 -- [[ TOGGLE NA UI ]] --
 p:AddToggle({
-    Title = "Auto Collect Fruit",
+    Title = "Auto Tween to Fruit",
     Description = "Automatic tween to get devil fruit",
     -- 1. Carrega o estado salvo
     Default = GetSetting("AutoTweenFruit_Save", false),
@@ -9906,13 +9922,36 @@ spawn(function()
 		end;
 	end;
 end);
-
+p:AddToggle({
+    Title = "Auto Collect Fruit",
+    Description = "Automatic bring devil fruit",
+    -- 1. Carrega o estado salvo ou false por padrão
+    Default = GetSetting("AutoCollectFruit_Save", false),
+    Callback = function(I)
+        _G.InstanceF = I
+        
+        -- 2. Guarda na memória de salvamento
+        _G.SaveData["AutoCollectFruit_Save"] = I
+        
+        -- 3. Salva no arquivo Settings.json
+        SaveSettings()
+    end,
+})
+spawn(function()
+	while wait(Sec) do
+		if _G.InstanceF then
+			pcall(function()
+				collectFruits(_G.InstanceF);
+			end);
+		end;
+	end;
+end);
 -- [[ CONFIGURAÇÃO ]] --
 -- Distância máxima para considerar que foi um player que dropou
 local DropDistCheck = 15 
 
 p:AddToggle({
-    Title = "Notify Fruit Spawn",
+    Title = "Notify Fruit Spawn/Drop",
     Description = "Notifies and distinguishes spawned vs dropped fruits",
     Default = GetSetting("NotifyFruit_Save", false),
     Callback = function(Value)
