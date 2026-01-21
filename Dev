@@ -2498,7 +2498,7 @@ local m        = V:T("Race","rbxassetid://10734951847")
 local VI       = V:T("Visuals And ESP","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
 
-local R        = V:T("Get Items And Upgrade","rbxassetid://10734975692")
+local R        = V:T("Get Items And Upgrade","rbxassetid://10734975486")
 local B        = V:T("Raid & Fruit","rbxassetid://10709790875")
 local c        = V:T("Settings And Misc","rbxassetid://10734950309")
 
