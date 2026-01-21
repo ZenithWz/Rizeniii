@@ -689,48 +689,58 @@ statsSetings = function(I, e)
 
 
 
-local TweenService = game:GetService("TweenService")
+-- Configurações de tempo
+local tempoPuxando = 3
+local tempoSolto = 5
 
-local BRING_TIME = 3
-local RELEASE_TIME = 5
-local RANGE = 300
+local function ManageEnemies(isBringing)
+    if not _B then return end
+    
+    for I, e in pairs(workspace.Enemies:GetChildren()) do
+        if e:FindFirstChild("Humanoid") and e.Humanoid.Health > 0 then
+            local primaryPart = e.PrimaryPart
+            if primaryPart and (primaryPart.Position - PosMon).Magnitude <= 300 then
+                
+                if isBringing then
+                    -- Lógica para Trazer/Prender
+                    primaryPart.CFrame = CFrame.new(PosMon)
+                    primaryPart.CanCollide = true
+                    e.Humanoid.WalkSpeed = 0
+                    e.Humanoid.JumpPower = 0
+                    
+                    if e.Humanoid:FindFirstChild("Animator") then
+                        e.Humanoid.Animator:Destroy()
+                    end
+                    plr.SimulationRadius = math.huge
+                else
+                    -- Lógica para Soltar/Liberar
+                    e.Humanoid.WalkSpeed = 16 -- Velocidade padrão do Roblox
+                    e.Humanoid.JumpPower = 50 -- Pulo padrão do Roblox
+                    -- Nota: O Animator destruído não volta sozinho, 
+                    -- o mob vai se mover mas sem animação.
+                end
+                
+            end
+        end
+    end
+end
 
-local bringing = true
-
+-- Loop Principal de Controle
 task.spawn(function()
-	while true do
-		bringing = true
-		task.wait(BRING_TIME)
-		bringing = false
-		task.wait(RELEASE_TIME)
-	end
+    while true do
+        -- FASE 1: PUXAR (3 segundos)
+        local start = tick()
+        while tick() - start < tempoPuxando do
+            ManageEnemies(true)
+            task.wait(0.1) -- Delay curto para manter o mob no lugar
+        end
+        
+        -- FASE 2: SOLTAR (5 segundos ou mais)
+        ManageEnemies(false)
+        task.wait(tempoSolto)
+    end
 end)
 
-BringEnemy = function(PosMon)
-	if not _B then return end
-
-	for _, e in pairs(workspace.Enemies:GetChildren()) do
-		local humanoid = e:FindFirstChild("Humanoid")
-		local root = e:FindFirstChild("HumanoidRootPart") or e.PrimaryPart
-
-		if humanoid and root and humanoid.Health > 0 then
-			if e:FindFirstChild("IsBoss") then
-				continue
-			end
-
-			if (root.Position - PosMon).Magnitude <= RANGE then
-				if bringing then
-					local tween = TweenService:Create(
-						root,
-						TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-						{CFrame = CFrame.new(PosMon)}
-					)
-					tween:Play()
-				end
-			end
-		end
-	end
-end
 
 Useskills = function(I, e)
 		if I == "Melee" then
