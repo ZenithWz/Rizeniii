@@ -140,18 +140,18 @@ function I:NewWindow(config)
 
     local MobileButton = Minimizer:CreateMobileMinimizer({
         Image = "rbxassetid://135264546140981",
-        BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     })
 
     if MobileButton then
-        MobileButton.Size = UDim2.new(0, 70, 0, 70)
+        MobileButton.Size = UDim2.new(0, 55, 0, 55)
 
         local UICorner = Instance.new("UICorner")
         UICorner.CornerRadius = UDim.new(1, 0)
         UICorner.Parent = MobileButton
 
         local UIStroke = Instance.new("UIStroke")
-        UIStroke.Thickness = 2
+        UIStroke.Thickness = 1.5
         UIStroke.Color = Color3.fromRGB(0, 0, 0)
         UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
         UIStroke.Parent = MobileButton
