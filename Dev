@@ -1211,149 +1211,140 @@ Hop = function()
 			end;
 		end);
 	end;
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+local C = Instance.new("Part", workspace);
+C.Size = Vector3.new(1, 1, 1);
+C.Name = "Rip_Indra";
+C.Anchored = true;
+C.CanCollide = false;
+C.CanTouch = false;
+C.Transparency = 1;
 
--- Configurações Globais
-_G.distance = 250 
-_G.BypassTp = false
-getgenv().TweenSpeedFar = 300
-getgenv().IsTweening = false -- Variável de controle vital
+local M = workspace:FindFirstChild(C.Name);
+if M and M ~= C then
+	M:Destroy();
+end;
 
-local currentTween = nil -- Armazena o tween atual para cancelá-lo
-
--- =======================
--- FUNÇÃO DE TELEPORTE (TP)
--- =======================
-local function TP(TargetCFrame)
-    local Character = LocalPlayer.Character
-    if not Character or not Character:FindFirstChild("HumanoidRootPart") then return end
-    
-    local HRP = Character.HumanoidRootPart
-    local dist = (TargetCFrame.Position - HRP.Position).Magnitude
-    
-    -- Se já houver um tween rodando, cancela ele antes de começar outro
-    if currentTween then currentTween:Cancel() end
-    
-    -- Se estiver perto, teleporte instantâneo e para
-    if dist <= _G.distance then
-        HRP.CFrame = TargetCFrame
-        getgenv().IsTweening = false
-        return
-    end
-    
-    getgenv().IsTweening = true -- Ativa o modo de voo/noclip
-
-    -- Configuração do Tween
-    local tweenTime = dist / getgenv().TweenSpeedFar
-    local tweenInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Linear)
-    
-    currentTween = TweenService:Create(HRP, tweenInfo, { ["CFrame"] = TargetCFrame })
-    
-    -- Ajuste de altura inicial apenas se estiver longe
-    if dist > 50 then
-        HRP.CFrame = CFrame.new(HRP.CFrame.X, TargetCFrame.Position.Y, HRP.CFrame.Z)
-    end
-    
-    -- Lógica de Bypass
-    if _G.BypassTp and dist >= 3000 then
-        if Character:FindFirstChild("Humanoid") then
-            Character.Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
-        end
-        HRP.CFrame = TargetCFrame
-        task.wait()
-        HRP.CFrame = TargetCFrame
-    end
-    
-    currentTween:Play()
-
-    -- Detecta quando o tween acaba sozinho
-    currentTween.Completed:Connect(function()
-        getgenv().IsTweening = false
-    end)
-end
-
--- =======================
--- FUNÇÃO STOP TWEEN (CORRIGIDA)
--- =======================
-local function StopTween()
-    getgenv().IsTweening = false -- Desliga o suporte de voo
-    if currentTween then 
-        currentTween:Cancel() -- Para o movimento imediatamente
-    end
-    
-    local Character = LocalPlayer.Character
-    if Character then
-        local HRP = Character:FindFirstChild("HumanoidRootPart")
-        local Humanoid = Character:FindFirstChild("Humanoid")
-        
-        -- Remove o BodyVelocity para você não ficar travado no ar
-        if HRP and HRP:FindFirstChild("BodyClip") then
-            HRP.BodyClip:Destroy()
-        end
-        
-        -- Devolve a física ao Humanoid
-        if Humanoid then
-            Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-        end
-    end
-end
-
--- =======================
--- LOOP DE SUPORTE (DINÂMICO)
--- =======================
 task.spawn(function()
-    while true do
-        task.wait()
-        pcall(function()
-            local Character = LocalPlayer.Character
-            if Character and Character:FindFirstChild("HumanoidRootPart") then
-                local HRP = Character.HumanoidRootPart
-                
-                -- SÓ APLICA NOCLIP E VELOCITY SE ESTIVER TWEENANDO
-                if getgenv().IsTweening then
-                    -- Cria ou mantém o BodyVelocity (para não cair)
-                    local bv = HRP:FindFirstChild("BodyClip")
-                    if not bv then
-                        bv = Instance.new("BodyVelocity")
-                        bv.Name = "BodyClip"
-                        bv.Parent = HRP
-                        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                    end
-                    bv.Velocity = Vector3.new(0, 0, 0)
-                    
-                    -- Noclip (desativa colisão)
-                    for _, v in pairs(Character:GetDescendants()) do
-                        if v:IsA("BasePart") then
-                            v.CanCollide = false
-                        end
-                    end
-                else
-                    -- SE NÃO ESTIVER TWEENANDO: Limpa e devolve a colisão
-                    if HRP:FindFirstChild("BodyClip") then
-                        HRP.BodyClip:Destroy()
-                    end
-                    -- Reativa colisão básica para não atravessar o chão
-                    if Character:FindFirstChild("UpperTorso") then
-                         Character.UpperTorso.CanCollide = true
-                    elseif Character:FindFirstChild("Torso") then
-                         Character.Torso.CanCollide = true
-                    end
-                    HRP.CanCollide = true
-                end
-            end
-        end)
-    end
+	while task.wait() do
+		if C and C.Parent == workspace then
+			if shouldTween then
+				(getgenv()).OnFarm = true;
+			else
+				(getgenv()).OnFarm = false;
+			end;
+		else
+			(getgenv()).OnFarm = false;
+		end;
+	end;
+end);
+
+task.spawn(function()
+	local I = game.Players.LocalPlayer;
+	repeat task.wait() until I.Character and I.Character.PrimaryPart;
+
+	C.CFrame = I.Character.PrimaryPart.CFrame;
+
+	while task.wait() do
+		pcall(function()
+			if (getgenv()).OnFarm then
+				if C and C.Parent == workspace then
+					local e = I.Character and I.Character.PrimaryPart;
+					if e and (e.Position - C.Position).Magnitude <= 200 then
+						e.CFrame = C.CFrame;
+					else
+						C.CFrame = e.CFrame;
+					end;
+				end;
+
+				local e = I.Character;
+				if e then
+					for _, v in pairs(e:GetChildren()) do
+						if v:IsA("BasePart") then
+							v.CanCollide = false;
+						end;
+					end;
+				end;
+
+			else
+				local e = I.Character;
+				if e then
+					for _, v in pairs(e:GetChildren()) do
+						if v:IsA("BasePart") then
+							v.CanCollide = true;
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+
+-- =======================
+-- TWEEN AJUSTADO POR DISTÂNCIA
+-- =======================
+
+-- [[ VARIÁVEIS PARA O SEU INPUT ]] --
+getgenv().TweenSpeedFar = 300   -- Velocidade Padrão (Longe)
+getgenv().TweenSpeedNear = 600  -- Velocidade Boost (Perto <= 15 studs)
+
+_tp = function(I)
+local e = plr.Character;
+if not e or not e:FindFirstChild("HumanoidRootPart") then
+return;
+end;
+
+local HRP = e.HumanoidRootPart;  
+
+-- Desativar farm enquanto tweena  
+shouldTween = true  
+getgenv().OnFarm = false  
+
+-- Garantir que não está ancorado  
+if HRP.Anchored then  
+	HRP.Anchored = false  
+	task.wait()  
+end  
+
+local dist = (I.Position - HRP.Position).Magnitude  
+
+-- ===============================  
+--  SE ESTIVER ATÉ 15 STUDS → USA A VELOCIDADE DE PERTO
+--  CASO CONTRÁRIO → USA A VELOCIDADE PADRÃO
+-- ===============================  
+local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
+
+local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)  
+local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })  
+
+-- Caso esteja sentado  
+if e.Humanoid.Sit == true then  
+	C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)  
+end  
+
+tween:Play()  
+
+-- Anti travamento / controle  
+task.spawn(function()  
+	while tween.PlaybackState == Enum.PlaybackState.Playing do  
+		if not shouldTween then  
+			tween:Cancel()  
+			break  
+		end  
+		task.wait(.1)  
+	end  
+
+	getgenv().OnFarm = true  
 end)
 
--- Interceptadores Globais
-getgenv()._tp = TP
-getgenv().TeleportToTarget = TP
-getgenv().notween = TP
-getgenv().StopTween = StopTween
+end
 
+TeleportToTarget = function(I)
+_tp(I)
+end
 
+notween = function(I)
+plr.Character.HumanoidRootPart.CFrame = I
+end
 
 
 function BTP(I)
@@ -4155,7 +4146,7 @@ end)
 
 
 
-b:AddSeperator("statistics point")
+b:AddSeperator("Statistics point")
 
 -- ESTADOS
 _G.StatsList = GetSetting("SelectedStats_Save", {})
