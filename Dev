@@ -9921,96 +9921,353 @@ local function c5(I, e)
 	end;
 	return d;
 end;
+function AttackNoCoolDown()
+	local I = (game:GetService("Players")).LocalPlayer;
+	local e = I.Character;
+	if not e then
+		return;
+	end;
+	local K = nil;
+	for I, e in ipairs(e:GetChildren()) do
+		if e:IsA("Tool") then
+			K = e;
+			break;
+		end;
+	end;
+	if not K then
+		return;
+	end;
+	local n = c5(e, 60);
+	if #n == 0 then
+		return;
+	end;
+	local d = game:GetService("ReplicatedStorage");
+	local z = d:FindFirstChild("Modules");
+	if not z then
+		return;
+	end;
+	local H = ((d:WaitForChild("Modules")):WaitForChild("Net")):WaitForChild("RE/RegisterAttack");
+	local F = ((d:WaitForChild("Modules")):WaitForChild("Net")):WaitForChild("RE/RegisterHit");
+	if not H or not F then
+		return;
+	end;
+	local Q, X = {}, nil;
+	for I, e in ipairs(n) do
+		if not e:GetAttribute("IsBoat") then
+			local I = {
+					"RightLowerArm",
+					"RightUpperArm",
+					"LeftLowerArm",
+					"LeftUpperArm",
+					"RightHand",
+					"LeftHand",
+				};
+			local K = e:FindFirstChild(I[math.random(#I)]) or e.PrimaryPart;
+			if K then
+				table.insert(Q, { e, K });
+				X = K;
+			end;
+		end;
+	end;
+	if not X then
+		return;
+	end;
+	H:FireServer(0);
+	local P = I:FindFirstChild("PlayerScripts");
+	if not P then
+		return;
+	end;
+	local w = P:FindFirstChildOfClass("LocalScript");
+	while not w do
+		P.ChildAdded:Wait();
+		w = P:FindFirstChildOfClass("LocalScript");
+	end;
+	local O;
+	if getsenv then
+		local I, e = pcall(getsenv, w);
+		if I and e then
+			O = e._G.SendHitsToServer;
+		end;
+	end;
+	local G, J = pcall(function()
+			return (require(z.Flags)).COMBAT_REMOTE_THREAD or false;
+		end);
+	if G and (J and O) then
+		O(X, Q);
+	elseif G and not J then
+		F:FireServer(X, Q);
+	end;
+end;
+CameraShakerR = require(game.ReplicatedStorage.Util.CameraShaker);
+CameraShakerR:Stop();
+get_Monster = function()
+		for I, e in pairs(workspace.Enemies:GetChildren()) do
+			local K = e:FindFirstChild("UpperTorso") or e:FindFirstChild("Head");
+			if e:FindFirstChild("HumanoidRootPart", true) and K then
+				if (e.Head.Position - plr.Character.HumanoidRootPart.Position).Magnitude <= 50 then
+					return true, K.Position;
+				end;
+			end;
+		end;
+		for I, e in pairs(workspace.SeaBeasts:GetChildren()) do
+			if e:FindFirstChild("HumanoidRootPart") and (e:FindFirstChild("Health") and e.Health.Value > 0) then
+				return true, e.HumanoidRootPart.Position;
+			end;
+		end;
+		for I, e in pairs(workspace.Enemies:GetChildren()) do
+			if e:FindFirstChild("Health") and (e.Health.Value > 0 and e:FindFirstChild("VehicleSeat")) then
+				return true, e.Engine.Position;
+			end;
+		end;
+	end;
+Actived = function()
+		local I = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool");
+		for I, e in next, getconnections(I.Activated) do
+			if typeof(e.Function) == "function" then
+				getupvalues(e.Function);
+			end;
+		end;
+	end;
+task.spawn(function()
+	RunSer.Heartbeat:Connect(function()
+		pcall(function()
+			if not _G.Seriality then
+				return;
+			end;
+			AttackNoCoolDown();
+			local I = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool");
+			local e = I.ToolTip;
+			local K, n = get_Monster();
+			if e == "Blox Fruit" then
+				if K then
+					local e = I:FindFirstChild("LeftClickRemote");
+					if e then
+						Actived();
+						e:FireServer(Vector3.new(.01, -500, .01), 1, true);
+						e:FireServer(false);
+					end;
+				end;
+			end;
+		end);
+	end);
+end);
+-- FastAttack extraído do seu script (cole isso onde precisar)
+local FastAttackModule = {}
+
+-- Dependências (ajuste se já tiver essas variáveis no seu ambiente)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Player = Players.LocalPlayer
-local target_remote = nil
-local remote_id = nil
-local folders_to_scan = {
-    ReplicatedStorage:WaitForChild("Util"),
-    ReplicatedStorage:WaitForChild("Common"),
-    ReplicatedStorage:WaitForChild("Remotes"),
-    ReplicatedStorage:WaitForChild("Assets"),
-    ReplicatedStorage:WaitForChild("FX"),
+
+local function SafeWaitForChild(parent, childName)
+    local success, result = pcall(function()
+        return parent:WaitForChild(childName)
+    end)
+    if not success or not result then
+        warn("SafeWaitForChild falhou: " .. tostring(childName))
+    end
+    return result
+end
+
+local Modules = SafeWaitForChild(ReplicatedStorage, "Modules")
+local Net = SafeWaitForChild(Modules, "Net")
+
+-- Configs usadas pelo loop externo (podem ser mudadas em runtime)
+local Settings = {
+    AutoClick = true,
+    ClickDelay = 0
 }
-local function UpdateRemote()
-    for _, folder in ipairs(folders_to_scan) do
-        for _, child in ipairs(folder:GetChildren()) do
-            if child:IsA('RemoteEvent') and child:GetAttribute('Id') then
-                remote_id = child:GetAttribute('Id')
-                target_remote = child
+
+-- Implementação do FastAttack
+local FastAttack = {
+    Distance = 100,
+    attackMobs = true,
+    attackPlayers = true,
+    Equipped = nil
+}
+
+local RegisterAttack = SafeWaitForChild(Net, "RE/RegisterAttack")
+local RegisterHit = SafeWaitForChild(Net, "RE/RegisterHit")
+
+local function IsAlive(character)
+    return character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0
+end
+
+-- Procura inimigos (Head) dentro da pasta passada (Enemies ou Characters)
+local function ProcessEnemies(OthersEnemies, Folder)
+    local BasePart = nil
+    for _, Enemy in ipairs(Folder:GetChildren()) do
+        local Head = Enemy:FindFirstChild("Head")
+        if Head and IsAlive(Enemy) and Player:DistanceFromCharacter(Head.Position) < FastAttack.Distance then
+            if Enemy ~= Player.Character then
+                table.insert(OthersEnemies, { Enemy, Head })
+                BasePart = Head
             end
         end
     end
+    return BasePart
 end
-UpdateRemote()
-local function GetTargets()
-    local targets = {}
+
+function FastAttack:Attack(BasePart, OthersEnemies)
+    if not BasePart or #OthersEnemies == 0 then return end
+    -- envia RegisterAttack com delay configurado e depois RegisterHit com os alvos
+    pcall(function()
+        RegisterAttack:FireServer(Settings.ClickDelay or 0)
+        RegisterHit:FireServer(BasePart, OthersEnemies)
+    end)
+end
+
+function FastAttack:AttackNearest()
+    local OthersEnemies = {}
+    -- assume que as pastas 'Enemies' e 'Characters' existem no workspace
+    local EnemiesFolder = workspace:FindFirstChild("Enemies")
+    local CharactersFolder = workspace:FindFirstChild("Characters")
+    local Part1 = nil
+    local Part2 = nil
+    if EnemiesFolder then Part1 = ProcessEnemies(OthersEnemies, EnemiesFolder) end
+    if CharactersFolder then Part2 = ProcessEnemies(OthersEnemies, CharactersFolder) end
+
     local character = Player.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return targets end
-    local rootPart = character.HumanoidRootPart
-    local search_folders = {workspace:FindFirstChild("Enemies"), workspace:FindFirstChild("Characters")}
-    for _, folder in ipairs(search_folders) do
-        if folder then
-            for _, model in ipairs(folder:GetChildren()) do
-                local enemyRoot = model:FindFirstChild("HumanoidRootPart")
-                local enemyHum = model:FindFirstChild("Humanoid")
-                if model ~= character and enemyRoot and enemyHum and enemyHum.Health > 0 then
-                    if (enemyRoot.Position - rootPart.Position).Magnitude <= 60 then
-                        for _, part in ipairs(model:GetChildren()) do
-                            if part:IsA("BasePart") then
-                                table.insert(targets, {model, part})
+    if not character then return end
+    local equippedWeapon = character:FindFirstChildOfClass("Tool")
+
+    -- Se a arma tem LeftClickRemote, usa ela (some armas enviam direção)
+    if equippedWeapon and equippedWeapon:FindFirstChild("LeftClickRemote") then
+        for _, enemyData in ipairs(OthersEnemies) do
+            local enemy = enemyData[1]
+            if enemy and enemy:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("HumanoidRootPart") then
+                local direction = (enemy.HumanoidRootPart.Position - character:GetPivot().Position).Unit
+                pcall(function()
+                    equippedWeapon.LeftClickRemote:FireServer(direction, 1)
+                end)
+            end
+        end
+    elseif #OthersEnemies > 0 then
+        self:Attack(Part1 or Part2, OthersEnemies)
+    else
+        task.wait(0.1)
+    end
+end
+
+function FastAttack:BladeHits()
+    local Equipped = IsAlive(Player.Character) and Player.Character:FindFirstChildOfClass("Tool")
+    if Equipped and Equipped.ToolTip ~= "Gun" then
+        self:AttackNearest()
+    else
+        task.wait(0.1)
+    end
+end
+
+task.spawn(function()
+    while task.wait(Settings.ClickDelay) do
+        -- Agora ele verifica a mesma variável do botão (_G.Seriality)
+        if _G.Seriality then 
+            FastAttack:BladeHits()
+        end
+    end
+end)
+
+_ENV.rz_FastAttack = FastAttack
+FastAttackModule.FastAttack = FastAttack
+return FastAttackModule
+
+-- Script de Auto-Attack / Kill Aura
+-- Nota: Este script funciona em jogos com sistemas de remotos específicos.
+
+local v1 = next
+local folders_to_scan = {
+    game.ReplicatedStorage:WaitForChild("Util"),
+    game.ReplicatedStorage:WaitForChild("Common"),
+    game.ReplicatedStorage:WaitForChild("Remotes"),
+    game.ReplicatedStorage:WaitForChild("Assets"),
+    game.ReplicatedStorage:WaitForChild("FX"),
+}
+
+local target_remote = nil
+local remote_id = nil
+
+-- Busca o RemoteEvent escondido com o atributo 'Id'
+for _, folder in ipairs(folders_to_scan) do
+    for _, child in ipairs(folder:GetChildren()) do
+        if child:IsA('RemoteEvent') and child:GetAttribute('Id') then
+            remote_id = child:GetAttribute('Id')
+            target_remote = child
+        end
+    end
+    
+    -- Mantém o ID atualizado se novos remotos forem adicionados
+    folder.ChildAdded:Connect(function(child)
+        if child:IsA('RemoteEvent') and child:GetAttribute('Id') then
+            remote_id = child:GetAttribute('Id')
+            target_remote = child
+        end
+    end)
+end
+
+-- Loop principal de ataque
+task.spawn(function()
+    while task.wait() do
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+        
+        if not rootPart then continue end
+
+        local targets = {}
+        local search_folders = {workspace:FindFirstChild("Enemies"), workspace:FindFirstChild("Characters")}
+
+        -- Busca por alvos em um raio de 60 studs
+        for _, folder in ipairs(search_folders) do
+            if folder then
+                for _, model in ipairs(folder:GetChildren()) do
+                    local enemyRoot = model:FindFirstChild("HumanoidRootPart")
+                    local enemyHum = model:FindFirstChild("Humanoid")
+
+                    if model ~= character and enemyRoot and enemyHum and enemyHum.Health > 0 then
+                        local distance = (enemyRoot.Position - rootPart.Position).Magnitude
+                        if distance <= 60 then
+                            -- Adiciona todas as partes do corpo como alvos válidos
+                            for _, part in ipairs(model:GetChildren()) do
+                                if part:IsA("BasePart") then
+                                    table.insert(targets, {model, part})
+                                end
                             end
                         end
                     end
                 end
             end
         end
-    end
-    return targets
-end
-local function NewFastAttack()
-    local character = Player.Character
-    if not character then return end
-    local tool = character:FindFirstChildOfClass("Tool")
-    if not tool or not (tool:GetAttribute("WeaponType") == "Melee" or tool:GetAttribute("WeaponType") == "Sword") then
-        return 
-    end
-    local targets = GetTargets()
-    if #targets <= 0 then return end
-    pcall(function()
-        local netModule = require(ReplicatedStorage.Modules.Net)
-        local regAttack = ReplicatedStorage.Modules.Net:FindFirstChild("RE/RegisterAttack")
-        local regHit = ReplicatedStorage.Modules.Net:FindFirstChild("RE/RegisterHit")
-        if regAttack then regAttack:FireServer() end
-        local enemyHead = targets[1][1]:FindFirstChild("Head")
-        if enemyHead and regHit then
-            regHit:FireServer(
-                enemyHead, 
-                targets, 
-                {}, 
-                tostring(Player.UserId):sub(2, 4) .. string.sub(tostring(coroutine.running()), 11, 15)
-            )
-            if target_remote and remote_id then
-                local encryptedName = string.gsub('RE/RegisterHit', '.', function(char)
-                    return string.char(bit32.bxor(string.byte(char), math.floor(workspace:GetServerTimeNow() / 10 % 10) + 1))
-                end)
-                local seedValue = netModule.seed and netModule.seed:InvokeServer() or 1
-                local key = bit32.bxor(remote_id + 909090, seedValue * 2)
-                target_remote:FireServer(encryptedName, key, enemyHead, targets)
-            end
-        end
-    end)
-end
-task.spawn(function()
-    while true do
-        task.wait()
-        if _G.Seriality then
-            pcall(NewFastAttack)
+
+        -- Verifica se o jogador está segurando uma arma (Melee ou Sword)
+        local tool = character:FindFirstChildOfClass("Tool")
+        if #targets > 0 and tool and (tool:GetAttribute("WeaponType") == "Melee" or tool:GetAttribute("WeaponType") == "Sword") then
+            pcall(function()
+                local netModule = require(game.ReplicatedStorage.Modules.Net)
+                netModule:RemoteEvent('RegisterHit', true)
+                game.ReplicatedStorage.Modules.Net['RE/RegisterAttack']:FireServer()
+
+                local enemyHead = targets[1][1]:FindFirstChild("Head")
+                if enemyHead and target_remote and remote_id then
+                    -- Envia o hit para o servidor com bypass de criptografia XOR
+                    game.ReplicatedStorage.Modules.Net['RE/RegisterHit']:FireServer(
+                        enemyHead, 
+                        targets, 
+                        {}, 
+                        tostring(player.UserId):sub(2, 4) .. string.sub(tostring(coroutine.running()), 11, 15)
+                    )
+
+                    -- Comando de bypass complexo
+                    local encryptedName = string.gsub('RE/RegisterHit', '.', function(char)
+                        return string.char(bit32.bxor(string.byte(char), math.floor(workspace:GetServerTimeNow() / 10 % 10) + 1))
+                    end)
+                    
+                    local key = bit32.bxor(remote_id + 909090, game.ReplicatedStorage.Modules.Net.seed:InvokeServer() * 2)
+                    
+                    target_remote:FireServer(encryptedName, key, enemyHead, targets)
+                end
+            end)
         end
     end
 end)
-for _, folder in ipairs(folders_to_scan) do
-    folder.ChildAdded:Connect(UpdateRemote)
-end
+
