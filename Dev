@@ -2488,14 +2488,14 @@ local g        = V:T("Shop","rbxassetid://134556077676632")
 local y        = V:T("Main","rbxassetid://127561653320876")
 local c        = V:T("Settings","rbxassetid://10734950309")
 
-local x        = V:T("Quests/Boss","rbxassetid://10734975692")
+local x        = V:T("Quests/Boss","rbxassetid://72448332143088")
 local t        = V:T("Sea Events","rbxassetid://96788654458681")
-local m        = V:T("Race","rbxassetid://115164375298022")
+local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
 
 local VI       = V:T("Visuals And Esp","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
 local l        = V:T("Island","rbxassetid://10734910680")
-local R        = V:T("Get Items And Upgrade","rbxassetid://10734975486")
+local R        = V:T("Get Items And Upgrade","rbxassetid://10709782582")
 local B        = V:T("Raid And Fruit","rbxassetid://10709790875")
 
 -- SECTIONS (somente nomes alterados)
@@ -10838,253 +10838,119 @@ local function c5(I, e)
 	end;
 	return d;
 end;
-function AttackNoCoolDown()
-	local I = (game:GetService("Players")).LocalPlayer;
-	local e = I.Character;
-	if not e then
-		return;
-	end;
-	local K = nil;
-	for I, e in ipairs(e:GetChildren()) do
-		if e:IsA("Tool") then
-			K = e;
-			break;
-		end;
-	end;
-	if not K then
-		return;
-	end;
-	local n = c5(e, 60);
-	if #n == 0 then
-		return;
-	end;
-	local d = game:GetService("ReplicatedStorage");
-	local z = d:FindFirstChild("Modules");
-	if not z then
-		return;
-	end;
-	local H = ((d:WaitForChild("Modules")):WaitForChild("Net")):WaitForChild("RE/RegisterAttack");
-	local F = ((d:WaitForChild("Modules")):WaitForChild("Net")):WaitForChild("RE/RegisterHit");
-	if not H or not F then
-		return;
-	end;
-	local Q, X = {}, nil;
-	for I, e in ipairs(n) do
-		if not e:GetAttribute("IsBoat") then
-			local I = {
-					"RightLowerArm",
-					"RightUpperArm",
-					"LeftLowerArm",
-					"LeftUpperArm",
-					"RightHand",
-					"LeftHand",
-				};
-			local K = e:FindFirstChild(I[math.random(#I)]) or e.PrimaryPart;
-			if K then
-				table.insert(Q, { e, K });
-				X = K;
-			end;
-		end;
-	end;
-	if not X then
-		return;
-	end;
-	H:FireServer(0);
-	local P = I:FindFirstChild("PlayerScripts");
-	if not P then
-		return;
-	end;
-	local w = P:FindFirstChildOfClass("LocalScript");
-	while not w do
-		P.ChildAdded:Wait();
-		w = P:FindFirstChildOfClass("LocalScript");
-	end;
-	local O;
-	if getsenv then
-		local I, e = pcall(getsenv, w);
-		if I and e then
-			O = e._G.SendHitsToServer;
-		end;
-	end;
-	local G, J = pcall(function()
-			return (require(z.Flags)).COMBAT_REMOTE_THREAD or false;
-		end);
-	if G and (J and O) then
-		O(X, Q);
-	elseif G and not J then
-		F:FireServer(X, Q);
-	end;
-end;
-CameraShakerR = require(game.ReplicatedStorage.Util.CameraShaker);
-CameraShakerR:Stop();
-get_Monster = function()
-		for I, e in pairs(workspace.Enemies:GetChildren()) do
-			local K = e:FindFirstChild("UpperTorso") or e:FindFirstChild("Head");
-			if e:FindFirstChild("HumanoidRootPart", true) and K then
-				if (e.Head.Position - plr.Character.HumanoidRootPart.Position).Magnitude <= 50 then
-					return true, K.Position;
-				end;
-			end;
-		end;
-		for I, e in pairs(workspace.SeaBeasts:GetChildren()) do
-			if e:FindFirstChild("HumanoidRootPart") and (e:FindFirstChild("Health") and e.Health.Value > 0) then
-				return true, e.HumanoidRootPart.Position;
-			end;
-		end;
-		for I, e in pairs(workspace.Enemies:GetChildren()) do
-			if e:FindFirstChild("Health") and (e.Health.Value > 0 and e:FindFirstChild("VehicleSeat")) then
-				return true, e.Engine.Position;
-			end;
-		end;
-	end;
-Actived = function()
-		local I = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool");
-		for I, e in next, getconnections(I.Activated) do
-			if typeof(e.Function) == "function" then
-				getupvalues(e.Function);
-			end;
-		end;
-	end;
-task.spawn(function()
-	RunSer.Heartbeat:Connect(function()
-		pcall(function()
-			if not _G.Seriality then
-				return;
-			end;
-			AttackNoCoolDown();
-			local I = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool");
-			local e = I.ToolTip;
-			local K, n = get_Monster();
-			if e == "Blox Fruit" then
-				if K then
-					local e = I:FindFirstChild("LeftClickRemote");
-					if e then
-						Actived();
-						e:FireServer(Vector3.new(.01, -500, .01), 1, true);
-						e:FireServer(false);
-					end;
-				end;
-			end;
-		end);
-	end);
-end);
--- FastAttack extraído do seu script (cole isso onde precisar)
-local FastAttackModule = {}
+--[[ 
+    Auto-Attack Otimizado (Substituto TOTAL do FastAttack antigo)
+    Use com armas Melee ou Sword
+--]]
 
--- Dependências (ajuste se já tiver essas variáveis no seu ambiente)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local Player = Players.LocalPlayer
 
-local function SafeWaitForChild(parent, childName)
-    local success, result = pcall(function()
-        return parent:WaitForChild(childName)
-    end)
-    if not success or not result then
-        warn("SafeWaitForChild falhou: " .. tostring(childName))
+local player = Players.LocalPlayer
+
+-- Pastas usadas para descobrir remotes dinamicamente
+local foldersToScan = {
+    ReplicatedStorage:WaitForChild("Util"),
+    ReplicatedStorage:WaitForChild("Common"),
+    ReplicatedStorage:WaitForChild("Remotes"),
+    ReplicatedStorage:WaitForChild("Assets"),
+    ReplicatedStorage:WaitForChild("FX"),
+}
+
+local secureRemote
+local secureId
+
+-- Descobre Remote protegido automaticamente
+for _, folder in ipairs(foldersToScan) do
+    for _, obj in ipairs(folder:GetChildren()) do
+        if obj:IsA("RemoteEvent") and obj:GetAttribute("Id") then
+            secureRemote = obj
+            secureId = obj:GetAttribute("Id")
+        end
     end
-    return result
+
+    folder.ChildAdded:Connect(function(obj)
+        if obj:IsA("RemoteEvent") and obj:GetAttribute("Id") then
+            secureRemote = obj
+            secureId = obj:GetAttribute("Id")
+        end
+    end)
 end
 
-local Modules = SafeWaitForChild(ReplicatedStorage, "Modules")
-local Net = SafeWaitForChild(Modules, "Net")
-
--- Configs usadas pelo loop externo (podem ser mudadas em runtime)
-local Settings = {
-    AutoClick = true,
-    ClickDelay = 0
-}
-
--- Implementação do FastAttack
-local FastAttack = {
-    Distance = 100,
-    attackMobs = true,
-    attackPlayers = true,
-    Equipped = nil
-}
-
-local RegisterAttack = SafeWaitForChild(Net, "RE/RegisterAttack")
-local RegisterHit = SafeWaitForChild(Net, "RE/RegisterHit")
-
-local function IsAlive(character)
-    return character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0
+local function Alive(model)
+    local hum = model and model:FindFirstChild("Humanoid")
+    return hum and hum.Health > 0
 end
 
--- Procura inimigos (Head) dentro da pasta passada (Enemies ou Characters)
-local function ProcessEnemies(OthersEnemies, Folder)
-    local BasePart = nil
-    for _, Enemy in ipairs(Folder:GetChildren()) do
-        local Head = Enemy:FindFirstChild("Head")
-        if Head and IsAlive(Enemy) and Player:DistanceFromCharacter(Head.Position) < FastAttack.Distance then
-            if Enemy ~= Player.Character then
-                table.insert(OthersEnemies, { Enemy, Head })
-                BasePart = Head
+RunService.Heartbeat:Connect(function()
+    if not _G.Seriality then return end
+
+    local char = player.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+
+    local tool = char:FindFirstChildOfClass("Tool")
+    if not tool then return end
+
+    local weaponType = tool:GetAttribute("WeaponType")
+    if weaponType ~= "Melee" and weaponType ~= "Sword" then return end
+
+    local targets = {}
+    local folders = {
+        workspace:FindFirstChild("Enemies"),
+        workspace:FindFirstChild("Characters")
+    }
+
+    for _, folder in ipairs(folders) do
+        if folder then
+            for _, enemy in ipairs(folder:GetChildren()) do
+                if enemy ~= char and Alive(enemy) then
+                    local eroot = enemy:FindFirstChild("HumanoidRootPart")
+                    if eroot and (eroot.Position - root.Position).Magnitude <= 60 then
+                        for _, part in ipairs(enemy:GetChildren()) do
+                            if part:IsA("BasePart") then
+                                table.insert(targets, {enemy, part})
+                            end
+                        end
+                    end
+                end
             end
         end
     end
-    return BasePart
-end
 
-function FastAttack:Attack(BasePart, OthersEnemies)
-    if not BasePart or #OthersEnemies == 0 then return end
-    -- envia RegisterAttack com delay configurado e depois RegisterHit com os alvos
+    if #targets == 0 then return end
+
+    local net = ReplicatedStorage.Modules.Net
+    local head = targets[1][1]:FindFirstChild("Head")
+
+    if not head then return end
+
     pcall(function()
-        RegisterAttack:FireServer(Settings.ClickDelay or 0)
-        RegisterHit:FireServer(BasePart, OthersEnemies)
+        net["RE/RegisterAttack"]:FireServer()
+
+        net["RE/RegisterHit"]:FireServer(
+            head,
+            targets,
+            {},
+            tostring(player.UserId):sub(2, 4) ..
+            string.sub(tostring(coroutine.running()), 11, 15)
+        )
+
+        if secureRemote and secureId then
+            secureRemote:FireServer(
+                string.gsub("RE/RegisterHit", ".", function(c)
+                    return string.char(
+                        bit32.bxor(
+                            string.byte(c),
+                            math.floor(workspace:GetServerTimeNow() / 10 % 10) + 1
+                        )
+                    )
+                end),
+                bit32.bxor(secureId + 909090, net.seed:InvokeServer() * 2),
+                head,
+                targets
+            )
+        end
     end)
-end
-
-function FastAttack:AttackNearest()
-    local OthersEnemies = {}
-    -- assume que as pastas 'Enemies' e 'Characters' existem no workspace
-    local EnemiesFolder = workspace:FindFirstChild("Enemies")
-    local CharactersFolder = workspace:FindFirstChild("Characters")
-    local Part1 = nil
-    local Part2 = nil
-    if EnemiesFolder then Part1 = ProcessEnemies(OthersEnemies, EnemiesFolder) end
-    if CharactersFolder then Part2 = ProcessEnemies(OthersEnemies, CharactersFolder) end
-
-    local character = Player.Character
-    if not character then return end
-    local equippedWeapon = character:FindFirstChildOfClass("Tool")
-
-    -- Se a arma tem LeftClickRemote, usa ela (some armas enviam direção)
-    if equippedWeapon and equippedWeapon:FindFirstChild("LeftClickRemote") then
-        for _, enemyData in ipairs(OthersEnemies) do
-            local enemy = enemyData[1]
-            if enemy and enemy:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("HumanoidRootPart") then
-                local direction = (enemy.HumanoidRootPart.Position - character:GetPivot().Position).Unit
-                pcall(function()
-                    equippedWeapon.LeftClickRemote:FireServer(direction, 1)
-                end)
-            end
-        end
-    elseif #OthersEnemies > 0 then
-        self:Attack(Part1 or Part2, OthersEnemies)
-    else
-        task.wait(0.1)
-    end
-end
-
-function FastAttack:BladeHits()
-    local Equipped = IsAlive(Player.Character) and Player.Character:FindFirstChildOfClass("Tool")
-    if Equipped and Equipped.ToolTip ~= "Gun" then
-        self:AttackNearest()
-    else
-        task.wait(0.1)
-    end
-end
-
-task.spawn(function()
-    while task.wait(Settings.ClickDelay) do
-        -- Agora ele verifica a mesma variável do botão (_G.Seriality)
-        if _G.Seriality then 
-            FastAttack:BladeHits()
-        end
-    end
 end)
-
-_ENV.rz_FastAttack = FastAttack
-FastAttackModule.FastAttack = FastAttack
-return FastAttackModule
