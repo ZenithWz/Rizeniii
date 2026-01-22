@@ -126,23 +126,23 @@ Pirates = function()
 -- [[ 1. CARREGAMENTO DA NOVA UI (redz-V5) ]] --
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/redz-V5-remake/main.luau"))()
 
--- [[ 2. ADAPTADOR (NIGHT MYSTIC -> REDZ V5) ]] --
+-- [[ 2. ADAPTADOR (DIAMOND HUB -> REDZ V5) ]] --
 local I = {}
 
 function I:NewWindow(config)
-    -- Cria a janela principal
+    -- Cria a janela principal com as novas credenciais
     local Window = Library:MakeWindow({
-        Title = "Night Mystic",
-        SubTitle = "by araujozwx & Maurozzx",
-        ScriptFolder = "NightMysticConfig"
+        Title = "Diamond Hub ・By wz7xwz",
+        SubTitle = "Game: Blox Fruits",
+        ScriptFolder = "DiamondHubConfig"
     })
 
-    -- Configuração do Minimizer (PC e Mobile)
+    -- Configuração do Minimizer
     local Minimizer = Window:NewMinimizer({
         KeyCode = Enum.KeyCode.RightControl
     })
     Minimizer:CreateMobileMinimizer({
-        Image = "rbxassetid://105245380363493", -- Usando seu ícone
+        Image = "rbxassetid://105245380363493", 
         BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     })
 
@@ -157,11 +157,10 @@ function I:NewWindow(config)
 
         local TabWrapper = {}
 
-        -- Função para criar Seções (Na Redz V5 usamos AddSection ou apenas títulos)
+        -- Função para criar Seções (Corrigido para usar AddSection nativo)
         function TabWrapper:AddSection(sectionName)
-            -- A Redz V5 não exige um objeto de seção separado para adicionar itens,
-            -- mas podemos adicionar um parágrafo ou label como separador visual.
-            Tab:AddParagraph(sectionName, "")
+            -- Cria a seção visualmente correta sem Paragraph
+            Tab:AddSection(sectionName)
 
             local SectionWrapper = {}
 
@@ -182,7 +181,7 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Dropdown (Lista de seleção)
+            -- Dropdown
             function SectionWrapper:AddDropdown(config)
                 return Tab:AddDropdown({
                     Name = config.Title,
@@ -193,19 +192,19 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Slider (Barra de valor)
+            -- Slider
             function SectionWrapper:AddSlider(config)
                 return Tab:AddSlider({
                     Name = config.Title,
                     Min = config.Min or 0,
                     Max = config.Max or 100,
                     Default = config.Default or 0,
-                    Increment = 1, -- Padrão
+                    Increment = 1,
                     Callback = config.Callback
                 })
             end
 
-            -- Input (Caixa de Texto)
+            -- Input
             function SectionWrapper:AddInput(config)
                 return Tab:AddTextBox({
                     Name = config.Title,
@@ -215,18 +214,19 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Paragraph (Texto informativo)
+            -- Paragraph (Apenas quando solicitado explicitamente)
             function SectionWrapper:AddParagraph(config)
                 return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")
             end
 
-            -- Label / Separator
+            -- Separator (Agora usa AddSection para manter o padrão visual)
+            function SectionWrapper:AddSeperator(text)
+                Tab:AddSection(text)
+            end
+            
+            -- Label
             function SectionWrapper:AddLabel(text)
                 return Tab:AddParagraph(text, "")
-            end
-
-            function SectionWrapper:AddSeperator(text)
-                return Tab:AddParagraph("--- " .. text .. " ---", "")
             end
 
             -- Discord Invite
@@ -242,10 +242,10 @@ function I:NewWindow(config)
         return TabWrapper
     end
 
-    -- Notificações globais
+    -- Notificações
     function WindowWrapper:Notify(config)
         Window:Notify({
-            Title = config.Title or "Aviso",
+            Title = config.Title or "Diamond Hub",
             Content = config.Content or config.Text or "",
             Duration = config.Duration or 5
         })
