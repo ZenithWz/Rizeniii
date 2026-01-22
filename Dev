@@ -3127,27 +3127,28 @@ function LockTween()
         return 
     end
 end
-function BringMob(v369)
-    for _, v371 in pairs(WS.Enemies:GetChildren()) do
-        if v371.Name == v369 and v371.Parent and v371:FindFirstChild("HumanoidRootPart") and v371:FindFirstChild("Humanoid") and v371.Humanoid.Health > 0 and (v371.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude <= 350 then
-            v371.HumanoidRootPart.CFrame = BringPos
-            v371.Humanoid.JumpPower = 0
-            v371.Humanoid.WalkSpeed = 0
-            v371.HumanoidRootPart.Transparency = 1
-            v371.HumanoidRootPart.CanCollide = false
-            v371.Head.CanCollide = false
-            if v371.Humanoid:FindFirstChild("Animator") then
-                v371.Humanoid.Animator:Destroy()
+local TweenService = game:GetService("TweenService")
+local plr = game.Players.LocalPlayer
+local WS = workspace
+local BringPos = workspace:WaitForChild("BringPos") -- posição alvo
+
+function BringMob(mobName)
+    for _, mob in pairs(WS.Enemies:GetChildren()) do
+        local humanoid = mob:FindFirstChild("Humanoid")
+        local root = mob:FindFirstChild("HumanoidRootPart")
+        if mob.Name == mobName and humanoid and root and humanoid.Health > 0 then
+            local distance = (root.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+            if distance <= 350 then
+                -- Tween para levar o mob até BringPos
+                local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
+                local goal = {CFrame = BringPos.CFrame}
+                TweenService:Create(root, tweenInfo, goal):Play()
+                
+                -- Mantemos animação normal, não mexemos no Animator
+                -- Se quiser impedir que ande/jump temporariamente, pode comentar ou ajustar:
+                -- humanoid.WalkSpeed = 0
+                -- humanoid.JumpPower = 0
             end
-            if not v371.HumanoidRootPart:FindFirstChild("Lock") then
-                local l_BodyVelocity_0 = Instance.new("BodyVelocity")
-                l_BodyVelocity_0.Parent = v371.HumanoidRootPart
-                l_BodyVelocity_0.Name = "Lock"
-                l_BodyVelocity_0.MaxForce = Vector3.new(100000, 100000, 100000)
-                l_BodyVelocity_0.Velocity = Vector3.new(0, 0, 0)
-            end
-            sethiddenproperty(plr, "SimulationRadius", math.huge)
-            v371.Humanoid:ChangeState(11)
         end
     end
 end
@@ -3661,158 +3662,83 @@ function CheckItemBPCRBPCR(v463)
         end
     end
 end
-local FluentAdapter = [[
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
-
-local FakeLibrary = {}
-local FluentWindow = nil
-
-function FakeLibrary:MakeWindow(Config)
-    FluentWindow = Fluent:CreateWindow({
-        Title = "Diamond Hub",
-        SubTitle = "By MikasaZx",
-        TabWidth = 160,
-        Size = UDim2.fromOffset(580, 460),
-        Acrylic = true,
-        Theme = "Dark",
-        MinimizeKey = Enum.KeyCode.LeftControl
-    })
-    
-    local FakeWindow = {}
-    
-    function FakeWindow:NewMinimizer()
-        return {CreateMobileMinimizer = function() end}
+local v466 = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/V5/Source.lua"))():MakeWindow({
+    Title = "Diamond Hub ・Blox Fruits",
+    SubTitle = "By MikasaZx",
+    SaveFolder = "Redz | redz lib v5.lua"
+})
+local l_ScreenGui_0 = Instance.new("ScreenGui")
+l_ScreenGui_0.Name = "ControlGUI"
+l_ScreenGui_0.Parent = game.CoreGui
+local l_ImageButton_0 = Instance.new("ImageButton")
+l_ImageButton_0.Size = UDim2.new(0, 50, 0, 50)
+l_ImageButton_0.Position = UDim2.new(0.15, 0, 0.15, 0)
+l_ImageButton_0.Image = "rbxassetid://92120582532478"
+l_ImageButton_0.BackgroundTransparency = 1
+l_ImageButton_0.Parent = l_ScreenGui_0
+local l_UICorner_0 = Instance.new("UICorner")
+l_UICorner_0.CornerRadius = UDim.new(0.25, 0)
+l_UICorner_0.Parent = l_ImageButton_0
+local l_UIStroke_0 = Instance.new("UIStroke")
+l_UIStroke_0.Thickness = 2
+l_UIStroke_0.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+l_UIStroke_0.Parent = l_ImageButton_0
+local v471 = {
+    Color3.fromRGB(255, 0, 0),
+    Color3.fromRGB(255, 127, 0),
+    Color3.fromRGB(255, 255, 0),
+    Color3.fromRGB(0, 255, 0),
+    Color3.fromRGB(0, 255, 255),
+    Color3.fromRGB(0, 0, 255),
+    Color3.fromRGB(139, 0, 255)
+}
+task.spawn(function()
+    local v472 = 1
+    while true do
+        l_UIStroke_0.Color = v471[v472]
+        v472 = v472 % #v471 + 1
+        task.wait(0.3)
     end
-    
-    function FakeWindow:Notify(Config)
-        Fluent:Notify({
-            Title = Config.Title or "Notification",
-            Content = Config.Content or "",
-            Duration = Config.Duration or 5
-        })
-    end
-    
-    function FakeWindow:Dialog(Config)
-        Fluent:Notify({Title = Config.Title, Content = Config.Content, Duration = 5})
-        if Config.Options and Config.Options[2] and Config.Options[2].Callback then
-            Config.Options[2].Callback()
-        end
-    end
-
-    function FakeWindow:GetFlag(Flag)
-        if Fluent.Options[Flag] then return Fluent.Options[Flag].Value end
-        return nil
-    end
-
-    function FakeWindow:SetFlag(Flag, Value)
-        if Fluent.Options[Flag] then Fluent.Options[Flag]:SetValue(Value) end
-    end
-
-    function FakeWindow:MakeTab(Config)
-        local FluentTab = FluentWindow:AddTab({
-            Title = Config.Title,
-            Icon = Config.Icon or ""
-        })
-        
-        local FakeTab = {}
-        
-        function FakeTab:AddToggle(Config)
-            local ID = Config.Flag or Config.Name or math.random(1,99999)..tostring(os.time())
-            FluentTab:AddToggle(ID, {
-                Title = Config.Name,
-                Default = Config.Default or false,
-                Callback = Config.Callback
-            })
-        end
-        
-        function FakeTab:AddSlider(Config)
-            local ID = Config.Flag or Config.Name or math.random(1,99999)..tostring(os.time())
-            FluentTab:AddSlider(ID, {
-                Title = Config.Name,
-                Min = Config.Min or 0,
-                Max = Config.Max or 100,
-                Default = Config.Default or 0,
-                Rounding = (Config.Increment and Config.Increment < 1) and 1 or 0,
-                Callback = Config.Callback
-            })
-        end
-        
-        function FakeTab:AddDropdown(Config)
-            local ID = Config.Flag or Config.Name or math.random(1,99999)..tostring(os.time())
-            FluentTab:AddDropdown(ID, {
-                Title = Config.Name,
-                Values = Config.Options,
-                Multi = Config.MultiSelect or false,
-                Default = Config.Default,
-                Callback = Config.Callback
-            })
-        end
-        
-        function FakeTab:AddTextBox(Config)
-            local ID = Config.Flag or Config.Name or math.random(1,99999)..tostring(os.time())
-            FluentTab:AddInput(ID, {
-                Title = Config.Name,
-                Default = Config.Default,
-                Placeholder = Config.Placeholder,
-                Numeric = false,
-                Finished = true,
-                Callback = Config.Callback
-            })
-        end
-        
-        function FakeTab:AddButton(Config)
-            FluentTab:AddButton({
-                Title = Config.Name,
-                Callback = Config.Callback
-            })
-        end
-        
-        function FakeTab:AddParagraph(Arg1, Arg2)
-            local Title, Content
-            if type(Arg1) == "table" then
-                Title = Arg1.Title
-                Content = Arg1.Text or Arg1.Content
-            else
-                Title = Arg1
-                Content = Arg2
-            end
-            FluentTab:AddParagraph({Title = Title, Content = Content})
-        end
-        
-        function FakeTab:AddDiscordInvite(Config)
-            FluentTab:AddButton({
-                Title = "Discord: " .. (Config.Title or "Join"),
-                Description = "Click to copy invite",
-                Callback = function()
-                    setclipboard(Config.Invite or "")
-                    Fluent:Notify({Title = "Discord", Content = "Invite copied to clipboard!", Duration = 3})
-                end
-            })
-        end
-        
-        return FakeTab
-    end
-    
-    FluentWindow:SelectTab(1)
-    return FakeWindow
-end
-
-function FakeLibrary:GetMaxScale() return 1 end
-function FakeLibrary:GetMinScale() return 1 end
-function FakeLibrary:SetUIScale(val) end
-
-return FakeLibrary
-]]
-
-local OldHttpGet
-OldHttpGet = hookfunction(game.HttpGet, function(self, Url, ...)
-    if type(Url) == "string" and (string.find(Url, "redz-V5") or string.find(Url, "tlredz") or string.find(Url, "Library")) then
-        return FluentAdapter
-    end
-    return OldHttpGet(self, Url, ...)
 end)
-
+local v473 = true
+local v474 = nil
+local v475 = nil
+local v476 = nil
+local v477 = nil
+local function v480(v478)
+    local v479 = v478.Position - v476
+    l_ImageButton_0.Position = UDim2.new(v477.X.Scale, v477.X.Offset + v479.X, v477.Y.Scale, v477.Y.Offset + v479.Y)
+end
+l_ImageButton_0.InputBegan:Connect(function(v481)
+    if v481.UserInputType == Enum.UserInputType.Touch or v481.UserInputType == Enum.UserInputType.MouseButton1 then
+        v474 = true
+        v476 = v481.Position
+        v477 = l_ImageButton_0.Position
+        v481.Changed:Connect(function()
+            if v481.UserInputState == Enum.UserInputState.End then
+                v474 = false
+            end
+        end)
+    end
+end)
+l_ImageButton_0.InputChanged:Connect(function(v482)
+    if v482.UserInputType == Enum.UserInputType.Touch or v482.UserInputType == Enum.UserInputType.MouseMovement then
+        v475 = v482
+    end
+end)
+game:GetService("UserInputService").InputChanged:Connect(function(v483)
+    if v474 and v483 == v475 then
+        v480(v483)
+    end
+end)
+l_ImageButton_0.MouseButton1Click:Connect(function()
+    v473 = not v473
+    if v473 then
+        v466:Minimize(false)
+    else
+        v466:Minimize(true)
+    end
+end)
 
 local v485 = v466:MakeTab({"Main", "rbxassetid://10723407389"})
 local v487 = v466:MakeTab({"Quest/Items", "rbxassetid://10734975692"})
@@ -3820,7 +3746,7 @@ local v491 = v466:MakeTab({"Raid And Dungeon", "rbxassetid://10734975486"})
 local v492 = v466:MakeTab({"Fruits", "rbxassetid://10709790875"})
 local v493 = v466:MakeTab({"Island", "rbxassetid://10734910680"})
 local v494 = v466:MakeTab({"Local Player", "rbxassetid://10747373176"})
-local v495 = v466:MakeTab({"Shop", "rbxassetid://10734952"})
+
 local v496 = v466:MakeTab({"Settings", "rbxassetid://10734950309"})
 
 local _ = v485:AddSection({"Global Settings"})
@@ -4016,7 +3942,7 @@ spawn(function()
         end
     end
 end)
-local _ = v485:AddSection({"Raid Pirate"})
+local _ = v485:AddSection({"Raid Event"})
 v485:AddToggle({
     Name = "Auto Raid Pirate",
     Default = false,
@@ -5619,9 +5545,9 @@ if World2 then
 end
 if World3 then
     local _ = v487:AddSection({"Quest Sea 3"})
-    local _ = v487:AddSection({"Boss Rip indra"})
+    local _ = v487:AddSection({"Boss Raid"})
     v487:AddToggle({
-        Name = "Auto kill Rip Indra",
+        Name = "Auto Farm Rip_Indra",
         Default = false,
         Callback = function(v767)
             _G.RipIndraKill = v767
@@ -5695,103 +5621,7 @@ if World3 then
                 end
             end
         end)
-        local _ = v487:AddSection({"Quest Skull Guitar"})
-        v487:AddToggle({
-            Name = "Auto Skull Guitar",
-            Default = false,
-            Callback = function(v778)
-                _G.AutoSkullGuitar = v778
-                StopTween(_G.AutoSkullGuitar)
-            end
-        })
-        spawn(function()
-            while task.wait() do
-                if getgenv().AutoSkullGuitar then
-                    pcall(function()
-                        if not GetWeaponInventory("Skull Guitar") then
-                            local l_LocalPlayer_11 = game:GetService("Players").LocalPlayer
-                            local v780 = l_LocalPlayer_11.Character and l_LocalPlayer_11.Character:FindFirstChild("HumanoidRootPart")
-                            if v780 and (Vector3.new(-9681.458, 6.139, 6341.372) - v780.Position).Magnitude <= 5000 then
-                                if game:GetService("Workspace").NPCs:FindFirstChild("Skeleton Machine") then
-                                    game:GetService("ReplicatedStorage").Remotes.CommF:InvokeServer("soulGuitarBuy", true)
-                                else
-                                    local l_FirstChild_3 = game:GetService("Workspace").Map:FindFirstChild("Haunted Castle")
-                                    if not l_FirstChild_3 or l_FirstChild_3.Candle1.Transparency ~= 0 then
-                                        if not l_FirstChild_3 or not l_FirstChild_3.Tablet or not l_FirstChild_3.Tablet:FindFirstChild("Segment1") then
-                                            if game:GetService("Workspace").NPCs:FindFirstChild("Ghost") then
-                                                game:GetService("ReplicatedStorage").Remotes.CommF:InvokeServer("GuitarPuzzleProgress", "Ghost")
-                                            end
-                                            local l_Enemies_2 = game.Workspace:FindFirstChild("Enemies")
-                                            if l_Enemies_2 and l_Enemies_2:FindFirstChild("Living Zombie") then
-                                                for _, v784 in pairs(l_Enemies_2:GetChildren()) do
-                                                    if v784:FindFirstChild("HumanoidRootPart") and v784:FindFirstChild("Humanoid") and v784.Humanoid.Health > 0 and v784.Name == "Living Zombie" then
-                                                        AutoHaki()
-                                                        EquipWeapon(getgenv().SelectWeapon)
-                                                        v784.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                                        v784.HumanoidRootPart.Transparency = 1
-                                                        v784.Humanoid.JumpPower = 0
-                                                        v784.Humanoid.WalkSpeed = 0
-                                                        v784.HumanoidRootPart.CanCollide = false
-                                                        v784.HumanoidRootPart.CFrame = v780.CFrame * CFrame.new(0, 20, 0)
-                                                        topos(CFrame.new(-10160.787, 138.662, 5955.031))
-                                                        task.wait(0.5)
-                                                        local l_VirtualUser_0 = game:GetService("VirtualUser")
-                                                        l_VirtualUser_0:CaptureController()
-                                                        l_VirtualUser_0:Button1Down(Vector2.new(1280, 672))
-                                                    end
-                                                end
-                                            else
-                                                topos(CFrame.new(-10160.787, 138.662, 5955.031))
-                                            end
-                                        else
-                                            local l_l_FirstChild_3_FirstChild_0 = l_FirstChild_3:FindFirstChild("Lab Puzzle")
-                                            if not l_l_FirstChild_3_FirstChild_0 or not l_l_FirstChild_3_FirstChild_0.ColorFloor.Model.Part1:FindFirstChild("ClickDetector") then
-                                                Quest3 = true
-                                            else
-                                                Quest4 = true
-                                                topos(CFrame.new(-9553.599, 65.623, 6041.588))
-                                                task.wait(1)
-                                                for _, v788 in ipairs({3, 4, 4, 4, 6, 6, 8, 10, 10, 10}) do
-                                                    local l_FirstChild_4 = l_l_FirstChild_3_FirstChild_0.ColorFloor.Model:FindFirstChild("Part" .. v788)
-                                                    if l_FirstChild_4 and l_FirstChild_4:FindFirstChild("ClickDetector") then
-                                                        topos(l_FirstChild_4.CFrame)
-                                                        task.wait(1)
-                                                        fireclickdetector(l_FirstChild_4.ClickDetector)
-                                                        task.wait(0.5)
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    else
-                                        local l_Placard1_0 = l_FirstChild_3:FindFirstChild("Placard1")
-                                        if l_Placard1_0 and l_Placard1_0.Left.Part.Transparency == 0 then
-                                            Quest2 = true
-                                            topos(CFrame.new(-8762.691, 176.847, 6171.308))
-                                            task.wait(1)
-                                            for v791 = 7, 1, -1 do
-                                                local l_l_FirstChild_3_FirstChild_1 = l_FirstChild_3:FindFirstChild("Placard" .. v791)
-                                                if l_l_FirstChild_3_FirstChild_1 and l_l_FirstChild_3_FirstChild_1:FindFirstChild("Left") and l_l_FirstChild_3_FirstChild_1.Left:FindFirstChild("ClickDetector") then
-                                                    fireclickdetector(l_l_FirstChild_3_FirstChild_1.Left.ClickDetector)
-                                                    task.wait(0.5)
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        elseif not string.find(game:GetService("ReplicatedStorage").Remotes.CommF:InvokeServer("gravestoneEvent", 2), "Error") then
-                            if string.find(game:GetService("ReplicatedStorage").Remotes.CommF:InvokeServer("gravestoneEvent", 2), "Nothing") then
-                                topos("Wait Full Moon")
-                            else
-                                game:GetService("ReplicatedStorage").Remotes.CommF:InvokeServer("gravestoneEvent", 2, true)
-                            end
-                        else
-                            topos(CFrame.new(-8653.206, 140.985, 6160.033))
-                        end
-                    end)
-                end
-            end
-        end)
+        
         v487:AddToggle({
             Name = "Auto Elite Hunter",
             Default = false,
@@ -7245,50 +7075,49 @@ v496:AddToggle({
         StopTween(_G.BringMonster)
     end
 })
+local TweenService = game:GetService("TweenService")
+local Player = game.Players.LocalPlayer
+local PosMon = workspace:WaitForChild("PosMon") -- sua posição alvo
+
 spawn(function()
-    while task.wait() do
+    while task.wait(0.1) do
         pcall(function()
             CheckQuest()
-            for _, v1167 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                if _G.BringMonster and (StartBring and v1167.Name == MonFarm or v1167.Name == Mon and v1167:FindFirstChild("Humanoid") and v1167:FindFirstChild("HumanoidRootPart") and v1167.Humanoid.Health > 0 and (v1167.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 320) then
-                    if v1167.Name == "Factory Staff" then
-                        if (v1167.HumanoidRootPart.Position - PosMon.Position).Magnitude <= 250 then
-                            v1167.Head.CanCollide = false
-                            v1167.HumanoidRootPart.CanCollide = false
-                            v1167.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            v1167.HumanoidRootPart.CFrame = PosMon
-                            if v1167.Humanoid:FindFirstChild("Animator") then
-                                v1167.Humanoid.Animator:Destroy()
-                            end
-                            sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
+            for _, mob in pairs(workspace.Enemies:GetChildren()) do
+                local humanoid = mob:FindFirstChild("Humanoid")
+                local root = mob:FindFirstChild("HumanoidRootPart")
+                if _G.BringMonster and StartBring and humanoid and root and humanoid.Health > 0 then
+                    if mob.Name == "Factory Staff" then
+                        if (root.Position - PosMon.Position).Magnitude <= 250 then
+                            local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
+                            local goal = {CFrame = PosMon.CFrame}
+                            TweenService:Create(root, tweenInfo, goal):Play()
                         end
-                    elseif (v1167.Name == MonFarm or v1167.Name == Mon) and (v1167.HumanoidRootPart.Position - PosMon.Position).Magnitude <= 320 then
-                        v1167.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                        v1167.HumanoidRootPart.CFrame = PosMon
-                        v1167.HumanoidRootPart.CanCollide = false
-                        v1167.Head.CanCollide = false
-                        if v1167.Humanoid:FindFirstChild("Animator") then
-                            v1167.Humanoid.Animator:Destroy()
+                    elseif mob.Name == MonFarm or mob.Name == Mon then
+                        if (root.Position - PosMon.Position).Magnitude <= 320 then
+                            local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
+                            local goal = {CFrame = PosMon.CFrame}
+                            TweenService:Create(root, tweenInfo, goal):Play()
                         end
-                        sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
                     end
                 end
             end
         end)
     end
 end)
-function InMyNetWork(v1168)
+
+-- Função de rede (mantida igual)
+function InMyNetWork(part)
     if not isnetworkowner then
-        if (v1168.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude > 320 then
+        if (part.Position - Player.Character.HumanoidRootPart.Position).Magnitude > 320 then
             return false
         else
             return true
         end
     else
-        return isnetworkowner(v1168)
+        return isnetworkowner(part)
     end
 end
-
 v496:AddToggle({Title = "Auto Active Haki", Value = false, Callback = function(v1170)
     _G.AutoHaki = v1170
 end})
