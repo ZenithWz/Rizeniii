@@ -2488,7 +2488,6 @@ local g        = V:T("Shop","rbxassetid://134556077676632")
 local y        = V:T("Main","rbxassetid://127561653320876")
 local c        = V:T("Settings & Misc","rbxassetid://127147149367603")
 
-local CS_Tab   = V:T("Farm Mastery","rbxassetid://10709782497")
 local x        = V:T("Farm Others","rbxassetid://72448332143088")
 local t        = V:T("Sea Events","rbxassetid://96788654458681")
 local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
@@ -2501,7 +2500,6 @@ local B        = V:T("Raid And Fruit","rbxassetid://10709790875")
 
 -- SECTIONS (somente nomes alterados)
 local b    = y:AddSection("Auto Farm main");
-local CS   = CS_Tab:AddSection("Farm Mastery");
 
 local serverSection = server:AddSection("Server Options");
 
@@ -2537,24 +2535,7 @@ local Discord_Info = i:AddSection("discord server And information");
 -- Secção de Configurações manuais
 local ConfigSection = c:AddSection("Manual Save")
 
-ConfigSection:AddButton({
-    Title = "Salvar Configurações Agora",
-    Description = "Cria um backup manual das tuas opções atuais",
-    Callback = function()
-        -- Verifica se a função existe antes de chamar
-        if SaveSettings then
-            SaveSettings()
-game.StarterGui:SetCore("SendNotification", {
-    Title = "Night Mystic",
-    Text = "Configurações salvas com sucesso!",
-    Duration = 5
-})
-            
-        else
-            warn("Erro: Função SaveSettings não encontrada!")
-        end
-    end
-})
+
 
 ConfigSection:AddButton({
     Title = "Resetar Configurações",
@@ -2581,248 +2562,7 @@ ConfigSection:AddButton({
     end
 })
 
-CS:AddSeperator("Mastery")
 
-local islands = { "Cake", "Bone" }
-CS:AddDropdown({
-    Title = "Select Método",
-    Description = "",
-    Values = islands,
-    Default = "Cake",
-    Callback = function(I)
-        SelectIsland = I
-    end
-})
-
--- FUNÇÃO: pegar inimigo mais próximo dentro de uma lista
-local function GetNearestMobFromList(list)
-    local plr = game.Players.LocalPlayer
-    local root = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-    if not root then return nil end
-
-    local nearest, dist = nil, math.huge
-    for _, mob in pairs(workspace.Enemies:GetChildren()) do
-        if table.find(list, mob.Name)
-        and mob:FindFirstChild("HumanoidRootPart")
-        and mob:FindFirstChild("Humanoid")
-        and mob.Humanoid.Health > 0 then
-            local d = (mob.HumanoidRootPart.Position - root.Position).Magnitude
-            if d < dist then
-                dist = d
-                nearest = mob
-            end
-        end
-    end
-    return nearest
-end
-
--- FUNÇÃO: verificar se ainda existe mob vivo
-local function HasAliveMob(list)
-    for _, mob in pairs(workspace.Enemies:GetChildren()) do
-        if table.find(list, mob.Name)
-        and mob:FindFirstChild("Humanoid")
-        and mob.Humanoid.Health > 0 then
-            return true
-        end
-    end
-    return false
-end
-
-
-
--- CÓDIGO MODIFICADO COM SAVE
-CS:AddToggle({
-    Title = "Auto Farm Mastery Fruit",
-    Description = "",
-    -- 1. Usa GetSetting para pegar o valor salvo (ou false se não tiver salvo)
-    Default = GetSetting("FarmMastery_Dev", false), 
-    Callback = function(I)
-        _G.FarmMastery_Dev = I
-        
-        -- 2. Salva o valor na tabela e escreve no arquivo
-        _G.SaveData["FarmMastery_Dev"] = I 
-        SaveSettings()
-    end
-})
-spawn(function()
-    RunSer.RenderStepped:Connect(function()
-        if _G.FarmMastery_Dev then
-            pcall(function()
-                for _, e in pairs(plr.PlayerGui.Notifications:GetChildren()) do
-                    if e.Name == "NotificationTemplate" and string.find(e.Text, "Skill locked!") then
-                        e:Destroy()
-                    end
-                end
-            end)
-        end
-    end)
-end)
-
-spawn(function()
-    while task.wait(Sec) do
-        if _G.FarmMastery_Dev then
-            pcall(function()
-
-                local list = (SelectIsland == "Cake" and X or P)
-                local mob = GetNearestMobFromList(list)
-
-               if mob then
-    local percent = (_G.MasteryHealthPercent or 70) / 100
-    HealthM = mob.Humanoid.MaxHealth * percent
-                    repeat
-                        task.wait()
-
-                        if not mob.Parent
-                        or not mob:FindFirstChild("Humanoid")
-                        or mob.Humanoid.Health <= 0
-                        or not mob:FindFirstChild("HumanoidRootPart") then
-                            mob = GetNearestMobFromList(list)
-                            if not mob then break end
-                        end
-
-                        MousePos = mob.HumanoidRootPart.Position
-                        G.Mas(mob, _G.FarmMastery_Dev)
-
-                        if not HasAliveMob(list) then break end
-
-                    until not _G.FarmMastery_Dev
-
-                else
-                    if SelectIsland == "Cake" then
-                        _tp(CFrame.new(-1943.6765, 251.5095, -12337.8808))
-                    else
-                        _tp(CFrame.new(-9495.6806, 453.5862, 5977.3486))
-                    end
-                end
-
-            end)
-        end
-    end
-end)
-
-
-
--- AUTO FARM MASTERY GUN
-CS:AddToggle({
-    Title = "Auto Farm Mastery Gun",
-    Description = "",
-    Default = false,
-    Callback = function(I)
-        _G.FarmMastery_G = I
-    end
-})
-
-spawn(function()
-    while task.wait(Sec) do
-        if _G.FarmMastery_G then
-            pcall(function()
-
-                local list = (SelectIsland == "Cake" and X or P)
-                local mob = GetNearestMobFromList(list)
-
-               if mob then
-    local percent = (_G.MasteryHealthPercent or 70) / 100
-    HealthM = mob.Humanoid.MaxHealth * percent
-
-                    repeat
-                        task.wait()
-
-                        if not mob.Parent
-                        or not mob:FindFirstChild("Humanoid")
-                        or mob.Humanoid.Health <= 0
-                        or not mob:FindFirstChild("HumanoidRootPart") then
-                            mob = GetNearestMobFromList(list)
-                            if not mob then break end
-                        end
-
-                        MousePos = mob.HumanoidRootPart.Position
-                        G.Masgun(mob, _G.FarmMastery_G)
-
-                        local modules = replicated:FindFirstChild("Modules")
-                        local K = modules:FindFirstChild("Net")
-                        local shoot = K:FindFirstChild("RE/ShootGunEvent")
-                        local tool = plr.Character:FindFirstChildOfClass("Tool")
-
-                        if tool and tool.Name == "Skull Guitar" then
-                            SoulGuitar = true
-                            tool.RemoteEvent:FireServer("TAP", MousePos)
-                        elseif tool then
-                            SoulGuitar = false
-                            shoot:FireServer(MousePos, { mob.HumanoidRootPart })
-                        end
-
-                        if not HasAliveMob(list) then break end
-
-                    until not _G.FarmMastery_G
-
-                    SoulGuitar = false
-
-                else
-                    if SelectIsland == "Cake" then
-                        _tp(CFrame.new(-1943.6765, 251.5095, -12337.8808))
-                    else
-                        _tp(CFrame.new(-9495.6806, 453.5862, 5977.3486))
-                    end
-                end
-
-            end)
-        end
-    end
-end)
-
--- [[ NOVO SLIDER DE PORCENTAGEM DE VIDA ]] --
-_G.MasteryHealthPercent = 70 -- Valor padrão
-
-CS:AddSlider({
-    Title = "Skill Usage HP (%)",
-    Description = "Health % to stop clicking and use skills",
-    Min = 10,
-    Max = 100,
-    Default = GetSetting("MasteryHealth_Save", 70), -- Salva a config
-    Callback = function(Value)
-        _G.MasteryHealthPercent = Value
-        _G.SaveData["MasteryHealth_Save"] = Value
-        SaveSettings()
-    end
-})
-
--- Função auxiliar para carregar o save
-local function GetSavedSkillsList()
-    local saved = GetSetting("FruitSkills_Multi", {})
-    local list = {}
-    for key, val in pairs(saved) do
-        if val then table.insert(list, key) end
-    end
-    return list
-end
-
-CS:AddDropdown({
-    Title = "Select Fruit Skills", -- Título do Menu
-    -- AQUI MUDAMOS OS NOMES QUE APARECEM NA LISTA
-    Values = {
-        "Fruit Skill Z",
-        "Fruit Skill X",
-        "Fruit Skill C",
-        "Fruit Skill V",
-        "Fruit Skill F"
-    },
-    Multi = true,
-    Default = GetSavedSkillsList(),
-    Callback = function(Selected)
-        -- AQUI FAZEMOS A LIGAÇÃO: Nome Longo (UI) -> Nome Curto (Script)
-        -- O script interno do Night Mystic só entende .Z, .X, etc.
-        
-        _G.FruitSkills.Z = Selected["Fruit Skill Z"] or false
-        _G.FruitSkills.X = Selected["Fruit Skill X"] or false
-        _G.FruitSkills.C = Selected["Fruit Skill C"] or false
-        _G.FruitSkills.V = Selected["Fruit Skill V"] or false
-        _G.FruitSkills.F = Selected["Fruit Skill F"] or false
-
-        -- Salva a configuração com os novos nomes
-        _G.SaveData["FruitSkills_Multi"] = Selected
-        SaveSettings()
-    end
-})
 
 serverSection:AddSeperator("Server - Function");
 
@@ -3385,151 +3125,72 @@ if World3 then
 end
 
 
-VI_S:AddSeperator("Fontes");
+local currentFont = Enum.Font.Arial -- Fonte padrão
+local autoApply = false -- Controla se deve aplicar a novos itens
 
-local currentFont = Enum.Font.Arial -- Fonte padrão inicial
-
+-- Função principal para aplicar a fonte
 local function ApplyGlobalFont(fontEnum)
     currentFont = fontEnum
-
-    -- Aplica a fonte para todos os objetos existentes
-    for _, obj in ipairs(game.Players.LocalPlayer.PlayerGui:GetDescendants()) do
-        if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
-            obj.Font = fontEnum
-        end
+    for _, obj in ipairs(game.Players.LocalPlayer.PlayerGui:GetDescendants()) do  
+        if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then  
+            obj.Font = fontEnum  
+        end  
     end
 end
 
--- Observa novos objetos adicionados futuramente
+-- Mantém a fonte em novos itens que aparecerem na tela
 game.Players.LocalPlayer.PlayerGui.DescendantAdded:Connect(function(obj)
-    if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+    if autoApply and (obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox")) then
         obj.Font = currentFont
     end
 end)
 
-VI_S:AddButton({
-    Title = "Fonte: Amatic SC",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.AmaticSC)
+VI_S:AddSeperator("Font");
+
+-- 1. DROPDOWN COM TODAS AS FONTES COMUNS
+VI_S:AddDropdown({
+    Title = "Select Font",
+    Description = "Escolha uma fonte da lista",
+    Values = {
+        "AmaticSC", "Antique", "Arcade", "Arial", "ArialBold", "Bangers", 
+        "Bodoni", "Cartoon", "Code", "Creepster", "DenkOne", "Fondamento", 
+        "FredokaOne", "Garamond", "Gotham", "GothamBlack", "GothamBold", 
+        "GothamMedium", "Highway", "IndieFlower", "JosefinSans", "Jura", 
+        "Kalam", "LuckiestGuy", "Merriweather", "Michroma", "Nunito", 
+        "Oswald", "PatrickHand", "PermanentMarker", "Roboto", "RobotoCondensed", 
+        "RobotoMono", "Sarpanch", "SciFi", "SourceSans", "SourceSansBold", 
+        "SourceSansLight", "SourceSansSemibold", "SpecialElite", "TitilliumWeb", "Ubuntu"
+    },
+    Default = "Arial",
+    Callback = function(Value)
+        currentFont = Enum.Font[Value]
     end
 })
 
+-- 2. BOTÃO PARA APLICAR
 VI_S:AddButton({
-    Title = "Fonte: Antique",
-    Description = "",
+    Title = "Change Font",
+    Description = "Clique para aplicar a fonte selecionada acima",
     Callback = function()
-        ApplyGlobalFont(Enum.Font.Antique)
+        autoApply = true -- Ativa a aplicação automática para novos itens
+        ApplyGlobalFont(currentFont)
     end
 })
 
+-- 3. BOTÃO PARA VOLTAR AO ORIGINAL
 VI_S:AddButton({
-    Title = "Fonte: Arcade",
+    Title = "Go back to normal font",
     Description = "",
     Callback = function()
-        ApplyGlobalFont(Enum.Font.Arcade)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Arial",
-    Description = "",
-    Callback = function()
+        autoApply = false -- Desativa a aplicação automática
         ApplyGlobalFont(Enum.Font.Arial)
     end
 })
 
-VI_S:AddButton({
-    Title = "Fonte: Arial Bold",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.ArialBold)
-    end
-})
+
+VI_S:AddSeperator("Fps");
 
 VI_S:AddButton({
-    Title = "Fonte: Bangers",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Bangers)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Bodoni",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Bodoni)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Cartoon",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Cartoon)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Code",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Code)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Creepster",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Creepster)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Denk One",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.DenkOne)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Fondamento",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Fondamento)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Fredoka One",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.FredokaOne)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Garamond",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Garamond)
-    end
-})
-
-VI_S:AddButton({
-    Title = "Fonte: Gotham",
-    Description = "",
-    Callback = function()
-        ApplyGlobalFont(Enum.Font.Gotham)
-    end
-})
-
-kk:AddSeperator("Fps");
-
-kk:AddButton({
     Title = "Stretch the screen",
     Description = "",
     Callback = function()
@@ -3560,9 +3221,10 @@ kk:AddButton({
         getgenv().gg_scripters = "Aori0001"
     end
 })
-kk:AddButton({ Title = "Fps Boost", Description = "", Callback = function()
+VI_S:AddButton({ Title = "Fps Boost", Description = "", Callback = function()
 		LowCpu();
 	end });
+
 
 if World3 then
 RR:AddSeperator("Skull Guitar");
@@ -5547,6 +5209,249 @@ spawn(function()
     end
 end)
 
+b:AddSeperator("Mastery")
+
+local islands = { "Cake", "Bone" }
+b:AddDropdown({
+    Title = "Select Type",
+    Description = "",
+    Values = islands,
+    Default = "Bone",
+    Callback = function(I)
+        SelectIsland = I
+    end
+})
+
+-- FUNÇÃO: pegar inimigo mais próximo dentro de uma lista
+local function GetNearestMobFromList(list)
+    local plr = game.Players.LocalPlayer
+    local root = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return nil end
+
+    local nearest, dist = nil, math.huge
+    for _, mob in pairs(workspace.Enemies:GetChildren()) do
+        if table.find(list, mob.Name)
+        and mob:FindFirstChild("HumanoidRootPart")
+        and mob:FindFirstChild("Humanoid")
+        and mob.Humanoid.Health > 0 then
+            local d = (mob.HumanoidRootPart.Position - root.Position).Magnitude
+            if d < dist then
+                dist = d
+                nearest = mob
+            end
+        end
+    end
+    return nearest
+end
+
+-- FUNÇÃO: verificar se ainda existe mob vivo
+local function HasAliveMob(list)
+    for _, mob in pairs(workspace.Enemies:GetChildren()) do
+        if table.find(list, mob.Name)
+        and mob:FindFirstChild("Humanoid")
+        and mob.Humanoid.Health > 0 then
+            return true
+        end
+    end
+    return false
+end
+
+
+
+-- CÓDIGO MODIFICADO COM SAVE
+b:AddToggle({
+    Title = "Auto Farm Mastery Fruit",
+    Description = "",
+    -- 1. Usa GetSetting para pegar o valor salvo (ou false se não tiver salvo)
+    Default = GetSetting("FarmMastery_Dev", false), 
+    Callback = function(I)
+        _G.FarmMastery_Dev = I
+        
+        -- 2. Salva o valor na tabela e escreve no arquivo
+        _G.SaveData["FarmMastery_Dev"] = I 
+        SaveSettings()
+    end
+})
+spawn(function()
+    RunSer.RenderStepped:Connect(function()
+        if _G.FarmMastery_Dev then
+            pcall(function()
+                for _, e in pairs(plr.PlayerGui.Notifications:GetChildren()) do
+                    if e.Name == "NotificationTemplate" and string.find(e.Text, "Skill locked!") then
+                        e:Destroy()
+                    end
+                end
+            end)
+        end
+    end)
+end)
+
+spawn(function()
+    while task.wait(Sec) do
+        if _G.FarmMastery_Dev then
+            pcall(function()
+
+                local list = (SelectIsland == "Cake" and X or P)
+                local mob = GetNearestMobFromList(list)
+
+               if mob then
+    local percent = (_G.MasteryHealthPercent or 70) / 100
+    HealthM = mob.Humanoid.MaxHealth * percent
+                    repeat
+                        task.wait()
+
+                        if not mob.Parent
+                        or not mob:FindFirstChild("Humanoid")
+                        or mob.Humanoid.Health <= 0
+                        or not mob:FindFirstChild("HumanoidRootPart") then
+                            mob = GetNearestMobFromList(list)
+                            if not mob then break end
+                        end
+
+                        MousePos = mob.HumanoidRootPart.Position
+                        G.Mas(mob, _G.FarmMastery_Dev)
+
+                        if not HasAliveMob(list) then break end
+
+                    until not _G.FarmMastery_Dev
+
+                else
+                    if SelectIsland == "Cake" then
+                        _tp(CFrame.new(-1943.6765, 251.5095, -12337.8808))
+                    else
+                        _tp(CFrame.new(-9495.6806, 453.5862, 5977.3486))
+                    end
+                end
+
+            end)
+        end
+    end
+end)
+
+
+
+-- AUTO FARM MASTERY GUN
+b:AddToggle({
+    Title = "Auto Farm Mastery Gun",
+    Description = "",
+    Default = false,
+    Callback = function(I)
+        _G.FarmMastery_G = I
+    end
+})
+
+spawn(function()
+    while task.wait(Sec) do
+        if _G.FarmMastery_G then
+            pcall(function()
+
+                local list = (SelectIsland == "Cake" and X or P)
+                local mob = GetNearestMobFromList(list)
+
+               if mob then
+    local percent = (_G.MasteryHealthPercent or 70) / 100
+    HealthM = mob.Humanoid.MaxHealth * percent
+
+                    repeat
+                        task.wait()
+
+                        if not mob.Parent
+                        or not mob:FindFirstChild("Humanoid")
+                        or mob.Humanoid.Health <= 0
+                        or not mob:FindFirstChild("HumanoidRootPart") then
+                            mob = GetNearestMobFromList(list)
+                            if not mob then break end
+                        end
+
+                        MousePos = mob.HumanoidRootPart.Position
+                        G.Masgun(mob, _G.FarmMastery_G)
+
+                        local modules = replicated:FindFirstChild("Modules")
+                        local K = modules:FindFirstChild("Net")
+                        local shoot = K:FindFirstChild("RE/ShootGunEvent")
+                        local tool = plr.Character:FindFirstChildOfClass("Tool")
+
+                        if tool and tool.Name == "Skull Guitar" then
+                            SoulGuitar = true
+                            tool.RemoteEvent:FireServer("TAP", MousePos)
+                        elseif tool then
+                            SoulGuitar = false
+                            shoot:FireServer(MousePos, { mob.HumanoidRootPart })
+                        end
+
+                        if not HasAliveMob(list) then break end
+
+                    until not _G.FarmMastery_G
+
+                    SoulGuitar = false
+
+                else
+                    if SelectIsland == "Cake" then
+                        _tp(CFrame.new(-1943.6765, 251.5095, -12337.8808))
+                    else
+                        _tp(CFrame.new(-9495.6806, 453.5862, 5977.3486))
+                    end
+                end
+
+            end)
+        end
+    end
+end)
+
+-- [[ NOVO SLIDER DE PORCENTAGEM DE VIDA ]] --
+_G.MasteryHealthPercent = 70 -- Valor padrão
+
+b:AddSlider({
+    Title = "Skill Usage HP (%)",
+    Description = "Health % to stop clicking and use skills",
+    Min = 10,
+    Max = 100,
+    Default = GetSetting("MasteryHealth_Save", 70), -- Salva a config
+    Callback = function(Value)
+        _G.MasteryHealthPercent = Value
+        _G.SaveData["MasteryHealth_Save"] = Value
+        SaveSettings()
+    end
+})
+
+-- Função auxiliar para carregar o save
+local function GetSavedSkillsList()
+    local saved = GetSetting("FruitSkills_Multi", {})
+    local list = {}
+    for key, val in pairs(saved) do
+        if val then table.insert(list, key) end
+    end
+    return list
+end
+
+b:AddDropdown({
+    Title = "Select Fruit Skills", -- Título do Menu
+    -- AQUI MUDAMOS OS NOMES QUE APARECEM NA LISTA
+    Values = {
+        "Fruit Skill Z",
+        "Fruit Skill X",
+        "Fruit Skill C",
+        "Fruit Skill V",
+        "Fruit Skill F"
+    },
+    Multi = true,
+    Default = GetSavedSkillsList(),
+    Callback = function(Selected)
+        -- AQUI FAZEMOS A LIGAÇÃO: Nome Longo (UI) -> Nome Curto (Script)
+        -- O script interno do Night Mystic só entende .Z, .X, etc.
+        
+        _G.FruitSkills.Z = Selected["Fruit Skill Z"] or false
+        _G.FruitSkills.X = Selected["Fruit Skill X"] or false
+        _G.FruitSkills.C = Selected["Fruit Skill C"] or false
+        _G.FruitSkills.V = Selected["Fruit Skill V"] or false
+        _G.FruitSkills.F = Selected["Fruit Skill F"] or false
+
+        -- Salva a configuração com os novos nomes
+        _G.SaveData["FruitSkills_Multi"] = Selected
+        SaveSettings()
+    end
+})
+
 b:AddSeperator("Material");
 
 -- Dropdown de Selecionar Material
@@ -5568,7 +5473,7 @@ b:AddDropdown({
 
 -- Toggle de Auto Farm (Material)
 b:AddToggle({
-	Title = "Auto Farm",
+	Title = "Start Farming",
 	Description = "",
 	-- 1. Carrega se o farm de material estava ligado
 	Default = GetSetting("AutoMaterial_Save", false),
