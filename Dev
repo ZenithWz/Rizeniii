@@ -9921,87 +9921,96 @@ local function c5(I, e)
 	end;
 	return d;
 end;
--- FAST ATTACK (SUBSTITUTO COMPLETO)
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-
-local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
-local RegisterHit = Net:WaitForChild("RE/RegisterHit")
-local RegisterAttack = Net:WaitForChild("RE/RegisterAttack")
-
--- Pega SendHitsToServer se existir
-local PlayerScripts = LocalPlayer:WaitForChild("PlayerScripts")
-local LocalScript = PlayerScripts:FindFirstChildOfClass("LocalScript")
-while not LocalScript do
-	PlayerScripts.ChildAdded:Wait()
-	LocalScript = PlayerScripts:FindFirstChildOfClass("LocalScript")
+local Player = Players.LocalPlayer
+local target_remote = nil
+local remote_id = nil
+local folders_to_scan = {
+    ReplicatedStorage:WaitForChild("Util"),
+    ReplicatedStorage:WaitForChild("Common"),
+    ReplicatedStorage:WaitForChild("Remotes"),
+    ReplicatedStorage:WaitForChild("Assets"),
+    ReplicatedStorage:WaitForChild("FX"),
+}
+local function UpdateRemote()
+    for _, folder in ipairs(folders_to_scan) do
+        for _, child in ipairs(folder:GetChildren()) do
+            if child:IsA('RemoteEvent') and child:GetAttribute('Id') then
+                remote_id = child:GetAttribute('Id')
+                target_remote = child
+            end
+        end
+    end
 end
-
-local HIT_FUNCTION
-if getsenv then
-	pcall(function()
-		local ok, env = pcall(getsenv, LocalScript)
-		if ok and env then
-			HIT_FUNCTION = env._G.SendHitsToServer
-		end
-	end)
+UpdateRemote()
+local function GetTargets()
+    local targets = {}
+    local character = Player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return targets end
+    local rootPart = character.HumanoidRootPart
+    local search_folders = {workspace:FindFirstChild("Enemies"), workspace:FindFirstChild("Characters")}
+    for _, folder in ipairs(search_folders) do
+        if folder then
+            for _, model in ipairs(folder:GetChildren()) do
+                local enemyRoot = model:FindFirstChild("HumanoidRootPart")
+                local enemyHum = model:FindFirstChild("Humanoid")
+                if model ~= character and enemyRoot and enemyHum and enemyHum.Health > 0 then
+                    if (enemyRoot.Position - rootPart.Position).Magnitude <= 60 then
+                        for _, part in ipairs(model:GetChildren()) do
+                            if part:IsA("BasePart") then
+                                table.insert(targets, {model, part})
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return targets
 end
-
-local function GetValidTargets(list)
-	local targets = {}
-	for _, enemy in ipairs(list) do
-		local hum = enemy:FindFirstChild("Humanoid")
-		local part = enemy:FindFirstChild("HumanoidRootPart")
-		if hum and part and hum.Health > 0 then
-			table.insert(targets, { enemy, part })
-		end
-	end
-	return targets
+local function NewFastAttack()
+    local character = Player.Character
+    if not character then return end
+    local tool = character:FindFirstChildOfClass("Tool")
+    if not tool or not (tool:GetAttribute("WeaponType") == "Melee" or tool:GetAttribute("WeaponType") == "Sword") then
+        return 
+    end
+    local targets = GetTargets()
+    if #targets <= 0 then return end
+    pcall(function()
+        local netModule = require(ReplicatedStorage.Modules.Net)
+        local regAttack = ReplicatedStorage.Modules.Net:FindFirstChild("RE/RegisterAttack")
+        local regHit = ReplicatedStorage.Modules.Net:FindFirstChild("RE/RegisterHit")
+        if regAttack then regAttack:FireServer() end
+        local enemyHead = targets[1][1]:FindFirstChild("Head")
+        if enemyHead and regHit then
+            regHit:FireServer(
+                enemyHead, 
+                targets, 
+                {}, 
+                tostring(Player.UserId):sub(2, 4) .. string.sub(tostring(coroutine.running()), 11, 15)
+            )
+            if target_remote and remote_id then
+                local encryptedName = string.gsub('RE/RegisterHit', '.', function(char)
+                    return string.char(bit32.bxor(string.byte(char), math.floor(workspace:GetServerTimeNow() / 10 % 10) + 1))
+                end)
+                local seedValue = netModule.seed and netModule.seed:InvokeServer() or 1
+                local key = bit32.bxor(remote_id + 909090, seedValue * 2)
+                target_remote:FireServer(encryptedName, key, enemyHead, targets)
+            end
+        end
+    end)
 end
-
-local function FastAttack()
-	local char = LocalPlayer.Character
-	if not char then return end
-
-	local root = char:FindFirstChild("HumanoidRootPart")
-	local tool = char:FindFirstChildOfClass("Tool")
-	if not root or not tool then return end
-
-	local folders = {
-		workspace:FindFirstChild("Enemies"),
-		workspace:FindFirstChild("Characters")
-	}
-
-	for _, folder in ipairs(folders) do
-		if folder then
-			local children = folder:GetChildren()
-			for _, enemy in ipairs(children) do
-				local hum = enemy:FindFirstChild("Humanoid")
-				local eroot = enemy:FindFirstChild("HumanoidRootPart")
-
-				if hum and eroot and hum.Health > 0 then
-					if (eroot.Position - root.Position).Magnitude <= 100 then
-						RegisterAttack:FireServer(0)
-
-						local targets = GetValidTargets(children)
-						if HIT_FUNCTION then
-							HIT_FUNCTION(eroot, targets)
-						else
-							RegisterHit:FireServer(eroot, targets)
-						end
-					end
-				end
-			end
-		end
-	end
-end
-
--- LOOP
-RunService.Heartbeat:Connect(function()
-	if _G.Seriality then
-		pcall(FastAttack)
-	end
+task.spawn(function()
+    while true do
+        task.wait()
+        if _G.Seriality then
+            pcall(NewFastAttack)
+        end
+    end
 end)
+for _, folder in ipairs(folders_to_scan) do
+    folder.ChildAdded:Connect(UpdateRemote)
+end
