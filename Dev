@@ -2488,10 +2488,10 @@ local g        = V:T("Shop","rbxassetid://134556077676632")
 local y        = V:T("Main","rbxassetid://127561653320876")
 local c        = V:T("Settings","rbxassetid://10734950309")
 
-local x        = V:T("Farm Others","rbxassetid://72448332143088")
+local x        = V:T("Quests/Bosses","rbxassetid://72448332143088")
 local t        = V:T("Sea Events","rbxassetid://96788654458681")
-local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
-local v        = V:T("Dojo Quest & Drago Race","rbxassetid://91920478152016")
+local m        = V:T("Race","rbxassetid://115164375298022")
+
 local VI       = V:T("Visuals And Esp","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
 local l        = V:T("Island","rbxassetid://10734910680")
@@ -8193,114 +8193,11 @@ if World1 or World2 then
 nn:AddSeperator("only in Sea 3");
 end
 if World3 then
-W:AddSeperator("Dojo Quest & Drago Race");
-W:AddToggle({
-	Title = "Auto Dojo Trainer",
-	Description = "turn on for do dojo belt quest white to black",
-	Default = false,
-	Callback = function(I)
-		_G.Dojoo = I;
-	end,
-});
-function printBeltName(I)
-	if type(I) == "table" and I.Quest.BeltName then
-		return I.Quest.BeltName;
-	end;
-end;
-spawn(function()
-	while wait(Sec) do
-		if _G.Dojoo then
-			pcall(function()
-				local I = { [1] = { NPC = "Dojo Trainer", Command = "RequestQuest" } };
-				local e = (replicated.Modules.Net:FindFirstChild("RF/InteractDragonQuest")):InvokeServer(unpack(I));
-				local K = printBeltName(e);
-				if debug == false and (not e and not K) then
-					_tp(CFrame.new(5865.0234375, 1208.3154296875, 871.15185546875));
-					debug = true;
-				elseif debug == true and ((CFrame.new(5865.0234375, 1208.3154296875, 871.15185546875)).Position - plr.Character.HumanoidRootPart.Position).Magnitude <= 50 then
-					if K == "White" then
-						local I = GetConnectionEnemies("Skull Slayer");
-						if I then
-							repeat
-								task.wait();
-								G.Kill(I, _G.Dojoo);
-							until not e or not _G.Dojoo or not G.Alive(I);
-						else
-							_tp(CFrame.new(-16759.58984375, 71.283767700195, 1595.3399658203));
-						end;
-					elseif K == "Yellow" then
-						repeat
-							task.wait();
-							_G.SeaBeast1 = true;
-							_G.TerrorShark = true;
-							_G.Shark = true;
-							_G.Piranha = true;
-							_G.MobCrew = true;
-							_G.FishBoat = true;
-							_G.SailBoats = true;
-						until not _G.Dojoo or not e;
-						_G.SeaBeast1 = false;
-						_G.TerrorShark = false;
-						_G.Shark = false;
-						_G.Piranha = false;
-						_G.MobCrew = false;
-						_G.FishBoat = false;
-						_G.SailBoats = false;
-					elseif K == "Green" then
-						repeat
-							task.wait();
-							_G.SailBoats = true;
-						until not _G.Dojoo or not e;
-						_G.SailBoats = false;
-					elseif K == "Purple" then
-						repeat
-							task.wait();
-							_G.FarmEliteHunt = true;
-						until not _G.Dojoo or not e;
-						_G.FarmEliteHunt = false;
-					elseif K == "Red" then
-						repeat
-							task.wait();
-							_G.SailBoats = true;
-							_G.FishBoat = true;
-						until not _G.Dojoo or not e;
-						_G.SailBoats = false;
-						_G.FishBoat = false;
-					elseif K == "Black" then
-						repeat
-							task.wait();
-							if workspace.Map:FindFirstChild("PrehistoricIsland") or workspace._WorldOrigin.Locations:FindFirstChild("Prehistoric Island") then
-								_G.Prehis_Find = true;
-								if workspace.Map.PrehistoricIsland.Core.ActivationPrompt:FindFirstChild("ProximityPrompt", true) then
-									_G.Prehis_Skills = false;
-									_G.Prehis_Find = true;
-								else
-									_G.Prehis_Skills = true;
-									_G.Prehis_Find = false;
-								end;
-							else
-								_G.Prehis_Find = true;
-								_G.Prehis_Skills = false;
-							end;
-						until not _G.Dojoo or not e;
-						_G.Prehis_Find = false;
-						_G.Prehis_Skills = false;
-					elseif K == "Orange" or K == "Blue" then
-						return nil;
-					end;
-				end;
-				if not e then
-					debug = false;
-					local I = { [1] = { NPC = "Dojo Trainer", Command = "ClaimQuest" } };
-					(replicated.Modules.Net:FindFirstChild("RF/InteractDragonQuest")):InvokeServer(unpack(I));
-				end;
-			end);
-		end;
-	end;
-end);
-W:AddToggle({
+nn:AddSeperator("Draco Race");
+
+nn:AddToggle({
 	Title = "Auto Dragon Hunter",
-	Description = "turn on for farm blaze ember + auto collect blaze ember",
+	Description = "",
 	Default = false,
 	Callback = function(I)
 		_G.FarmBlazeEM = I;
@@ -8425,41 +8322,10 @@ spawn(function()
 		end;
 	end;
 end);
-W:AddSeperator("Draco Trial");
-GetQuestDracoLevel = function()
-		local I = { [1] = { NPC = "Dragon Wizard", Command = "Upgrade" } };
-		return (replicated.Modules.Net:FindFirstChild("RF/InteractDragonQuest")):InvokeServer(unpack(I));
-	end;
-W:AddToggle({
-	Title = "Tween To Upgrade Draco Trial",
+
+nn:AddToggle({
+	Title = "Auto Draco V1",
 	Description = "",
-	Default = false,
-	Callback = function(I)
-		_G.UPGDrago = I;
-	end,
-});
-spawn(function()
-	while wait(Sec) do
-		pcall(function()
-			if _G.UPGDrago then
-				if GetQuestDracoLevel() == false then
-					return nil;
-				elseif GetQuestDracoLevel() == true then
-					if ((CFrame.new(5814.4272460938, 1208.3267822266, 884.57855224609)).Position - Root.Position).Magnitude >= 300 then
-						_tp(CFrame.new(5814.4272460938, 1208.3267822266, 884.57855224609));
-					else
-						_tp(CFrame.new(5814.4272460938, 1208.3267822266, 884.57855224609));
-						local I = { [1] = { NPC = "Dragon Wizard", Command = "Upgrade" } };
-						(replicated.Modules.Net:FindFirstChild("RF/InteractDragonQuest")):InvokeServer(unpack(I));
-					end;
-				end;
-			end;
-		end);
-	end;
-end);
-W:AddToggle({
-	Title = "Auto race draco (V1)",
-	Description = "turn on for auto quest1 auto prehistoric event + collect dragon eggs",
 	Default = false,
 	Callback = function(I)
 		_G.DragoV1 = I;
@@ -8484,9 +8350,9 @@ spawn(function()
 		end);
 	end;
 end);
-W:AddToggle({
-	Title = "Auto race draco (V2)",
-	Description = "turn on for auto kill Forest Pirate & Collect fireflower",
+nn:AddToggle({
+	Title = "Auto Draco V2",
+	Description = "",
 	Default = false,
 	Callback = function(I)
 		_G.AutoFireFlowers = I;
@@ -8524,9 +8390,9 @@ spawn(function()
 		end;
 	end;
 end);
-W:AddToggle({
-	Title = "Auto race draco (V3)",
-	Description = "turn on for sea event kill terror shark",
+nn:AddToggle({
+	Title = "Auto Draco V3",
+	Description = "",
 	Default = false,
 	Callback = function(I)
 		_G.DragoV3 = I;
@@ -8549,60 +8415,10 @@ spawn(function()
 		end);
 	end;
 end);
-W:AddToggle({
-	Title = "Auto Relic Draco Trial [Beta]",
-	Description = "turn on for auto trial v4 you have to COLLECT RELIC by your self",
-	Default = false,
-	Callback = function(I)
-		_G.Relic123 = I;
-	end,
-});
-spawn(function()
-	while wait(Sec) do
-		if _G.Relic123 then
-			pcall(function()
-				if workspace.Map:FindFirstChild("DracoTrial") then
-					replicated.Remotes.DracoTrial:InvokeServer();
-					wait(.5);
-					repeat
-						wait();
-						_tp(CFrame.new(-39934.9765625, 10685.359375, 22999.34375));
-					until not _G.Relic123 or Root.Position == (CFrame.new(-39934.9765625, 10685.359375, 22999.34375)).Position;
-					repeat
-						wait();
-						_tp(CFrame.new(-40511.25390625, 9376.4013671875, 23458.37890625));
-					until not _G.Relic123 or Root.Position == (CFrame.new(-40511.25390625, 9376.4013671875, 23458.37890625)).Position;
-					wait(2.5);
-					repeat
-						wait();
-						_tp(CFrame.new(-39914.65625, 10685.384765625, 23000.177734375));
-					until not _G.Relic123 or Root.Position == (CFrame.new(-39914.65625, 10685.384765625, 23000.177734375)).Position;
-					repeat
-						wait();
-						_tp(CFrame.new(-40045.83203125, 9376.3984375, 22791.287109375));
-					until not _G.Relic123 or Root.Position == (CFrame.new(-40045.83203125, 9376.3984375, 22791.287109375)).Position;
-					wait(2.5);
-					repeat
-						wait();
-						_tp(CFrame.new(-39908.5, 10685.405273438, 22990.04296875));
-					until not _G.Relic123 or Root.Position == (CFrame.new(-39908.5, 10685.405273438, 22990.04296875)).Position;
-					repeat
-						wait();
-						_tp(CFrame.new(-39609.5, 9376.400390625, 23472.94335975));
-					until not _G.Relic123 or Root.Position == (CFrame.new(-39609.5, 9376.400390625, 23472.94335975)).Position;
-				else
-					local I = workspace.Map.PrehistoricIsland:FindFirstChild("TrialTeleport");
-					if I and I:IsA("Part") then
-						_tp(CFrame.new(I.Position));
-					end;
-				end;
-			end);
-		end;
-	end;
-end);
-W:AddToggle({
+
+nn:AddToggle({
 	Title = "Auto to train race draco",
-	Description = "turn on for training Drago race v4 + auto upgrade tier",
+	Description = "",
 	Default = false,
 	Callback = function(I)
 		_G.TrainDrago = I;
@@ -8634,171 +8450,7 @@ spawn(function()
 		end);
 	end;
 end);
---================================================--
--- FLY TOGGLE
---================================================--
-W:AddToggle({
-	Title = "Fly",
-	Description = "Fly controlado pelo analógico ( Subida Automática )",
-	Default = false,
-	Callback = function(v)
-		_G.Fly = v
-	end,
-})
 
---================================================--
--- FLY SYSTEM
---================================================--
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local player = Players.LocalPlayer
-local flying = false
-
-local speed = 90        -- velocidade horizontal
-local yForce = 50       -- força de subida (AJUSTE AQUI)
-
-local bodyGyro, bodyVelocity
-local flyConn
-
-local function startFly()
-	local char = player.Character or player.CharacterAdded:Wait()
-	local hum = char:WaitForChild("Humanoid")
-	local root = char:WaitForChild("HumanoidRootPart")
-
-	-- segurança
-	if bodyGyro then bodyGyro:Destroy() end
-	if bodyVelocity then bodyVelocity:Destroy() end
-
-	bodyGyro = Instance.new("BodyGyro")
-	bodyGyro.P = 9e4
-	bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-	bodyGyro.CFrame = root.CFrame
-	bodyGyro.Parent = root
-
-	bodyVelocity = Instance.new("BodyVelocity")
-	bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-	bodyVelocity.Velocity = Vector3.zero
-	bodyVelocity.Parent = root
-
-	flying = true
-
-	flyConn = RunService.Heartbeat:Connect(function()
-		if not _G.Fly or not flying then return end
-
-		local moveDir = hum.MoveDirection
-		local velX, velZ = 0, 0
-
-		if moveDir.Magnitude > 0 then
-			velX = moveDir.Unit.X * speed
-			velZ = moveDir.Unit.Z * speed
-
-			bodyGyro.CFrame = CFrame.new(
-				root.Position,
-				root.Position + Vector3.new(moveDir.X, 0, moveDir.Z)
-			)
-		end
-
-		bodyVelocity.Velocity = Vector3.new(
-			velX,
-			yForce,
-			velZ
-		)
-	end)
-end
-
-local function stopFly()
-	flying = false
-
-	if flyConn then
-		flyConn:Disconnect()
-		flyConn = nil
-	end
-
-	if bodyGyro then
-		bodyGyro:Destroy()
-		bodyGyro = nil
-	end
-
-	if bodyVelocity then
-		bodyVelocity:Destroy()
-		bodyVelocity = nil
-	end
-end
-
---================================================--
--- LOOP CONTROLLER
---================================================--
-task.spawn(function()
-	while task.wait() do
-		if _G.Fly and not flying then
-			startFly()
-		elseif not _G.Fly and flying then
-			stopFly()
-		end
-	end
-end)
-W:AddToggle({
-	Title = "Tween to Draco Trials",
-	Description = "",
-	Default = false,
-	Callback = function(I)
-		_G.TpDrago_Prehis = I;
-	end,
-});
-spawn(function()
-	while wait(Sec) do
-		if _G.TpDrago_Prehis then
-			local I = workspace.Map.PrehistoricIsland:FindFirstChild("TrialTeleport");
-			if I and I:IsA("Part") then
-				_tp(CFrame.new(I.Position));
-			end;
-		end;
-	end;
-end);
-W:AddToggle({
-	Title = "Swap Draco Race",
-	Description = "",
-	Default = false,
-	Callback = function(I)
-		_G.BuyDrago = I;
-	end,
-});
-spawn(function()
-	while wait(Sec) do
-		if _G.BuyDrago then
-			pcall(function()
-				if ((CFrame.new(5814.4272460938, 1208.3267822266, 884.57855224609)).Position - Root.Position).Magnitude >= 300 then
-					_tp(CFrame.new(5814.4272460938, 1208.3267822266, 884.57855224609));
-				else
-					_tp(CFrame.new(5814.4272460938, 1208.3267822266, 884.57855224609));
-					local I = { [1] = { NPC = "Dragon Wizard", Command = "DragonRace" } };
-					(replicated.Modules.Net:FindFirstChild("RF/InteractDragonQuest")):InvokeServer(unpack(I));
-				end;
-			end);
-		end;
-	end;
-end);
-W:AddToggle({
-	Title = "Upgrade Dragon Talon With Uzoth",
-	Description = "",
-	Default = false,
-	Callback = function(I)
-		_G.DT_Uzoth = I;
-	end,
-});
-spawn(function()
-	while wait(Sec) do
-		if _G.DT_Uzoth then
-			local I = CFrame.new(5661.89014, 1211.31909, 864.836731, .811413169, -1.36805838e-08, -0.584473014, 4.75227395e-08, 1, 4.25682458e-08, .584473014, -6.23161966e-08, .811413169);
-			_tp(I);
-			if (I.Position - plr.Character.HumanoidRootPart.Position).Magnitude <= 25 then
-				local I = { NPC = "Uzoth", Command = "Upgrade" };
-				replicated.Modules.Net["RF/InteractDragonQuest"]:InvokeServer(I);
-			end;
-		end;
-	end;
-end);
 end
 if World1 or World2 then
 W:AddSeperator("only in Sea 3");
