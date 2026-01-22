@@ -3661,126 +3661,157 @@ function CheckItemBPCRBPCR(v463)
         end
     end
 end
+local FluentAdapter = [[
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
--- Configuração Fixa da Janela
-local Window = Fluent:CreateWindow({
-    Title = "Diamond Hub",
-    SubTitle = "By Mikasa",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Acrylic = true,
-    Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.LeftControl
-})
+local FakeLibrary = {}
+local FluentWindow = nil
 
-local Library = { Flags = {} }
-
--- Interceptador de Funções (Redz -> Fluent)
-function Library:MakeWindow(cfg)
-    local WindowProxy = {}
-
-    -- Ignora os minimizadores da Redz (Fluent já tem o seu)
-    function WindowProxy:NewMinimizer() 
-        return { CreateMobileMinimizer = function() end } 
+function FakeLibrary:MakeWindow(Config)
+    FluentWindow = Fluent:CreateWindow({
+        Title = "Diamond Hub",
+        SubTitle = "By MikasaZx",
+        TabWidth = 160,
+        Size = UDim2.fromOffset(580, 460),
+        Acrylic = true,
+        Theme = "Dark",
+        MinimizeKey = Enum.KeyCode.LeftControl
+    })
+    
+    local FakeWindow = {}
+    
+    function FakeWindow:NewMinimizer()
+        return {CreateMobileMinimizer = function() end}
+    end
+    
+    function FakeWindow:Notify(Config)
+        Fluent:Notify({
+            Title = Config.Title or "Notification",
+            Content = Config.Content or "",
+            Duration = Config.Duration or 5
+        })
+    end
+    
+    function FakeWindow:Dialog(Config)
+        Fluent:Notify({Title = Config.Title, Content = Config.Content, Duration = 5})
+        if Config.Options and Config.Options[2] and Config.Options[2].Callback then
+            Config.Options[2].Callback()
+        end
     end
 
-    -- Gerenciamento de Flags
-    function WindowProxy:GetFlag(id) return Library.Flags[id] end
-    function WindowProxy:SetFlag(id, val) Library.Flags[id] = val end
+    function FakeWindow:GetFlag(Flag)
+        if Fluent.Options[Flag] then return Fluent.Options[Flag].Value end
+        return nil
+    end
 
-    -- Criador de Tabs
-    function WindowProxy:MakeTab(tabCfg)
-        local Tab = Window:AddTab({ Title = tabCfg.Title, Icon = tabCfg.Icon or "" })
-        local TabProxy = {}
+    function FakeWindow:SetFlag(Flag, Value)
+        if Fluent.Options[Flag] then Fluent.Options[Flag]:SetValue(Value) end
+    end
 
-        -- Toggle
-        function TabProxy:AddToggle(tCfg)
-            local id = tCfg.Flag or tCfg.Name
-            local t = Tab:AddToggle(id, { Title = tCfg.Name, Default = tCfg.Default or false })
-            t:OnChanged(function(v)
-                Library.Flags[id] = v
-                if tCfg.Callback then tCfg.Callback(v) end
-            end)
-            return t
-        end
-
-        -- Slider
-        function TabProxy:AddSlider(sCfg)
-            local s = Tab:AddSlider(sCfg.Flag or sCfg.Name, {
-                Title = sCfg.Name,
-                Min = sCfg.Min, Max = sCfg.Max,
-                Default = sCfg.Default,
-                Rounding = 1,
-                Callback = sCfg.Callback
-            })
-            return s
-        end
-
-        -- Dropdown
-        function TabProxy:AddDropdown(dCfg)
-            local d = Tab:AddDropdown(dCfg.Flag or dCfg.Name, {
-                Title = dCfg.Name,
-                Values = dCfg.Options,
-                Multi = dCfg.MultiSelect or false,
-                Default = dCfg.Default,
-            })
-            d:OnChanged(dCfg.Callback)
-            return d
-        end
-
-        -- Button
-        function TabProxy:AddButton(bCfg)
-            return Tab:AddButton({ Title = bCfg.Name, Callback = bCfg.Callback })
-        end
-
-        -- TextBox
-        function TabProxy:AddTextBox(iCfg)
-            return Tab:AddInput(iCfg.Name, {
-                Title = iCfg.Name,
-                Default = iCfg.Default,
-                Placeholder = iCfg.Placeholder,
-                Callback = iCfg.Callback
+    function FakeWindow:MakeTab(Config)
+        local FluentTab = FluentWindow:AddTab({
+            Title = Config.Title,
+            Icon = Config.Icon or ""
+        })
+        
+        local FakeTab = {}
+        
+        function FakeTab:AddToggle(Config)
+            local ID = Config.Flag or Config.Name or math.random(1,99999)..tostring(os.time())
+            FluentTab:AddToggle(ID, {
+                Title = Config.Name,
+                Default = Config.Default or false,
+                Callback = Config.Callback
             })
         end
-
-        -- Paragraph
-        function TabProxy:AddParagraph(title, content)
-            return Tab:AddParagraph({ Title = title, Content = content })
+        
+        function FakeTab:AddSlider(Config)
+            local ID = Config.Flag or Config.Name or math.random(1,99999)..tostring(os.time())
+            FluentTab:AddSlider(ID, {
+                Title = Config.Name,
+                Min = Config.Min or 0,
+                Max = Config.Max or 100,
+                Default = Config.Default or 0,
+                Rounding = (Config.Increment and Config.Increment < 1) and 1 or 0,
+                Callback = Config.Callback
+            })
         end
-
-        -- Discord Invite
-        function TabProxy:AddDiscordInvite(dCfg)
-            return Tab:AddButton({ Title = dCfg.Title, Description = "Clique para copiar o convite", Callback = function() setclipboard(dCfg.Invite) end })
+        
+        function FakeTab:AddDropdown(Config)
+            local ID = Config.Flag or Config.Name or math.random(1,99999)..tostring(os.time())
+            FluentTab:AddDropdown(ID, {
+                Title = Config.Name,
+                Values = Config.Options,
+                Multi = Config.MultiSelect or false,
+                Default = Config.Default,
+                Callback = Config.Callback
+            })
         end
-
-        return TabProxy
-    end
-
-    -- Notificações e Diálogos
-    function WindowProxy:Notify(nCfg)
-        Fluent:Notify({ Title = nCfg.Title, Content = nCfg.Content, Duration = nCfg.Duration or 5 })
-    end
-
-    function WindowProxy:Dialog(dCfg)
-        local btns = {}
-        for _, opt in ipairs(dCfg.Options or {}) do
-            table.insert(btns, { Title = opt.Name, Callback = opt.Callback })
+        
+        function FakeTab:AddTextBox(Config)
+            local ID = Config.Flag or Config.Name or math.random(1,99999)..tostring(os.time())
+            FluentTab:AddInput(ID, {
+                Title = Config.Name,
+                Default = Config.Default,
+                Placeholder = Config.Placeholder,
+                Numeric = false,
+                Finished = true,
+                Callback = Config.Callback
+            })
         end
-        Window:Dialog({ Title = dCfg.Title, Content = dCfg.Content, Buttons = btns })
+        
+        function FakeTab:AddButton(Config)
+            FluentTab:AddButton({
+                Title = Config.Name,
+                Callback = Config.Callback
+            })
+        end
+        
+        function FakeTab:AddParagraph(Arg1, Arg2)
+            local Title, Content
+            if type(Arg1) == "table" then
+                Title = Arg1.Title
+                Content = Arg1.Text or Arg1.Content
+            else
+                Title = Arg1
+                Content = Arg2
+            end
+            FluentTab:AddParagraph({Title = Title, Content = Content})
+        end
+        
+        function FakeTab:AddDiscordInvite(Config)
+            FluentTab:AddButton({
+                Title = "Discord: " .. (Config.Title or "Join"),
+                Description = "Click to copy invite",
+                Callback = function()
+                    setclipboard(Config.Invite or "")
+                    Fluent:Notify({Title = "Discord", Content = "Invite copied to clipboard!", Duration = 3})
+                end
+            })
+        end
+        
+        return FakeTab
     end
-
-    return WindowProxy
+    
+    FluentWindow:SelectTab(1)
+    return FakeWindow
 end
 
--- Estubs para não dar erro de função inexistente
-function Library:SetUIScale() end
-function Library:GetMaxScale() return 1 end
-function Library:GetMinScale() return 1 end
+function FakeLibrary:GetMaxScale() return 1 end
+function FakeLibrary:GetMinScale() return 1 end
+function FakeLibrary:SetUIScale(val) end
 
---- ==========================================
---- SEU SCRIPT ABAIXO (NÃO PRECISA MUDAR NADA)
---- ==========================================
+return FakeLibrary
+]]
+
+local OldHttpGet
+OldHttpGet = hookfunction(game.HttpGet, function(self, Url, ...)
+    if type(Url) == "string" and (string.find(Url, "redz-V5") or string.find(Url, "tlredz") or string.find(Url, "Library")) then
+        return FluentAdapter
+    end
+    return OldHttpGet(self, Url, ...)
+end)
 
 
 local v485 = v466:MakeTab({"Main", "rbxassetid://10723407389"})
