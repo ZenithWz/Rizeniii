@@ -2483,7 +2483,7 @@ end)
 
 -- TABS (somente nomes alterados)
 local i        = V:T("Discord","rbxassetid://10723415903")
-local server   = V:T("Status And Server","rbxassetid://122223674767625")
+
 local g        = V:T("Shop","rbxassetid://134556077676632")
 local y        = V:T("Main","rbxassetid://127561653320876")
 local c        = V:T("Settings","rbxassetid://10734950309")
@@ -2501,7 +2501,6 @@ local B        = V:T("Raid And Fruit","rbxassetid://10709790875")
 -- SECTIONS (somente nomes alterados)
 local b    = y:AddSection("Auto Farm main");
 
-local serverSection = server:AddSection("Server Options");
 
 local D    = g:AddSection("Shop, Styles & Accessories");
 
@@ -2564,107 +2563,6 @@ ConfigSection:AddButton({
 
 
 
-serverSection:AddSeperator("Server - Function");
-
-serverSection:AddButton({ Title = "Rejoin Server", Description = "", Callback = function()
-    (game:GetService("TeleportService")):Teleport(game.PlaceId, game.Players.LocalPlayer);
-end });
-
-serverSection:AddButton({ Title = "Hop Server", Description = "", Callback = function()
-    Hop();
-end });
-
-serverSection:AddButton({ Title = "Hop Server with a few people", Description = "", Callback = function()
-    local I = game:GetService("HttpService");
-    local e = game:GetService("TeleportService");
-    local K = "https://games.roblox.com/v1/games/";
-    local n = game.PlaceId;
-    local d = K .. (n .. "/servers/Public?sortOrder=Asc&limit=100");
-    function ListServers(e)
-        local K = game:HttpGet(d .. (e and "&cursor=" .. e or ""));
-        return I:JSONDecode(K);
-    end;
-    local z, H;
-    repeat
-        local I = ListServers(H);
-        z = I.data[1];
-        H = I.nextPageCursor;
-    until z;
-    e:TeleportToPlaceInstance(n, z.id, plr);
-end });
-
-serverSection:AddButton({ Title = "Hop Sever with low ping", Description = "", Callback = function()
-    local I = game:GetService("HttpService");
-    local e = game:GetService("TeleportService");
-    local K = game:GetService("Stats");
-    local function n(e, K)
-        local n = string.format("https://games.roblox.com/v1/games/%d/servers/Public?limit=%d", e, K);
-        local d, z = pcall(function()
-            return I:JSONDecode(game:HttpGet(n));
-        end);
-        if d and (z and z.data) then
-            return z.data;
-        end;
-        return nil;
-    end;
-    local d = game.PlaceId;
-    local z = 100;
-    local H = n(d, z);
-    if not H then
-        return;
-    end;
-    local F = H[1];
-    for I, e in pairs(H) do
-        if e.ping < F.ping and e.maxPlayers > e.playing then
-            F = e;
-        end;
-    end;
-    local Q = .5;
-    task.wait(Q);
-    local X = 100;
-    local P = K.Network.ServerStatsItem;
-    local w = P["Data Ping"]:GetValueString();
-    local O = tonumber(w:match("(%d+)"));
-    if O >= X then
-        e:TeleportToPlaceInstance(d, F.id);
-    end;
-end });
-
-serverSection:AddInput({
-    Title = "JobID",
-    Description = "",
-    PlaceHolder = "",
-    Default = "",
-    Callback = function(I)
-        _G.JobId = I;
-    end,
-});
-
-spawn(function()
-    while wait(Sec) do
-        if _G.JobId then
-            pcall(function()
-                local I;
-                I = plr.OnTeleport:Connect(function(e)
-                    if e == Enum.TeleportState.Failed then
-                        I:Disconnect();
-                        if workspace:FindFirstChild("Message") then
-                            workspace.Message:Destroy();
-                        end;
-                    end;
-                end);
-            end);
-        end;
-    end;
-end);
-
-serverSection:AddButton({ Title = "Join Server", Description = "", Callback = function()
-    replicated.__ServerBrowser:InvokeServer("teleport", _G.JobId);
-end });
-
-serverSection:AddButton({ Title = "Copy JobID Server", Description = "", Callback = function()
-    setclipboard(tostring(game.JobId));
-end });
 
 function isnil(I)
 	return I == nil;
@@ -3616,225 +3514,10 @@ spawn(function()
 	end
 end)
 end
-serverSection:AddSeperator("Server - Status");
 
--- Sistema Time Zone
-local Time = serverSection:AddParagraph({Title = "Time Zone", Desc = ""})
-function UpdateOS()
-    local date = os.date("*t")
-    local hour = date.hour % 24
-    local ampm = hour < 12 and "AM" or "PM"
-    local timezone = string.format("%02i:%02i:%02i %s", ((hour - 1) % 12) + 1, date.min, date.sec, ampm)
-    local datetime = string.format("%02d/%02d/%04d", date.day, date.month, date.year)
-    local LocalizationService = game:GetService("LocalizationService")
-    local Players = game:GetService("Players")
-    local player = Players.LocalPlayer
-    local result, code = pcall(function()
-        return LocalizationService:GetCountryRegionForPlayerAsync(player)
-    end)
-    Time:SetDesc(datetime .. " - " .. timezone .. " [ " .. (code or "??") .. " ]")
-end
-spawn(function()
-    while wait() do
-        UpdateOS()
-        game:GetService("RunService").RenderStepped:Wait()
-    end
-end)
 
--- Sistema Game Time
-local Timmessss = serverSection:AddParagraph({Title = "Time", Desc = ""})
-function UpdateTime()
-    local GameTime = math.floor(workspace.DistributedGameTime + 0.5)
-    local Hour = math.floor(GameTime / (60 ^ 2)) % 24
-    local Minute = math.floor(GameTime / 60) % 60
-    local Second = GameTime % 60
-    Timmessss:SetDesc(Hour .. " Hour (h) " .. Minute .. " Minute (m) " .. Second .. " Second (s)")
-end
-spawn(function()
-    while wait() do
-        UpdateTime()
-    end
-end)
 
--- Sistema de Verificação de Ilhas
-local function CheckIsland(name, folder, childName)
-    local p = serverSection:AddParagraph({Title = name, Desc = "Status: "})
-    spawn(function()
-        pcall(function()
-            while wait() do
-                if folder:FindFirstChild(childName) then
-                    p:SetDesc('✅️')
-                else
-                    p:SetDesc('❌️')
-                end
-            end
-        end)
-    end)
-end
 
-CheckIsland("Mirage Island", game.Workspace._WorldOrigin.Locations, "Mirage Island")
-CheckIsland("Kitsune Island", game.Workspace.Map, "KitsuneIsland")
-CheckIsland("Prehistoric Island", game.Workspace._WorldOrigin.Locations, "Prehistoric Island")
-CheckIsland("Frozen Dimension", game.Workspace._WorldOrigin.Locations, "Frozen Dimension")
-
--- Sistema Cake Prince Kill
-local MobCakePrince = serverSection:AddParagraph({Title = "Dimension Killed", Desc = ""})
-spawn(function()
-    while wait() do
-        pcall(function()
-            local response = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CakePrinceSpawner")
-            local len = string.len(response)
-            if len == 88 then
-                MobCakePrince:SetDesc("Kill : " .. string.sub(response, 39, 41))
-            elseif len == 87 then
-                MobCakePrince:SetDesc("Kill : " .. string.sub(response, 39, 40))
-            elseif len == 86 then
-                MobCakePrince:SetDesc("Kill : " .. string.sub(response, 39, 39) .. " ")
-            else
-                MobCakePrince:SetDesc("Cake Prince : ✅️")
-            end
-        end)
-    end
-end)
-
--- Sistema Tyrant of the Skies
-local TyrantStatus = serverSection:AddParagraph({Title = "Tyrant of the Skies", Desc = "Status: "})
-spawn(function()
-    pcall(function()
-        while wait() do
-            if game:GetService("Workspace").Enemies:FindFirstChild("Tyrant of the Skies") then
-                TyrantStatus:SetDesc("Status : ✅️")
-            else
-                TyrantStatus:SetDesc("Status : ❌️")
-            end
-        end
-    end)
-end)
-
--- Sistema Rip_Indra
-local CheckRip = serverSection:AddParagraph({Title = "Rip_Indra", Desc = "Status: "})
-spawn(function()
-    while wait() do
-        pcall(function()
-            if game:GetService("ReplicatedStorage"):FindFirstChild("rip_indra True Form") 
-            or game:GetService("Workspace").Enemies:FindFirstChild("rip_indra") then
-                CheckRip:SetDesc("Status : ✅️")
-            else
-                CheckRip:SetDesc("Status : ❌️")
-            end
-        end)
-    end
-end)
-
--- Sistema Dough King
-local CheckDoughKing = serverSection:AddParagraph({Title = "Dough King", Desc = "Status: "})
-spawn(function()
-    while wait() do
-        pcall(function()
-            if game:GetService("ReplicatedStorage"):FindFirstChild("Dough King") 
-            or game:GetService("Workspace").Enemies:FindFirstChild("Dough King") then
-                CheckDoughKing:SetDesc("Status : ✅️")
-            else
-                CheckDoughKing:SetDesc("Status : ❌️")
-            end
-        end)
-    end
-end)
-
--- Sistema Elite Hunter
-local EliteHunter = serverSection:AddParagraph({Title = "Elite Hunter", Desc = "Status: "})
-spawn(function()
-    while wait() do
-        pcall(function()
-            local rs = game:GetService("ReplicatedStorage")
-            local ws = game:GetService("Workspace").Enemies
-            local progress = rs.Remotes.CommF_:InvokeServer("EliteHunter", "Progress")
-            if rs:FindFirstChild("Diablo") or rs:FindFirstChild("Deandre") or rs:FindFirstChild("Urban")
-            or ws:FindFirstChild("Diablo") or ws:FindFirstChild("Deandre") or ws:FindFirstChild("Urban") then
-                EliteHunter:SetDesc("Status : ✅️ | Killed: " .. progress)
-            else
-                EliteHunter:SetDesc("Status : ❌️ | Killed: " .. progress)
-            end
-        end)
-    end
-end)
-
--- Sistema Pull Lever
-local Pullever = serverSection:AddParagraph({Title = "Pull Lever", Desc = "Status: "})
-spawn(function()
-    while wait() do
-        pcall(function()
-            if game.ReplicatedStorage.Remotes.CommF_:InvokeServer("CheckTempleDoor") then
-                Pullever:SetDesc("✅")
-            else
-                Pullever:SetDesc("❌")
-            end
-        end)
-    end
-end)
-
--- Sistema Full Moon
-local FM = serverSection:AddParagraph({Title = "Full Moon", Desc = ""})
-spawn(function()
-    while wait() do
-        pcall(function()
-            local moonId = game:GetService("Lighting").Sky.MoonTextureId
-            if moonId == "http://www.roblox.com/asset/?id=9709149431" then
-                FM:SetDesc("Moon: 5/5")
-            elseif moonId == "http://www.roblox.com/asset/?id=9709149052" then
-                FM:SetDesc("Moon: 4/5")
-            elseif moonId == "http://www.roblox.com/asset/?id=9709143733" then
-                FM:SetDesc("Moon: 3/5")
-            elseif moonId == "http://www.roblox.com/asset/?id=9709150401" then
-                FM:SetDesc("Moon: 2/5")
-            elseif moonId == "http://www.roblox.com/asset/?id=9709149680" then
-                FM:SetDesc("Moon: 1/5")
-            else
-                FM:SetDesc("Moon: 0/5")
-            end
-        end)
-    end
-end)
-
--- Sistema Legendary Sword
-local LegendarySword = serverSection:AddParagraph({Title = "Legendary Sword", Desc = "Status: "})
-spawn(function()
-    pcall(function()
-        while wait() do
-            local rs = game:GetService("ReplicatedStorage").Remotes.CommF_
-            if rs:InvokeServer("LegendarySwordDealer", "1") then
-                LegendarySword:SetDesc("Shisui")
-            elseif rs:InvokeServer("LegendarySwordDealer", "2") then
-                LegendarySword:SetDesc("Wando")
-            elseif rs:InvokeServer("LegendarySwordDealer", "3") then
-                LegendarySword:SetDesc("Saddi")
-            else
-                LegendarySword:SetDesc("Not Found Legend Swords")
-            end
-        end
-    end)
-end)
-
--- Sistema Bone
-local Bone = serverSection:AddParagraph({Title = "Bone", Desc = ""})
-spawn(function()
-    pcall(function()
-        while wait() do
-            local bones = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Bones", "Check")
-            Bone:SetDesc("You Have : " .. tostring(bones) .. " Bones")
-        end
-    end)
-end)
-
-serverSection:AddSeperator("Place id");
-
--- Paragraph que mostra o PlaceId atual
-local PlaceInfo = serverSection:AddParagraph({
-    Title = "PlaceId",
-    Content = ""
-})
-
-PlaceInfo:SetDesc("Current PlaceId: " .. tostring(game.PlaceId))
 
 -- ROOT FIX: sempre atualizar o HRP quando o player respawnar
 local Root
@@ -4182,17 +3865,54 @@ Discord_Info:AddDiscord("Night Mystic", "gkud3frejh")
 
 Discord_Info:AddSeperator("information")
 
-Discord_Info:AddParagraph({
-    Title = "Script Information",
-    Content = [[Credits to Astral Hub for the reference to 
-the base structure, used with the developer's permission.
-The project has been extensively modified, reworked, and expanded with new systems.]]
+Discord_Info:AddSeperator("Timer");
+
+-- Sistema Time Zone
+local Time = Discord_Info:AddParagraph({Title = "Time Zone", Desc = ""})
+function UpdateOS()
+    local date = os.date("*t")
+    local hour = date.hour % 24
+    local ampm = hour < 12 and "AM" or "PM"
+    local timezone = string.format("%02i:%02i:%02i %s", ((hour - 1) % 12) + 1, date.min, date.sec, ampm)
+    local datetime = string.format("%02d/%02d/%04d", date.day, date.month, date.year)
+    local LocalizationService = game:GetService("LocalizationService")
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    local result, code = pcall(function()
+        return LocalizationService:GetCountryRegionForPlayerAsync(player)
+    end)
+    Time:SetDesc(datetime .. " - " .. timezone .. " [ " .. (code or "??") .. " ]")
+end
+spawn(function()
+    while wait() do
+        UpdateOS()
+        game:GetService("RunService").RenderStepped:Wait()
+    end
+end)
+
+-- Sistema Game Time
+local Timmessss = Discord_Info:AddParagraph({Title = "Time", Desc = ""})
+function UpdateTime()
+    local GameTime = math.floor(workspace.DistributedGameTime + 0.5)
+    local Hour = math.floor(GameTime / (60 ^ 2)) % 24
+    local Minute = math.floor(GameTime / 60) % 60
+    local Second = GameTime % 60
+    Timmessss:SetDesc(Hour .. " Hour (h) " .. Minute .. " Minute (m) " .. Second .. " Second (s)")
+end
+spawn(function()
+    while wait() do
+        UpdateTime()
+    end
+end)
+serverSection:AddSeperator("Place id");
+
+-- Paragraph que mostra o PlaceId atual
+local PlaceInfo = Discord_Info:AddParagraph({
+    Title = "PlaceId",
+    Content = ""
 })
 
-Discord_Info:AddParagraph({
-    Title = "Thank you X2Velaric and x2Moodz", 
-    Content = "ﾠ" -- Adicionei um espaço só por segurança, mas vazio deve funcionar
-})
+PlaceInfo:SetDesc("Current PlaceId: " .. tostring(game.PlaceI
 
 b:AddSeperator("Farming")
 b:AddDropdown({
@@ -10959,6 +10679,61 @@ spawn(function()
 		end;
 	end;
 end);
+
+Y:AddSeperator("Island Stats");
+
+-- Mirage Island
+local MirageParagraph = Y:AddParagraph({
+    Title = "Mirage Island",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Mirage Island") ~= nil
+        MirageParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+-- Kitsune Island
+local KitsuneParagraph = Y:AddParagraph({
+    Title = "Kitsune Island",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace.Map:FindFirstChild("KitsuneIsland") ~= nil
+        KitsuneParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+-- Prehistoric Island
+local PrehistoricParagraph = Y:AddParagraph({
+    Title = "Prehistoric Island",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Prehistoric Island") ~= nil
+        PrehistoricParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+-- Frozen Dimension
+local FrozenParagraph = Y:AddParagraph({
+    Title = "Frozen Dimension",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Frozen Dimension") ~= nil
+        FrozenParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
 Y:AddSeperator("Travel - Worlds");
 Y:AddButton({ Title = "Teleport Sea 1", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("TravelMain");
