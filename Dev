@@ -2488,14 +2488,14 @@ local g        = V:T("Shop","rbxassetid://134556077676632")
 local y        = V:T("Main","rbxassetid://127561653320876")
 local c        = V:T("Settings","rbxassetid://10734950309")
 
-local x        = V:T("Quests/Boss","rbxassetid://72448332143088")
+local x        = V:T("Quests/Boss","rbxassetid://10734975692")
 local t        = V:T("Sea Events","rbxassetid://96788654458681")
-local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
+local m        = V:T("Race","rbxassetid://115164375298022")
 
 local VI       = V:T("Visuals And Esp","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
 local l        = V:T("Island","rbxassetid://10734910680")
-local R        = V:T("Get Items And Upgrade","rbxassetid://10709782582")
+local R        = V:T("Get Items And Upgrade","rbxassetid://10734975486")
 local B        = V:T("Raid And Fruit","rbxassetid://10709790875")
 
 -- SECTIONS (somente nomes alterados)
