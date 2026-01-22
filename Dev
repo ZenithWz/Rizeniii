@@ -3739,16 +3739,20 @@ l_ImageButton_0.MouseButton1Click:Connect(function()
     end
 end)
 
-local v485 = v466:MakeTab({"Main", "rbxassetid://10723407389"})
-local v487 = v466:MakeTab({"Quest/Items", "rbxassetid://10734975692"})
-local v491 = v466:MakeTab({"Raid And Dungeon", "rbxassetid://10734975486"})
-local v492 = v466:MakeTab({"Fruits", "rbxassetid://10709790875"})
-local v493 = v466:MakeTab({"Island", "rbxassetid://10734910680"})
-local v494 = v466:MakeTab({"Local Player", "rbxassetid://10747373176"})
-local v495 = v466:MakeTab({"Shop", "rbxassetid://10734952"})
-local v496 = v466:MakeTab({"Settings", "rbxassetid://10734950309"})
+local v485 = v466:MakeTab({"Main", "rbxassetid://92120582532478"})
+local v486 = v466:MakeTab({"Auto Fishing", "rbxassetid://92120582532478"})
+local v487 = v466:MakeTab({"Quest/Items", "rbxassetid://92120582532478"})
 
-local _ = v485:AddSection({"Global Settings"})
+
+
+local v491 = v466:MakeTab({"Raid And Dungeon", "rbxassetid://92120582532478"})
+local v492 = v466:MakeTab({"Fruits", "rbxassetid://92120582532478"})
+local v493 = v466:MakeTab({"Island", "rbxassetid://92120582532478"})
+local v494 = v466:MakeTab({"Local Player", "rbxassetid://92120582532478"})
+local v495 = v466:MakeTab({"Shop", "rbxassetid://92120582532478"})
+local v496 = v466:MakeTab({"Settings", "rbxassetid://92120582532478"})
+
+local _ = v485:AddSection({"Select Melee,Sword,Gun,Fruit"})
 _G.SelectWeapon = "Melee"
 task.spawn(function()
     while task.wait() do
