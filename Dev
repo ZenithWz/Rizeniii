@@ -2488,10 +2488,10 @@ local g        = V:T("Shop","rbxassetid://134556077676632")
 local y        = V:T("Main","rbxassetid://127561653320876")
 local c        = V:T("Settings","rbxassetid://10734950309")
 
-local x        = V:T("Quests/Boss","rbxassetid://72448332143088")
+local x        = V:T("Farm Others","rbxassetid://72448332143088")
 local t        = V:T("Sea Events","rbxassetid://96788654458681")
 local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
-
+local v        = V:T("Dojo Quest & Drago Race","rbxassetid://91920478152016")
 local VI       = V:T("Visuals And Esp","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
 local l        = V:T("Island","rbxassetid://10734910680")
@@ -2517,6 +2517,8 @@ local h    = m:AddSection("Race V2/ V3 / V4");
 local nn    = m:AddSection("Upgrade V4");
 
 local RR   = R:AddSection("Swords & accessories");
+
+local W    = v:AddSection("Dojo Quest");
 
 local VI_S = VI:AddSection("ESP & World Visuals");
 local E    = q:AddSection("PVP, Movement & Aimbot");
@@ -8187,9 +8189,14 @@ spawn(function()
 	end;
 end);
 end
-
+if World1 or World2 then
+nn:AddSeperator("only in Sea 3");
 end
 
+end
+if World1 or World2 then
+W:AddSeperator("only in Sea 3");
+end
 if World3 then
 zu:AddSeperator("Volcanic Magnet");
 -- Configurações de UI e Toggle
