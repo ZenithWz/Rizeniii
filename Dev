@@ -123,26 +123,32 @@ Marines = function()
 Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
--- [[ 1. CARREGAMENTO DA REDZ LIBRARY V5 ]] --
+-- [[ 1. CARREGAMENTO DA NOVA UI (redz-V5) ]] --
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/redz-V5-remake/main.luau"))()
 
 -- [[ 2. ADAPTADOR (NIGHT MYSTIC -> REDZ V5) ]] --
 local I = {}
 
 function I:NewWindow(config)
-    -- Cria a janela principal na RedZ
+    -- Cria a janela principal
     local Window = Library:MakeWindow({
         Title = "Night Mystic",
         SubTitle = "by araujozwx & Maurozzx",
-        ScriptFolder = "redz-library-V5"
+        ScriptFolder = "NightMysticConfig"
     })
 
-    -- Configuração do Minimizer (Padrão para Mobile e PC)
-    Window:NewMinimizer({ KeyCode = Enum.KeyCode.LeftControl })
+    -- Configuração do Minimizer (PC e Mobile)
+    local Minimizer = Window:NewMinimizer({
+        KeyCode = Enum.KeyCode.RightControl
+    })
+    Minimizer:CreateMobileMinimizer({
+        Image = "rbxassetid://105245380363493", -- Usando seu ícone
+        BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    })
 
     local WindowWrapper = {}
 
-    -- Função para criar Abas (Tabs)
+    -- Função para criar Abas
     function WindowWrapper:T(name, iconId)
         local Tab = Window:MakeTab({
             Title = name,
@@ -151,15 +157,15 @@ function I:NewWindow(config)
 
         local TabWrapper = {}
 
-        -- Na RedZ V5 não há container de seção isolado como na Modern,
-        -- então vamos mapear as funções diretamente para a Tab.
+        -- Função para criar Seções (Na Redz V5 usamos AddSection ou apenas títulos)
         function TabWrapper:AddSection(sectionName)
-            -- Cria um parágrafo como cabeçalho de seção para manter a estética
-            Tab:AddParagraph("--- " .. sectionName .. " ---", "")
+            -- A Redz V5 não exige um objeto de seção separado para adicionar itens,
+            -- mas podemos adicionar um parágrafo ou label como separador visual.
+            Tab:AddParagraph(sectionName, "")
 
             local SectionWrapper = {}
 
-            -- Toggle
+            -- Toggle (Interruptor)
             function SectionWrapper:AddToggle(config)
                 return Tab:AddToggle({
                     Name = config.Title,
@@ -168,7 +174,7 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Button
+            -- Button (Botão)
             function SectionWrapper:AddButton(config)
                 return Tab:AddButton({
                     Name = config.Title,
@@ -176,30 +182,30 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Dropdown
+            -- Dropdown (Lista de seleção)
             function SectionWrapper:AddDropdown(config)
                 return Tab:AddDropdown({
                     Name = config.Title,
-                    Options = config.Values or config.Options,
+                    Options = config.Values or {},
                     Default = config.Default,
                     MultiSelect = config.Multi or false,
                     Callback = config.Callback
                 })
             end
 
-            -- Slider
+            -- Slider (Barra de valor)
             function SectionWrapper:AddSlider(config)
                 return Tab:AddSlider({
                     Name = config.Title,
                     Min = config.Min or 0,
                     Max = config.Max or 100,
                     Default = config.Default or 0,
-                    Increment = 1,
+                    Increment = 1, -- Padrão
                     Callback = config.Callback
                 })
             end
 
-            -- Input (TextBox)
+            -- Input (Caixa de Texto)
             function SectionWrapper:AddInput(config)
                 return Tab:AddTextBox({
                     Name = config.Title,
@@ -209,24 +215,25 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Paragraph
+            -- Paragraph (Texto informativo)
             function SectionWrapper:AddParagraph(config)
-                return Tab:AddParagraph(config.Title, config.Desc or config.Content or "")
+                return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")
             end
-            
-            -- Label
+
+            -- Label / Separator
             function SectionWrapper:AddLabel(text)
                 return Tab:AddParagraph(text, "")
             end
 
+            function SectionWrapper:AddSeperator(text)
+                return Tab:AddParagraph("--- " .. text .. " ---", "")
+            end
+
             -- Discord Invite
             function SectionWrapper:AddDiscord(title, link)
-                return Tab:AddDiscordInvite({
+                Tab:AddDiscordInvite({
                     Title = title,
-                    Invite = "https://discord.gg/" .. (link:gsub("https://discord.gg/", "")),
-                    Description = "Junte-se ao nosso servidor!",
-                    Logo = "rbxassetid://17382040552",
-                    Banner = "rbxassetid://17382040552"
+                    Invite = "https://discord.gg/" .. link,
                 })
             end
 
@@ -238,7 +245,7 @@ function I:NewWindow(config)
     -- Notificações globais
     function WindowWrapper:Notify(config)
         Window:Notify({
-            Title = config.Title or "Notificação",
+            Title = config.Title or "Aviso",
             Content = config.Content or config.Text or "",
             Duration = config.Duration or 5
         })
@@ -247,7 +254,7 @@ function I:NewWindow(config)
     return WindowWrapper
 end
 
--- [[ FIM DO ADAPTADOR ]] --
+
 
 
 if World1 then
