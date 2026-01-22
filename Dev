@@ -9313,6 +9313,7 @@ spawn(function()
 	end;
 end);
 
+end
 p:AddSeperator("Raiding");
 e = {
 		"Flame",
