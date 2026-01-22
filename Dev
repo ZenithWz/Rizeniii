@@ -9166,14 +9166,7 @@ spawn(function()
 		end;
 	end;
 end); 
-zu:AddToggle({
-	Title = "Auto Attack Leviathan",
-	Description = "",
-	Default = false,
-	Callback = function(I)
-		_G.Leviathan1 = I;
-	end,
-});
+
 zu:AddSeperator("Kitsune Island");
 zu:AddToggle({
     Title = "Auto Find Kitsune Island",
