@@ -2518,7 +2518,6 @@ local nn    = m:AddSection("Upgrade V4");
 
 local RR   = R:AddSection("Swords & accessories");
 
-local W    = v:AddSection("Dojo Quest");
 
 local VI_S = VI:AddSection("ESP & World Visuals");
 local E    = q:AddSection("PVP, Movement & Aimbot");
@@ -3859,7 +3858,7 @@ end)
 
 Discord_Info:AddDiscord("Night Mystic", "gkud3frejh")
 
-Discord_Info:AddSeperator("Server - Status");
+Discord_Info:AddSeperator("Status");
 
 -- Sistema Time Zone
 local Time = Discord_Info:AddParagraph({Title = "Time Zone", Desc = ""})
@@ -3914,19 +3913,6 @@ local PlaceInfo = Discord_Info:AddParagraph({
 PlaceInfo:SetDesc("Current PlaceId: " .. tostring(game.PlaceId))
 
 
-Discord_Info:AddSeperator("information")
-
-Discord_Info:AddParagraph({
-    Title = "Script Information",
-    Content = [[Credits to Astral Hub for the reference to 
-the base structure, used with the developer's permission.
-The project has been extensively modified, reworked, and expanded with new systems.]]
-})
-
-Discord_Info:AddParagraph({
-    Title = "Thank you X2Velaric and x2Moodz", 
-    Content = "ﾠ" -- Adicionei um espaço só por segurança, mas vazio deve funcionar
-})
 
 b:AddSeperator("Farming")
 b:AddDropdown({
