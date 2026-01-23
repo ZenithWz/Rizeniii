@@ -137,16 +137,16 @@ function I:NewWindow(config)
         ScriptFolder = "DiamondHubConfig"
     })
 
-    -- Configuração do Minimizer (Atualizado)
+    -- Configuração do Minimizer
     local Minimizer = Window:NewMinimizer({
         KeyCode = Enum.KeyCode.RightControl
     })
-    
+
     Minimizer:CreateMobileMinimizer({
-        Image = "rbxassetid://135264546140981", 
+        Image = "rbxassetid://135264546140981", -- Nova imagem solicitada
         BackgroundColor3 = Color3.fromRGB(20, 20, 20),
-        Size = UDim2.new(0, 55, 0, 55), -- Tamanho aumentado
-        CornerRadius = UDim.new(0, 12) -- Bordas bem arredondadas
+        Size = UDim2.new(0, 65, 0, 65), -- Tamanho aumentado (Um pouco maior)
+        CornerRadius = UDim.new(0, 16) -- Bordas arredondadas
     })
 
     local WindowWrapper = {}
@@ -158,90 +158,92 @@ function I:NewWindow(config)
             Icon = iconId or "home"
         })
 
-        local TabWrapper = {}
+        local TabWrapper = {}    
 
-        -- Função para criar Seções
-        function TabWrapper:AddSection(sectionName)
-            Tab:AddSection(sectionName)
+        -- Função para criar Seções (Corrigido para usar AddSection nativo)    
+        function TabWrapper:AddSection(sectionName)    
+            -- Cria a seção visualmente correta sem Paragraph    
+            Tab:AddSection(sectionName)    
 
-            local SectionWrapper = {}
+            local SectionWrapper = {}    
 
-            -- Toggle (Interruptor)
-            function SectionWrapper:AddToggle(config)
-                return Tab:AddToggle({
-                    Name = config.Title,
-                    Default = config.Default or false,
-                    Callback = config.Callback
-                })
-            end
+            -- Toggle (Interruptor)    
+            function SectionWrapper:AddToggle(config)    
+                return Tab:AddToggle({    
+                    Name = config.Title,    
+                    Default = config.Default or false,    
+                    Callback = config.Callback    
+                })    
+            end    
 
-            -- Button (Botão)
-            function SectionWrapper:AddButton(config)
-                return Tab:AddButton({
-                    Name = config.Title,
-                    Callback = config.Callback
-                })
-            end
+            -- Button (Botão)    
+            function SectionWrapper:AddButton(config)    
+                return Tab:AddButton({    
+                    Name = config.Title,    
+                    Callback = config.Callback    
+                })    
+            end    
 
-            -- Dropdown
-            function SectionWrapper:AddDropdown(config)
-                return Tab:AddDropdown({
-                    Name = config.Title,
-                    Options = config.Values or {},
-                    Default = config.Default,
-                    MultiSelect = config.Multi or false,
-                    Callback = config.Callback
-                })
-            end
+            -- Dropdown    
+            function SectionWrapper:AddDropdown(config)    
+                return Tab:AddDropdown({    
+                    Name = config.Title,    
+                    Options = config.Values or {},    
+                    Default = config.Default,    
+                    MultiSelect = config.Multi or false,    
+                    Callback = config.Callback    
+                })    
+            end    
 
-            -- Slider
-            function SectionWrapper:AddSlider(config)
-                return Tab:AddSlider({
-                    Name = config.Title,
-                    Min = config.Min or 0,
-                    Max = config.Max or 100,
-                    Default = config.Default or 0,
-                    Increment = 1,
-                    Callback = config.Callback
-                })
-            end
+            -- Slider    
+            function SectionWrapper:AddSlider(config)    
+                return Tab:AddSlider({    
+                    Name = config.Title,    
+                    Min = config.Min or 0,    
+                    Max = config.Max or 100,    
+                    Default = config.Default or 0,    
+                    Increment = 1,    
+                    Callback = config.Callback    
+                })    
+            end    
 
-            -- Input
-            function SectionWrapper:AddInput(config)
-                return Tab:AddTextBox({
-                    Name = config.Title,
-                    Default = config.Default or "",
-                    Placeholder = config.PlaceHolder or "Digite aqui...",
-                    Callback = config.Callback
-                })
-            end
+            -- Input    
+            function SectionWrapper:AddInput(config)    
+                return Tab:AddTextBox({    
+                    Name = config.Title,    
+                    Default = config.Default or "",    
+                    Placeholder = config.PlaceHolder or "Digite aqui...",    
+                    Callback = config.Callback    
+                })    
+            end    
 
-            -- Paragraph
-            function SectionWrapper:AddParagraph(config)
-                return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")
-            end
+            -- Paragraph (Apenas quando solicitado explicitamente)    
+            function SectionWrapper:AddParagraph(config)    
+                return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")    
+            end    
 
-            -- Separator
-            function SectionWrapper:AddSeperator(text)
-                Tab:AddSection(text)
-            end
-            
-            -- Label
-            function SectionWrapper:AddLabel(text)
-                return Tab:AddParagraph(text, "")
-            end
+            -- Separator (Agora usa AddSection para manter o padrão visual)    
+            function SectionWrapper:AddSeperator(text)    
+                Tab:AddSection(text)    
+            end    
+                
+            -- Label    
+            function SectionWrapper:AddLabel(text)    
+                return Tab:AddParagraph(text, "")    
+            end    
 
-            -- Discord Invite
-            function SectionWrapper:AddDiscord(title, link)
-                Tab:AddDiscordInvite({
-                    Title = title,
-                    Invite = "https://discord.gg/" .. link,
-                })
-            end
+            -- Discord Invite    
+            function SectionWrapper:AddDiscord(title, link)    
+                Tab:AddDiscordInvite({    
+                    Title = title,    
+                    Invite = "https://discord.gg/" .. link,    
+                })    
+            end    
 
-            return SectionWrapper
-        end
+            return SectionWrapper    
+        end    
         return TabWrapper
+
     end
 
     -- Notificações
@@ -254,8 +256,8 @@ function I:NewWindow(config)
     end
 
     return WindowWrapper
-end
 
+end
 
 
 
