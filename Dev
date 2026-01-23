@@ -474,7 +474,7 @@ G.DistH = function(I, e)
 		return (Root.Position - (I:FindFirstChild("HumanoidRootPart")).Position).Magnitude > e;
 	end;
 -- ALTURA ÚNICA AJUSTÁVEL DO MOB
-_G.MobHeight = _G.MobHeight or 35
+_G.MobHeight = _G.MobHeight or 37
 
 G.Kill = function(I, e)
     if not (I and e) then return end
@@ -1284,7 +1284,7 @@ end);
 -- =======================
 
 -- [[ VARIÁVEIS PARA O SEU INPUT ]] --
-getgenv().TweenSpeedFar = 364   -- Velocidade Padrão (Longe)
+getgenv().TweenSpeedFar = 370   -- Velocidade Padrão (Longe)
 getgenv().TweenSpeedNear = 600  -- Velocidade Boost (Perto <= 15 studs)
 
 _tp = function(I)
@@ -5171,7 +5171,7 @@ T:AddInput({
 T:AddInput({
     Title = "Select Farm Height",
     Description = "",
-    PlaceHolder = "35",
+    PlaceHolder = "38",
     Default = tostring(_G.MobHeight),
     Callback = function(Value)
         local num = tonumber(Value)
@@ -5184,8 +5184,8 @@ T:AddInput({
 T:AddInput({
     Title = "Tween Speed",
     Description = "",
-    PlaceHolder = "364",
-    Default = "364",
+    PlaceHolder = "370",
+    Default = "370",
     Callback = function(I)
         if tonumber(I) then
             getgenv().TweenSpeedFar = tonumber(I)
@@ -7762,7 +7762,7 @@ if World1 or World2 then
 zu:AddSeperator("only in Sea 3")
 end
 if World2 or World3 then
-    A:AddSeperator("Sea Event / Setting Sail")
+    A:AddSeperator("Sea Event")
 
     local z5 = {
         "Guardian",
@@ -7803,7 +7803,7 @@ if World2 or World3 then
     end
 
     A:AddToggle({
-        Title = "Auto Start farm",
+        Title = "Start farm",
         Description = "Auto Buy Boat & Move to Zone",
         Default = false,
         Callback = function(I)
@@ -9086,93 +9086,7 @@ E:AddInput({
         end
     end
 })
-E:AddSeperator("LocalPlayer Settings / Misc");
-E:AddToggle({
-	Title = "Instance Mink V3 [ INF ]",
-	Description = "turn on for make mink v3 infinity",
-	Default = false,
-	Callback = function(I)
-		InfAblities = I;
-	end,
-});
-spawn(function()
-	while wait(.2) do
-		pcall(function()
-			if InfAblities then
-				if not plr.Character.HumanoidRootPart:FindFirstChild("Agility") then
-					local I = replicated.FX.Agility:Clone();
-					I.Name = "Agility";
-					I.Parent = plr.Character.HumanoidRootPart;
-				end;
-			else
-				plr.Character.HumanoidRootPart.Agility:Destroy();
-			end;
-		end);
-	end;
-end);
-E:AddToggle({
-	Title = "Instance Energy [ INF ]",
-	Description = "turn on for make energy infinity",
-	Default = false,
-	Callback = function(I)
-		infEnergy = I;
-		if I then
-			getInfinity_Ability("Energy", infEnergy);
-		end;
-	end,
-});
-E:AddToggle({
-	Title = "Instance Soru [ INF ]",
-	Description = "turn on for make soru infinity",
-	Default = false,
-	Callback = function(I)
-		_G.InfSoru = I;
-		if I then
-			getInfinity_Ability("Soru", _G.InfSoru);
-		end;
-	end,
-});
-E:AddToggle({
-	Title = "Instance Observation Range [ INF ]",
-	Description = "turn on for make observation range infinity",
-	Default = false,
-	Callback = function(I)
-		_G.InfiniteObRange = I;
-		if I then
-			getInfinity_Ability("Observation", _G.InfiniteObRange);
-		end;
-	end,
-});
-E:AddSeperator("Settings Combat / Aimbot Settings");
-E:AddToggle({
-	Title = "Ignore Same Teams",
-	Description = "turn on for ignore not aimbot same team",
-	Default = false,
-	Callback = function(I)
-		_G.NoAimTeam = I;
-	end,
-});
-E:AddToggle({
-	Title = "Accept Allies",
-	Description = "turn on for auto accept ally",
-	Default = false,
-	Callback = function(I)
-		_G.AcceptAlly = I;
-	end,
-});
-spawn(function()
-	while wait(Sec) do
-		if _G.AcceptAlly then
-			pcall(function()
-				for I, e in pairs(ply:GetChildren()) do
-					if e.Name ~= plr.Name and (e:FindFirstChild("Humanoid") and e:FindFirstChild("HumanoidRootPart")) then
-						((replicated:WaitForChild("Remotes")):WaitForChild("CommF_")):InvokeServer("AcceptAlly", e.Name);
-					end;
-				end;
-			end);
-		end;
-	end;
-end);
+
 
 Y:AddSeperator("Island Stats");
 
