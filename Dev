@@ -474,7 +474,7 @@ G.DistH = function(I, e)
 		return (Root.Position - (I:FindFirstChild("HumanoidRootPart")).Position).Magnitude > e;
 	end;
 -- ALTURA ÚNICA AJUSTÁVEL DO MOB
-_G.MobHeight = _G.MobHeight or 20
+_G.MobHeight = _G.MobHeight or 35
 
 G.Kill = function(I, e)
     if not (I and e) then return end
@@ -697,7 +697,7 @@ _G = _G or {}
 _B = false
 PosMon = nil
 
-_G.BringRange = _G.BringRange or 235
+_G.BringRange = _G.BringRange or 220
 _G.MaxBringMobs = _G.MaxBringMobs or 3 -- LIMITE DE MOBS
 
 _G.FarmPriorityElf = _G.FarmPriorityElf or false
@@ -1284,7 +1284,7 @@ end);
 -- =======================
 
 -- [[ VARIÁVEIS PARA O SEU INPUT ]] --
-getgenv().TweenSpeedFar = 361   -- Velocidade Padrão (Longe)
+getgenv().TweenSpeedFar = 364   -- Velocidade Padrão (Longe)
 getgenv().TweenSpeedNear = 600  -- Velocidade Boost (Perto <= 15 studs)
 
 _tp = function(I)
@@ -5158,7 +5158,7 @@ T:AddSeperator("Select")
 T:AddInput({
     Title = "Bring Mobs Range",
     Description = "",
-    PlaceHolder = "235",
+    PlaceHolder = "220",
     Default = tostring(_G.BringRange),
     Callback = function(Value)
         local num = tonumber(Value)
@@ -5171,7 +5171,7 @@ T:AddInput({
 T:AddInput({
     Title = "Select Farm Height",
     Description = "",
-    PlaceHolder = "20",
+    PlaceHolder = "35",
     Default = tostring(_G.MobHeight),
     Callback = function(Value)
         local num = tonumber(Value)
@@ -5184,8 +5184,8 @@ T:AddInput({
 T:AddInput({
     Title = "Tween Speed",
     Description = "",
-    PlaceHolder = "361",
-    Default = "361",
+    PlaceHolder = "364",
+    Default = "364",
     Callback = function(I)
         if tonumber(I) then
             getgenv().TweenSpeedFar = tonumber(I)
@@ -5451,9 +5451,9 @@ end)
 
 
 
-outros:AddSeperator("Quests");
+outros:AddSeperator("Haki");
 outros:AddToggle({
-    Title = "Auto Farm Observation",
+    Title = "Auto Farm Haki obs",
     Description = "",
     -- 1. Carrega o estado salvo ou false por padrão
     Default = GetSetting("AutoObsFarm_Save", false),
@@ -5541,7 +5541,7 @@ spawn(function()
 end);
 if World3 then
 outros:AddToggle({
-	Title = "Auto Observation V2",
+	Title = "Auto Haki Obs V2",
 	Description = "",
 	-- 1. Carrega se estava ligado ou desligado ao abrir o script
 	Default = GetSetting("AutoKenV2_Save", false),
@@ -5703,17 +5703,10 @@ spawn(function()
 		end);
 	end;
 end);
-outros:AddSeperator("Cursed Swords");
-local r = j:AddParagraph({ Title = "Elites Process ", Content = "" });
-spawn(function()
-	while wait(Sec) do
-		pcall(function()
-			r:SetDesc("Elite Procress :  " .. replicated.Remotes.CommF_:InvokeServer("EliteHunter", "Progress"));
-		end);
-	end;
-end);
+outros:AddSeperator("Elite Hunter");
+
 outros:AddToggle({
-	Title = "Auto Elite Quest",
+	Title = "Auto Elite Hunter",
 	Description = "",
 	-- 1. Carrega o estado salvo ou false por padrão
 	Default = GetSetting("AutoEliteQuest_Save", false),
@@ -5755,7 +5748,7 @@ spawn(function()
 	end;
 end);
 outros:AddToggle({
-    Title = "Stop when got God's Chalice",
+    Title = "Stop when got God Chalice",
     Description = "",
     -- 1. Carrega o estado salvo ou inicia como true (padrão do seu script)
     Default = GetSetting("StopChalice_Save", true),
