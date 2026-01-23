@@ -1,7 +1,7 @@
  repeat task.wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
-local FolderName = "Night Mystic"
+local FolderName = "Diamond Hub"
 local FileName = "Settings.json"
 local FullPath = FolderName .. "/" .. FileName
 
@@ -2474,9 +2474,9 @@ local V=I:NewWindow();
 task.spawn(function()
     task.wait() -- Isso espera apenas 1 frame (milissegundos), é imperceptível
     V:Notify({
-        Title = "Night Mystic",
+        Title = "Diamond Hub",
         Body = "Script loaded successfully!!",
-        Icon = {"rbxassetid://105245380363493"},
+        Icon = {"rbxassetid://0"},
         Duration = 5
     })
 end)
@@ -2548,14 +2548,14 @@ ConfigSection:AddButton({
             
             -- Notificação Universal
             game.StarterGui:SetCore("SendNotification", {
-                Title = "Night Mystic",
-                Text = "Configurações resetadas! Re-execute o script.",
+                Title = "Diamond Hub",
+                Text = "Done",
                 Duration = 5
             })
         else
             game.StarterGui:SetCore("SendNotification", {
-                Title = "Night Mystic",
-                Text = "Nenhum arquivo de save encontrado para apagar.",
+                Title = "Diamond Hub",
+                Text = "Done",
                 Duration = 3
             })
         end
@@ -4772,7 +4772,7 @@ b:AddDropdown({
     Default = GetSavedSkillsList(),
     Callback = function(Selected)
         -- AQUI FAZEMOS A LIGAÇÃO: Nome Longo (UI) -> Nome Curto (Script)
-        -- O script interno do Night Mystic só entende .Z, .X, etc.
+        -- O script interno do Diamond Hub só entende .Z, .X, etc.
         
         _G.FruitSkills.Z = Selected["Fruit Skill Z"] or false
         _G.FruitSkills.X = Selected["Fruit Skill X"] or false
@@ -6648,6 +6648,61 @@ spawn(function()
 	end;
 end);
 end
+
+zu:AddSeperator("Island Stats");
+
+-- Mirage Island
+local MirageParagraph = zu:AddParagraph({
+    Title = "Mirage Island",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Mirage Island") ~= nil
+        MirageParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+-- Kitsune Island
+local KitsuneParagraph = zu:AddParagraph({
+    Title = "Kitsune Island",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace.Map:FindFirstChild("KitsuneIsland") ~= nil
+        KitsuneParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+-- Prehistoric Island
+local PrehistoricParagraph = zu:AddParagraph({
+    Title = "Prehistoric Island",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Prehistoric Island") ~= nil
+        PrehistoricParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+-- Frozen Dimension
+local FrozenParagraph = zu:AddParagraph({
+    Title = "Frozen Dimension",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Frozen Dimension") ~= nil
+        FrozenParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
 if World3 then
 zu:AddSeperator("Miragem Island");
 zu:AddToggle({
@@ -7297,59 +7352,6 @@ end);
 end
 
 
-zu:AddSeperator("Island Stats");
-
--- Mirage Island
-local MirageParagraph = zu:AddParagraph({
-    Title = "Mirage Island",
-    Content = "Status: False"
-})
-
-task.spawn(function()
-    while task.wait(1) do
-        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Mirage Island") ~= nil
-        MirageParagraph:SetContent("Status: " .. tostring(spawned))
-    end
-end)
-
--- Kitsune Island
-local KitsuneParagraph = zu:AddParagraph({
-    Title = "Kitsune Island",
-    Content = "Status: False"
-})
-
-task.spawn(function()
-    while task.wait(1) do
-        local spawned = game.Workspace.Map:FindFirstChild("KitsuneIsland") ~= nil
-        KitsuneParagraph:SetContent("Status: " .. tostring(spawned))
-    end
-end)
-
--- Prehistoric Island
-local PrehistoricParagraph = zu:AddParagraph({
-    Title = "Prehistoric Island",
-    Content = "Status: False"
-})
-
-task.spawn(function()
-    while task.wait(1) do
-        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Prehistoric Island") ~= nil
-        PrehistoricParagraph:SetContent("Status: " .. tostring(spawned))
-    end
-end)
-
--- Frozen Dimension
-local FrozenParagraph = zu:AddParagraph({
-    Title = "Frozen Dimension",
-    Content = "Status: False"
-})
-
-task.spawn(function()
-    while task.wait(1) do
-        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Frozen Dimension") ~= nil
-        FrozenParagraph:SetContent("Status: " .. tostring(spawned))
-    end
-end)
 
 
 if World3 then
