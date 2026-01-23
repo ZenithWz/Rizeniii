@@ -8614,6 +8614,120 @@ E:AddInput({
     end
 })
 
+E:AddSeperator("Travel Worlds");
+E:AddButton({ Title = "Teleport Sea 1", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("TravelMain");
+	end });
+E:AddButton({ Title = "Teleport Sea 2", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("TravelDressrosa");
+	end });
+E:AddButton({ Title = "Teleport Sea 3", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("TravelZou");
+	end });
+Y:AddSeperator("Travel Island")
+
+-- Lista de Ilhas
+Location = {}
+for _, e in pairs(workspace._WorldOrigin.Locations:GetChildren()) do
+	table.insert(Location, e.Name)
+end
+
+-- Dropdown
+E:AddDropdown({
+	Title = "Select Island",
+	Description = "",
+	Values = Location,
+	Default = false,
+	Multi = false,
+	Callback = function(I)
+		_G.Island = I
+	end,
+})
+
+
+E:AddToggle({
+    Title = "Start Teleport",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Teleport = Value
+        
+        if Value then
+            -- Procurar a ilha selecionada
+            local targetIsland = workspace._WorldOrigin.Locations:FindFirstChild(_G.Island)
+            
+            if targetIsland then
+                spawn(function()
+                    -- 1. Subida Instantânea (700 studs acima de onde você está agora)
+                    Root.CFrame = Root.CFrame * CFrame.new(0, 700, 0)
+                    wait(0.1) -- Pequena pausa para o motor físico processar
+                    
+                    -- 2. Viagem (Mantendo a altura de 700 studs acima do destino)
+                    local destination = targetIsland.CFrame * CFrame.new(0, 700, 0)
+                    
+                    -- Repete o movimento até chegar perto do destino (eixo X e Z)
+                    repeat
+                        wait()
+                        _tp(destination)
+                    until not _G.Teleport or (Root.Position - destination.p).Magnitude < 10
+                    
+                    -- 3. Descida Instantânea (Teleporta para a superfície da ilha)
+                    if _G.Teleport then
+                        Root.CFrame = targetIsland.CFrame * CFrame.new(0, 5, 0) -- 5 studs para não bugar no chão
+                    end
+                    
+                    -- 4. Desligar Automático
+                    _G.Teleport = false
+                    -- Nota: Para o botão visual do menu "desligar" sozinho, 
+                    -- depende da biblioteca que você está usando (ex: Fluent, Orion, Rayfield).
+                    -- Geralmente: NomeDaVariavelDoToggle:SetValue(false)
+                end)
+            else
+                print("Selecione uma ilha primeiro!")
+                _G.Teleport = false
+            end
+        end
+    end,
+})
+
+
+
+E:AddSeperator("Travel  Npc");
+for I, e in pairs(replicated.NPCs:GetChildren()) do
+	table.insert(NPCList, e.Name);
+end;
+E:AddDropdown({
+	Title = "Select Npc",
+	Description = "",
+	Values = NPCList,
+	Default = false,
+	Multi = false,
+	Callback = function(I)
+		NPClist = I;
+	end,
+});
+E:AddToggle({
+	Title = "Start Teleport",
+	Description = "Automatic teleport to pos Npcs",
+	Default = false,
+	Callback = function(I)
+		_G.TPNpc = I;
+	end,
+});
+spawn(function()
+	while wait(Sec) do
+		if _G.TPNpc then
+			pcall(function()
+				for I, e in pairs(replicated.NPCs:GetChildren()) do
+					if e.Name == NPClist then
+						_tp(e.HumanoidRootPart.CFrame);
+					end;
+				end;
+			end);
+		end;
+	end;
+end);
+
 
 Y:AddSeperator("Island Stats");
 
@@ -8669,119 +8783,7 @@ task.spawn(function()
     end
 end)
 
-Y:AddSeperator("Travel Worlds");
-Y:AddButton({ Title = "Teleport Sea 1", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("TravelMain");
-	end });
-Y:AddButton({ Title = "Teleport Sea 2", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("TravelDressrosa");
-	end });
-Y:AddButton({ Title = "Teleport Sea 3", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("TravelZou");
-	end });
-Y:AddSeperator("Travel Island")
 
--- Lista de Ilhas
-Location = {}
-for _, e in pairs(workspace._WorldOrigin.Locations:GetChildren()) do
-	table.insert(Location, e.Name)
-end
-
--- Dropdown
-Y:AddDropdown({
-	Title = "Select Island",
-	Description = "",
-	Values = Location,
-	Default = false,
-	Multi = false,
-	Callback = function(I)
-		_G.Island = I
-	end,
-})
-
-
-Y:AddToggle({
-    Title = "Start Teleport",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.Teleport = Value
-        
-        if Value then
-            -- Procurar a ilha selecionada
-            local targetIsland = workspace._WorldOrigin.Locations:FindFirstChild(_G.Island)
-            
-            if targetIsland then
-                spawn(function()
-                    -- 1. Subida Instantânea (700 studs acima de onde você está agora)
-                    Root.CFrame = Root.CFrame * CFrame.new(0, 700, 0)
-                    wait(0.1) -- Pequena pausa para o motor físico processar
-                    
-                    -- 2. Viagem (Mantendo a altura de 700 studs acima do destino)
-                    local destination = targetIsland.CFrame * CFrame.new(0, 700, 0)
-                    
-                    -- Repete o movimento até chegar perto do destino (eixo X e Z)
-                    repeat
-                        wait()
-                        _tp(destination)
-                    until not _G.Teleport or (Root.Position - destination.p).Magnitude < 10
-                    
-                    -- 3. Descida Instantânea (Teleporta para a superfície da ilha)
-                    if _G.Teleport then
-                        Root.CFrame = targetIsland.CFrame * CFrame.new(0, 5, 0) -- 5 studs para não bugar no chão
-                    end
-                    
-                    -- 4. Desligar Automático
-                    _G.Teleport = false
-                    -- Nota: Para o botão visual do menu "desligar" sozinho, 
-                    -- depende da biblioteca que você está usando (ex: Fluent, Orion, Rayfield).
-                    -- Geralmente: NomeDaVariavelDoToggle:SetValue(false)
-                end)
-            else
-                print("Selecione uma ilha primeiro!")
-                _G.Teleport = false
-            end
-        end
-    end,
-})
-
-
-
-Y:AddSeperator("Travel  Npc");
-for I, e in pairs(replicated.NPCs:GetChildren()) do
-	table.insert(NPCList, e.Name);
-end;
-Y:AddDropdown({
-	Title = "Select Npc",
-	Description = "",
-	Values = NPCList,
-	Default = false,
-	Multi = false,
-	Callback = function(I)
-		NPClist = I;
-	end,
-});
-Y:AddToggle({
-	Title = "Start Teleport",
-	Description = "Automatic teleport to pos Npcs",
-	Default = false,
-	Callback = function(I)
-		_G.TPNpc = I;
-	end,
-});
-spawn(function()
-	while wait(Sec) do
-		if _G.TPNpc then
-			pcall(function()
-				for I, e in pairs(replicated.NPCs:GetChildren()) do
-					if e.Name == NPClist then
-						_tp(e.HumanoidRootPart.CFrame);
-					end;
-				end;
-			end);
-		end;
-	end;
-end);
 
 if World2 or World3 then
     Y:AddSeperator("Sea Event")
