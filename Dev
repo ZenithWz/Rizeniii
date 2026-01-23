@@ -2489,13 +2489,14 @@ local y        = V:T("Main","rbxassetid://127561653320876")
 local c        = V:T("Settings","rbxassetid://10734950309")
 
 local x        = V:T("Quests/Boss","rbxassetid://72448332143088")
-local t        = V:T("Sea Events","rbxassetid://96788654458681")
+local l        = V:T("Sea Events","rbxassetid://10734910680")
+local t        = V:T("Island","rbxassetid://96788654458681")
 local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
 
 local VI       = V:T("Visuals And Esp","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
-local l        = V:T("Island","rbxassetid://10734910680")
-local R        = V:T("Get Items And Upgrade","rbxassetid://10709782582")
+
+local R        = V:T("Get Itens And Upgrade","rbxassetid://10709782582")
 local B        = V:T("Raid And Fruit","rbxassetid://10709790875")
 
 -- SECTIONS (somente nomes alterados)
@@ -7295,6 +7296,62 @@ spawn(function()
 end);
 end
 
+
+zu:AddSeperator("Island Stats");
+
+-- Mirage Island
+local MirageParagraph = zu:AddParagraph({
+    Title = "Mirage Island",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Mirage Island") ~= nil
+        MirageParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+-- Kitsune Island
+local KitsuneParagraph = zu:AddParagraph({
+    Title = "Kitsune Island",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace.Map:FindFirstChild("KitsuneIsland") ~= nil
+        KitsuneParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+-- Prehistoric Island
+local PrehistoricParagraph = zu:AddParagraph({
+    Title = "Prehistoric Island",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Prehistoric Island") ~= nil
+        PrehistoricParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+-- Frozen Dimension
+local FrozenParagraph = zu:AddParagraph({
+    Title = "Frozen Dimension",
+    Content = "Status: False"
+})
+
+task.spawn(function()
+    while task.wait(1) do
+        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Frozen Dimension") ~= nil
+        FrozenParagraph:SetContent("Status: " .. tostring(spawned))
+    end
+end)
+
+
 if World3 then
 zu:AddSeperator("Volcanic Magnet");
 -- Configurações de UI e Toggle
@@ -8624,7 +8681,7 @@ E:AddButton({ Title = "Teleport Sea 2", Description = "", Callback = function()
 E:AddButton({ Title = "Teleport Sea 3", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("TravelZou");
 	end });
-Y:AddSeperator("Travel Island")
+E:AddSeperator("Travel Island")
 
 -- Lista de Ilhas
 Location = {}
@@ -8729,59 +8786,6 @@ spawn(function()
 end);
 
 
-Y:AddSeperator("Island Stats");
-
--- Mirage Island
-local MirageParagraph = Y:AddParagraph({
-    Title = "Mirage Island",
-    Content = "Status: False"
-})
-
-task.spawn(function()
-    while task.wait(1) do
-        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Mirage Island") ~= nil
-        MirageParagraph:SetContent("Status: " .. tostring(spawned))
-    end
-end)
-
--- Kitsune Island
-local KitsuneParagraph = Y:AddParagraph({
-    Title = "Kitsune Island",
-    Content = "Status: False"
-})
-
-task.spawn(function()
-    while task.wait(1) do
-        local spawned = game.Workspace.Map:FindFirstChild("KitsuneIsland") ~= nil
-        KitsuneParagraph:SetContent("Status: " .. tostring(spawned))
-    end
-end)
-
--- Prehistoric Island
-local PrehistoricParagraph = Y:AddParagraph({
-    Title = "Prehistoric Island",
-    Content = "Status: False"
-})
-
-task.spawn(function()
-    while task.wait(1) do
-        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Prehistoric Island") ~= nil
-        PrehistoricParagraph:SetContent("Status: " .. tostring(spawned))
-    end
-end)
-
--- Frozen Dimension
-local FrozenParagraph = Y:AddParagraph({
-    Title = "Frozen Dimension",
-    Content = "Status: False"
-})
-
-task.spawn(function()
-    while task.wait(1) do
-        local spawned = game.Workspace._WorldOrigin.Locations:FindFirstChild("Frozen Dimension") ~= nil
-        FrozenParagraph:SetContent("Status: " .. tostring(spawned))
-    end
-end)
 
 
 
