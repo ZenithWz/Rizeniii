@@ -2504,7 +2504,7 @@ local g        = V:T("Shop","rbxassetid://134556077676632")
 local y        = V:T("Main","rbxassetid://127561653320876")
 local c        = V:T("Settings","rbxassetid://10734950309")
 
-local x        = V:T("Quests/Boss","rbxassetid://72448332143088")
+local x        = V:T("Quests/Boss","rbxassetid://10734975692")
 local l        = V:T("Sea Events","rbxassetid://10734910680")
 local t        = V:T("Island","rbxassetid://96788654458681")
 local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
@@ -2512,11 +2512,11 @@ local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
 local VI       = V:T("Visuals And Esp","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
 
-local R        = V:T("Get Itens And Upgrade","rbxassetid://10709782582")
+local R        = V:T("Get Itens And Upgrade","rbxassetid://10734975486")
 local B        = V:T("Raid And Fruit","rbxassetid://10709790875")
 
 -- SECTIONS (somente nomes alterados)
-local b    = y:AddSection("Auto Farm main");
+local b    = y:AddSection("Main");
 
 
 local D    = g:AddSection("Shop, Styles & Accessories");
@@ -2554,7 +2554,7 @@ local ConfigSection = c:AddSection("Manual Save")
 
 
 ConfigSection:AddButton({
-    Title = "Resetar Configurações",
+    Title = "Reset Config",
     Description = "Apaga o ficheiro de save e volta ao padrão",
     Callback = function()
         -- Usa a variável FullPath que foi definida lá no topo do script
@@ -3937,7 +3937,7 @@ b:AddSeperator("Farming")
 b:AddDropdown({
     Title = "Select Weapon",
     Description = "",
-    Values = {"Melee","Sword","Blox Fruit","Gun"},
+    Values = {"Melee","Sword"}, -- Apenas essas duas agora
     Default = "Melee",
     Multi = false,
     Callback = function(I)
@@ -5786,7 +5786,7 @@ end);
 end
 if World2 or World3 then
 -- SECTION BUSO/AURA COLOURS
-outros:AddSeperator("Buso/Aura Colours");
+outros:AddSeperator("Haki Colors");
 
 outros:AddToggle({
     Title = "Teleport Barista Haki",
@@ -8272,117 +8272,48 @@ spawn(function()
 	end;
 end);
 
-E:AddSeperator("Players");
 
--- 1. Cria o Dropdown
-local PlayerDropdown = E:AddDropdown({ 
-    Title = "Select Players",
-    Description = "",
-    Values = {}, -- Começa vazio, pois vamos atualizar já já
-    Default = false,
-    Multi = false,
-    Callback = function(I)
-        _G.PlayersList = I;
-    end,
-});
-
--- 2. Cria a Função de Atualizar
-local function RefreshPlayerList()
-    local NewPlayers = {} 
-    
-    -- Varre os players
-    for I, e in pairs(game:GetService("Players"):GetPlayers()) do
-        if e.Name ~= game.Players.LocalPlayer.Name then 
-            table.insert(NewPlayers, e.Name) 
-        end
-    end
-    
-    -- Atualiza o menu
-    PlayerDropdown:Refresh(NewPlayers, true)
-end
-
--- 3. Cria o Botão (Usa a função acima)
-E:AddButton({
-    Title = "Refresh Player List",
-    Description = "",
-    Callback = RefreshPlayerList
-});
-
--- 4. EXECUTA A FUNÇÃO AUTOMATICAMENTE AGORA!
-task.spawn(RefreshPlayerList)
-
-
-E:AddToggle({
-	Title = "Teleport to Player",
-	Description = "",
-	Default = false,
-	Callback = function(I)
-		_G.TpPly = I;
-		spawn(function()
-			pcall(function()
-				while _G.TpPly do
-					wait();
-					_tp((game:GetService("Players"))[_G.PlayersList].Character.HumanoidRootPart.CFrame);
-				end;
-			end);
-		end);
-	end,
-});
-E:AddToggle({
-	Title = "Spectate Choose Players",
-	Description = "",
-	Default = false,
-	Callback = function(I)
-		SpectatePlys = I;
-		spawn(function()
-			repeat
-				task.wait(.1);
-				workspace.Camera.CameraSubject = ((game:GetService("Players")):FindFirstChild(_G.PlayersList)).Character.Humanoid;
-			until not SpectatePlys;
-			workspace.Camera.CameraSubject = plr.Character.Humanoid;
-		end);
-	end,
-});
 
 E:AddSeperator("Aimbot");
 
 E:AddToggle({
-	Title = "Aimbot Cam Lock",
-	Description = "",
-	Default = false,
-	Callback = function(I)
-		_G.AimCam = I;
-	end,
-});
+    Title = "Aimbot Cam Lock",
+    Description = "",
+    Default = false,
+    Callback = function(I)
+        _G.AimCam = I
+    end,
+})
+
 task.spawn(function()
-	while task.wait(Sec) do
-		pcall(function()
-			if _G.AimCam then
-				local I = workspace.CurrentCamera;
-				closestplayer = function()
-						local I = math.huge;
-						local e = nil;
-						for K, n in next, ply:GetPlayers() do
-							if n ~= plr then
-								if n.Character and (n.Character:FindFirstChild("Head") and (_G.AimCam and n.Character.Humanoid.Health > 0)) then
-									local K = (n.Character.Head.Position - plr.Character.Head.Position).Magnitude;
-									if K < I then
-										I = K;
-										e = n;
-									end;
-								end;
-							end;
-						end;
-						return e;
-					end;
-				repeat
-					task.wait();
-					I.CFrame = CFrame.new(I.CFrame.Position, (closestplayer()).Character.HumanoidRootPart.Position);
-				until _G.AimCam == false or Mag > dist;
-			end;
-		end);
-	end;
-end);
+    while task.wait(Sec) do
+        pcall(function()
+            if _G.AimCam then
+                local cam = workspace.CurrentCamera
+
+                local function closestPlayer()
+                    local closestDist = math.huge
+                    local targetPlayer = nil
+                    for _, player in pairs(game.Players:GetPlayers()) do
+                        if player ~= plr and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 and player.Character:FindFirstChild("HumanoidRootPart") then
+                            local dist = (player.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+                            if dist < closestDist then
+                                closestDist = dist
+                                targetPlayer = player
+                            end
+                        end
+                    end
+                    return targetPlayer
+                end
+
+                local target = closestPlayer()
+                if target then
+                    cam.CFrame = CFrame.new(cam.CFrame.Position, target.Character.HumanoidRootPart.Position)
+                end
+            end
+        end)
+    end
+end)
 
 --==================================================
 -- TOGGLE ÚNICO (PRIMEIRO NO CÓDIGO)
