@@ -4474,6 +4474,100 @@ b:AddToggle({
     end,
 })
 
+-- Toggle Auto Collect Chest Bypass
+b:AddToggle({
+    Title = "Auto Collect Chest Bypass",
+    Description = "",
+    Default = false,
+    Callback = function(I)
+        _G.AutoCollectChests = I
+    end
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- [1] Reset Anti-Kick (continua funcionando sempre)
+task.spawn(function()
+    while task.wait(13) do
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.Health = 0
+        end
+    end
+end)
+
+-- [2] Função de Noclip
+local function toggleNoclip(Toggle)
+    if LocalPlayer.Character then
+        for _, v in pairs(LocalPlayer.Character:GetChildren()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = not Toggle
+            end
+        end
+    end
+end
+
+-- [3] Função de Teleporte Instantâneo
+local function Teleport(Goal)
+    local Character = LocalPlayer.Character
+    if Character and Character:FindFirstChild("HumanoidRootPart") then
+        toggleNoclip(true)
+        Character.HumanoidRootPart.CFrame = CFrame.new(Goal + Vector3.new(0,3,0))
+        task.wait(0.1)
+        toggleNoclip(false)
+    end
+end
+
+-- [4] Busca e Ordenação de Baús
+local UncheckedChests, FirstRun = {}, true
+
+local function getChestsSorted()
+    if FirstRun then
+        FirstRun = false
+        for _, Object in pairs(game:GetDescendants()) do
+            if Object.Name:find("Chest") and Object:IsA("Part") then
+                table.insert(UncheckedChests, Object)
+            end
+        end
+    end
+    
+    local Chests = {}
+    for _, Chest in pairs(UncheckedChests) do
+        if Chest:FindFirstChild("TouchInterest") then
+            table.insert(Chests, Chest)
+        end
+    end
+    
+    -- Ordena do mais próximo para o mais distante
+    table.sort(Chests, function(a, b)
+        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if root then
+            return (root.Position - a.Position).Magnitude < (root.Position - b.Position).Magnitude
+        end
+        return false
+    end)
+    
+    return Chests
+end
+
+-- [5] Loop Principal de Coleta (só ativa quando o toggle estiver ligado)
+task.spawn(function()
+    while task.wait(0.1) do
+        if _G.AutoCollectChests then
+            local Chests = getChestsSorted()
+            if #Chests > 0 then
+                Teleport(Chests[1].Position)
+            end
+        end
+    end
+end)
+
+-- Inicialização automática ao spawn
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(1)
+    -- Já inicia o loop, mas só coleta se o toggle estiver ativo
+end)
+
 -- Botão Auto Collect Berry
 b:AddToggle({
 	Title = "Auto Collect Berry",
