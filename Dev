@@ -2510,7 +2510,7 @@ local outros   = x:AddSection("Farm others");
 
 local A  = t:AddSection("Sea Events")
 local zu = t:AddSection("maritime islands")
-local o = t:AddSection("Configure skills for Sea events")
+
 
 local h    = m:AddSection("Race V2/ V3 / V4");
 
@@ -9051,10 +9051,10 @@ local function GetActiveSkillsList(category, allSkills, saveKey)
 end
 
 if World2 or World3 then
-    o:AddSeperator("Configure Skills for Sea Events")
+    Y:AddSeperator("Configure Skills for Sea Events")
 
     -- [[ MELEE MULTI DROPDOWN ]]
-    o:AddDropdown({
+    Y:AddDropdown({
         Title = "Melee Skills",
         Multi = true,
         Values = {"Z", "X", "C"},
@@ -9069,7 +9069,7 @@ if World2 or World3 then
     })
 
     -- [[ SWORD MULTI DROPDOWN ]]
-    o:AddDropdown({
+    Y:AddDropdown({
         Title = "Sword Skills",
         Multi = true,
         Values = {"Z", "X"},
@@ -9082,7 +9082,7 @@ if World2 or World3 then
     })
 
     -- [[ GUN MULTI DROPDOWN ]]
-    o:AddDropdown({
+    Y:AddDropdown({
         Title = "Gun Skills",
         Multi = true,
         Values = {"Z", "X"},
@@ -9095,7 +9095,7 @@ if World2 or World3 then
     })
 
     -- [[ BLOX FRUIT MULTI DROPDOWN ]]
-    o:AddDropdown({
+    Y:AddDropdown({
         Title = "Blox Fruit Skills",
         Multi = true,
         Values = {"Z", "X", "C", "V", "F"},
