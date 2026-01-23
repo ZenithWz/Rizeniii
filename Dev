@@ -5196,8 +5196,12 @@ T:AddInput({
 
 
 
+outros:AddSeperator("Raid Boss")
 
-
+outros:AddParagraph({
+    Title = "Coming Soon", 
+    Content = "This feature is under development and will be available soon." -- Adicionei um espaço só por segurança, mas vazio deve funcionar
+})
 
 
 
@@ -9234,7 +9238,7 @@ Y:AddButton({ Title = "Teleport Sea 2", Description = "", Callback = function()
 Y:AddButton({ Title = "Teleport Sea 3", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("TravelZou");
 	end });
-Y:AddSeperator("Travel - Island")
+Y:AddSeperator("Travel Island")
 
 -- Lista de Ilhas
 Location = {}
@@ -9244,7 +9248,7 @@ end
 
 -- Dropdown
 Y:AddDropdown({
-	Title = "Select Travelling",
+	Title = "Select Island",
 	Description = "",
 	Values = Location,
 	Default = false,
@@ -9256,7 +9260,7 @@ Y:AddDropdown({
 
 
 Y:AddToggle({
-    Title = "Auto Travel",
+    Title = "Start Teleport",
     Description = "",
     Default = false,
     Callback = function(Value)
@@ -9300,57 +9304,14 @@ Y:AddToggle({
     end,
 })
 
-Y:AddSeperator("Travel - Portal");
-if World1 then
-	Location_Portal = { "Sky", "UnderWater" };
-elseif World2 then
-	Location_Portal = { "SwanRoom", "Cursed Ship" };
-elseif World3 then
-	Location_Portal = {
-			"Castle On The Sea",
-			"Mansion Cafe",
-			"Hydra Teleport",
-			"Canvendish Room",
-			"Temple of Time",
-		};
-end;
-Y:AddDropdown({
-	Title = "Select Portal",
-	Description = "",
-	Values = Location_Portal,
-	Default = false,
-	Multi = false,
-	Callback = function(I)
-		_G.Island_PT = I;
-	end,
-});
-Y:AddButton({ Title = "requestEntrance", Description = "", Callback = function()
-		if _G.Island_PT == "Sky" then
-			replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-7894, 5547, -380));
-		elseif _G.Island_PT == "UnderWater" then
-			replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(61163, 11, 1819));
-		elseif _G.Island_PT == "SwanRoom" then
-			replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(2285, 15, 905));
-		elseif _G.Island_PT == "Cursed Ship" then
-			replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(923, 126, 32852));
-		elseif _G.Island_PT == "Castle On The Sea" then
-			replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5097.93164, 316.447021, -3142.66602, -0.405007899, -4.31682743e-08, .914313197, -1.90943332e-08, 1, 3.8755779e-08, -0.914313197, -1.76180437e-09, -0.405007899));
-		elseif _G.Island_PT == "Mansion Cafe" then
-			replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-12471.169921875, 374.94024658203, -7551.677734375));
-		elseif _G.Island_PT == "Hydra Teleport" then
-			replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5643.4526367188, 1013.0858154297, -340.51025390625));
-		elseif _G.Island_PT == "Canvendish Room" then
-			replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5314.5463867188, 22.562219619751, -127.06755065918));
-		elseif _G.Island_PT == "Temple of Time" then
-			replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28310.0234, 14895.1123, 109.456741, -0.469690144, -2.85620132e-08, -0.882831335, -3.23509219e-08, 1, -1.51411736e-08, .882831335, 2.14487486e-08, -0.469690144));
-		end;
-	end });
-Y:AddSeperator("Travel - NPCs");
+
+
+Y:AddSeperator("Travel  Npc");
 for I, e in pairs(replicated.NPCs:GetChildren()) do
 	table.insert(NPCList, e.Name);
 end;
 Y:AddDropdown({
-	Title = "Select NPCs",
+	Title = "Select Npc",
 	Description = "",
 	Values = NPCList,
 	Default = false,
@@ -9360,7 +9321,7 @@ Y:AddDropdown({
 	end,
 });
 Y:AddToggle({
-	Title = "Auto Tween to NPCs",
+	Title = "Start Teleport",
 	Description = "Automatic teleport to pos Npcs",
 	Default = false,
 	Callback = function(I)
@@ -9381,10 +9342,16 @@ spawn(function()
 	end;
 end);
 p:AddSeperator("Fruits Options");
-local J5 = {};
-local function i5(I)
-	local e = tostring(I);
+
+-- Variáveis Globais de Controle
+_G.SelectedFruitSniper = ""
+_G.FruitSniper = false
+
+-- Função para formatar preço (mantida do seu original)
+local function formatPrice(price)
+	local e = tostring(price);
 	while true do
+		local k
 		e, k = e:gsub("^(-?%d+)(%d%d%d)", "%1,%2");
 		if k == 0 then
 			break;
@@ -9392,70 +9359,82 @@ local function i5(I)
 	end;
 	return e;
 end;
-for I, e in pairs(replicated.Remotes.CommF_:InvokeServer("GetFruits", true)) do
-	if e.OnSale == true then
-		local I = i5(e.Price);
-		local K = e.Name;
-		table.insert(J5, K);
-	end;
-end;
-local C5 = {};
-for I, e in pairs(replicated.Remotes.CommF_:InvokeServer("GetFruits", false)) do
-	if e.OnSale == true then
-		local I = i5(e.Price);
-		local K = e.Name;
-		table.insert(C5, K);
-	end;
-end;
+
+-- Função para pegar apenas o estoque normal
+local function GetNormalStock()
+    local stock = {}
+    local success, fruits = pcall(function() 
+        return replicated.Remotes.CommF_:InvokeServer("GetFruits", false) 
+    end)
+    
+    if success and fruits then
+        for _, e in pairs(fruits) do
+            -- Adiciona todas as frutas existentes no jogo para você poder escolher qual "snipar"
+            table.insert(stock, e.Name)
+        end
+    end
+    table.sort(stock) -- Organiza por ordem alfabética
+    return stock
+end
+
+-- Dropdown para selecionar a fruta do Sniper
 p:AddDropdown({
-	Title = "Select Fruit Stock",
-	Description = "",
-	Values = C5,
+	Title = "Select Fruit to Sniper",
+	Description = "Select fruit to buy automatically when in stock",
+	Values = GetNormalStock(),
 	Default = false,
 	Multi = false,
-	Callback = function(I)
-		_G.SelectFruit = I;
+	Callback = function(val)
+		_G.SelectedFruitSniper = val
 	end,
 });
-p:AddButton({ Title = "Buy Basic Stock", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("PurchaseRawFruit", _G.SelectFruit);
-	end });
-p:AddDropdown({
-	Title = "Select Mirage Fruit",
-	Description = "",
-	Values = J5,
-	Default = false,
-	Multi = false,
-	Callback = function(I)
-		SelectF_Adv = I;
-	end,
-});
-local M5 = {};
-for I, e in pairs(replicated.Remotes.CommF_:InvokeServer("GetFruits", false)) do
-	if e.OnSale == true then
-		local I = i5(e.Price);
-		local K = e.Name;
-		table.insert(M5, K);
-	end;
-end;
-p:AddButton({ Title = "Buy Mirage Stock", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("PurchaseRawFruit", SelectF_Adv);
-	end });
+
+-- Toggle para ativar o Sniper
+p:AddToggle({
+    Title = "Fruit Sniper",
+    Description = "Buys selected fruit automatically when it appears in stock",
+    Default = false,
+    Callback = function(val)
+        _G.FruitSniper = val
+    end,
+})
+
+-- Loop do Sniper Fruit
+spawn(function()
+    while wait(10) do -- Verifica a cada 10 segundos para não dar spam no server
+        if _G.FruitSniper and _G.SelectedFruitSniper ~= "" then
+            pcall(function()
+                local currentStock = replicated.Remotes.CommF_:InvokeServer("GetFruits", false)
+                for _, fruit in pairs(currentStock) do
+                    if fruit.Name == _G.SelectedFruitSniper and fruit.OnSale then
+                        local buySuccess = replicated.Remotes.CommF_:InvokeServer("PurchaseRawFruit", _G.SelectedFruitSniper)
+                        if buySuccess then
+                            V:Notify({
+                                Title = "Fruit Sniper",
+                                Body = "Successfully bought: " .. _G.SelectedFruitSniper,
+                                Duration = 5
+                            })
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+---
+
 p:AddToggle({
     Title = "Auto Random Fruit",
     Description = "Automatic random devil fruit",
-    -- 1. Carrega se o giro automático estava ligado
     Default = GetSetting("AutoRandomFruit_Save", false),
     Callback = function(I)
         _G.Random_Auto = I
-        
-        -- 2. Guarda na memória de salvamento
         _G.SaveData["AutoRandomFruit_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
         SaveSettings()
     end,
 })
+
 spawn(function()
 	while wait(Sec) do
 		pcall(function()
@@ -9465,38 +9444,18 @@ spawn(function()
 		end);
 	end;
 end);
-p:AddToggle({
-	Title = "Auto Drop Fruit",
-	Description = "Automatic drop devil fruit",
-	Default = false,
-	Callback = function(I)
-		_G.DropFruit = I;
-	end,
-});
-spawn(function()
-	while wait(Sec) do
-		if _G.DropFruit then
-			pcall(function()
-				DropFruits();
-			end);
-		end;
-	end;
-end);
+
 p:AddToggle({
     Title = "Auto Store Fruit",
     Description = "Automatic store devil fruit",
-    -- 1. Carrega se o armazenamento automático estava ligado
     Default = GetSetting("AutoStoreFruit_Save", false),
     Callback = function(I)
         _G.StoreF = I
-        
-        -- 2. Guarda na memória de salvamento
         _G.SaveData["AutoStoreFruit_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
         SaveSettings()
     end,
 })
+
 spawn(function()
 	while wait(Sec) do
 		if _G.StoreF then
@@ -9507,28 +9466,24 @@ spawn(function()
 	end;
 end);
 
--- [[ TOGGLE NA UI ]] --
+-- [[ TWEEN FRUIT (MANTIDO) ]] --
 p:AddToggle({
-    Title = "Auto Tween to Fruit",
+    Title = "Auto Collect Fruit",
     Description = "Automatic tween to get devil fruit",
-    -- 1. Carrega o estado salvo
     Default = GetSetting("AutoTweenFruit_Save", false),
     Callback = function(I)
         _G.TwFruits = I
-        
-        -- 2. Guarda na memória de salvamento
         _G.SaveData["AutoTweenFruit_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
         SaveSettings()
     end,
 })
+
 spawn(function()
 	while wait(Sec) do
 		if _G.TwFruits then
 			pcall(function()
 				for I, e in pairs(workspace:GetChildren()) do
-					if string.find(e.Name, "Fruit") then
+					if string.find(e.Name, "Fruit") and e:FindFirstChild("Handle") then
 						_tp(e.Handle.CFrame);
 					end;
 				end;
@@ -9536,36 +9491,12 @@ spawn(function()
 		end;
 	end;
 end);
-p:AddToggle({
-    Title = "Auto Collect Fruit",
-    Description = "Automatic bring devil fruit",
-    -- 1. Carrega o estado salvo ou false por padrão
-    Default = GetSetting("AutoCollectFruit_Save", false),
-    Callback = function(I)
-        _G.InstanceF = I
-        
-        -- 2. Guarda na memória de salvamento
-        _G.SaveData["AutoCollectFruit_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
-        SaveSettings()
-    end,
-})
-spawn(function()
-	while wait(Sec) do
-		if _G.InstanceF then
-			pcall(function()
-				collectFruits(_G.InstanceF);
-			end);
-		end;
-	end;
-end);
--- [[ CONFIGURAÇÃO ]] --
--- Distância máxima para considerar que foi um player que dropou
+
+-- [[ NOTIFICAÇÃO DE SPAWN ]] --
 local DropDistCheck = 15 
 
 p:AddToggle({
-    Title = "Notify Fruit Spawn/Drop",
+    Title = "Notify Fruit Spawn",
     Description = "Notifies and distinguishes spawned vs dropped fruits",
     Default = GetSetting("NotifyFruit_Save", false),
     Callback = function(Value)
@@ -9575,15 +9506,13 @@ p:AddToggle({
     end,
 })
 
--- Listener Global Inteligente
 task.spawn(function()
     workspace.ChildAdded:Connect(function(child)
         if _G.NotifyFruit then
             local success, err = pcall(function()
-                task.wait(0.5) -- Espera carregar propriedades
+                task.wait(0.5)
                 
                 if child.Parent and string.find(child.Name, "Fruit") and (child:IsA("Tool") or child:FindFirstChild("Handle")) then
-                    
                     local fruitPos = nil
                     if child:FindFirstChild("Handle") then
                         fruitPos = child.Handle.Position
@@ -9591,7 +9520,6 @@ task.spawn(function()
                         fruitPos = child.Position
                     end
 
-                    -- Verifica se foi dropada por alguém
                     local isDropped = false
                     local dropperName = "Unknown"
 
@@ -9608,26 +9536,13 @@ task.spawn(function()
                         end
                     end
 
-                    -- Monta a mensagem baseada no resultado
-                    local titleMsg = ""
-                    local bodyMsg = ""
-                    local iconId = ""
-
-                    if isDropped then
-                        titleMsg = "Fruit Dropped!"
-                        bodyMsg = child.Name .. " dropped by " .. dropperName
-                        iconId = "rbxassetid://105245380363493" -- Ícone de aviso/player
-                    else
-                        titleMsg = "Fruit SPAWNED!"
-                        bodyMsg = child.Name .. " spawned on map!"
-                        iconId = "rbxassetid://105245380363493" -- Ícone de fruta/spawn
-                    end
-
-                    -- Envia a notificação
+                    local titleMsg = isDropped and "Fruit Dropped!" or "Fruit SPAWNED!"
+                    local bodyMsg = isDropped and (child.Name .. " dropped by " .. dropperName) or (child.Name .. " spawned on map!")
+                    
                     V:Notify({
                         Title = titleMsg,
                         Body = bodyMsg,
-                        Icon = {iconId},
+                        Icon = {"rbxassetid://0"},
                         Duration = 10
                     })
                 end
@@ -9650,39 +9565,10 @@ D:AddButton({ Title = "Buy Ken", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("KenTalk", "Buy");
 	end });
 D:AddSeperator("Fighting - Style");
-D:AddButton({ Title = "Buy Black Leg", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyBlackLeg");
-	end });
-D:AddButton({ Title = "Buy Electro", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyElectro");
-	end });
-D:AddButton({ Title = "Buy Fishman Karate", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyFishmanKarate");
-	end });
-D:AddButton({ Title = "Buy DragonClaw", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BlackbeardReward", "DragonClaw", "2");
-	end });
-D:AddButton({ Title = "Buy Superhuman", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuySuperhuman");
-	end });
-D:AddButton({ Title = "Buy Death Step", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyDeathStep");
-	end });
-D:AddButton({ Title = "Buy Sharkman Karate", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuySharkmanKarate");
-	end });
-D:AddButton({ Title = "Buy ElectricClaw", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyElectricClaw");
-	end });
-D:AddButton({ Title = "Buy DragonTalon", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyDragonTalon");
-	end });
-D:AddButton({ Title = "Buy Godhuman", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuyGodhuman");
-	end });
-D:AddButton({ Title = "Buy SanguineArt", Description = "", Callback = function()
-		replicated.Remotes.CommF_:InvokeServer("BuySanguineArt");
-	end });
+D:AddParagraph({
+    Title = "Coming Soon", 
+    Content = "This feature is under development and will be available soon." -- Adicionei um espaço só por segurança, mas vazio deve funcionar
+})
 D:AddSeperator("Accessory");
 D:AddButton({ Title = "Buy Tomoe Ring", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("BuyItem", "Tomoe Ring");
