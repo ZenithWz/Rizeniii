@@ -32,32 +32,6 @@ end
 
 LoadSettings() -- Carrega tudo antes de abrir a UI
 
-local Players = game:GetService("Players")
-local CollectionService = game:GetService("CollectionService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local player = Players.LocalPlayer
-local commE = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommE")
-
-local AutoKen = true
-
-local function HasKen()
-    local char = player.Character
-    if not char then return false end
-    return CollectionService:HasTag(char, "Ken")
-end
-
-task.spawn(function()
-    while AutoKen do
-        task.wait(0.2)
-
-        if HasKen() then
-            pcall(function()
-                commE:FireServer("Ken", true)
-            end)
-        end
-    end
-end)
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -4247,85 +4221,7 @@ end)
 
 b:AddSeperator("Other")
 
--- Configuração da Distância Máxima (em studs)
--- Aumente se quiser pegar mobs um pouco mais longe, diminua se quiser bem perto.
-_G.MaxFarmDistance = 325
 
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-b:AddToggle({
-    Title = "Kill Mobs Nearest",
-    Description = "",
-    -- 1. Carrega se estava ligado ou desligado ao abrir o script
-    Default = GetSetting("AutoFarmNear_Save", false),
-    Callback = function(I)
-        _G.AutoFarmNear = I
-        
-        -- 2. Guarda na tabela de configurações para o Save
-        _G.SaveData["AutoFarmNear_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json na pasta do executor
-        SaveSettings()
-    end,
-})
-
-spawn(function()
-    while task.wait() do
-        pcall(function()
-            if not _G.AutoFarmNear then return end
-
-            local Plr = Players.LocalPlayer
-            local Char = Plr.Character or Plr.CharacterAdded:Wait()
-            local Root = Char:FindFirstChild("HumanoidRootPart")
-            if not Root then return end
-
-            local ClosestEnemy = nil
-            local ShortestDistance = math.huge
-
-            -- 🔍 1. Procurar inimigos no WORKSPACE
-            if workspace:FindFirstChild("Enemies") then
-                for _, e in pairs(workspace.Enemies:GetChildren()) do
-                    if e:FindFirstChild("Humanoid")
-                    and e:FindFirstChild("HumanoidRootPart")
-                    and e.Humanoid.Health > 0 then
-                        
-                        local dist = (Root.Position - e.HumanoidRootPart.Position).Magnitude
-                        if dist < ShortestDistance then
-                            ShortestDistance = dist
-                            ClosestEnemy = e
-                        end
-                    end
-                end
-            end
-
-            -- 🔍 2. Procurar inimigos no REPLICATEDSTORAGE
-            if ReplicatedStorage:FindFirstChild("Enemies") then
-                for _, e in pairs(ReplicatedStorage.Enemies:GetChildren()) do
-                    if e:IsA("Model") and e:FindFirstChild("Humanoid") then
-                        -- Se não achou nenhum no workspace ainda
-                        if not ClosestEnemy then
-                            ClosestEnemy = e
-                        end
-                    end
-                end
-            end
-
-            -- ⚔️ 3. Atacar
-            if ClosestEnemy and (not _G.MaxFarmDistance or ShortestDistance <= _G.MaxFarmDistance) then
-                repeat
-                    task.wait()
-                    if G and G.Kill then
-                        G.Kill(ClosestEnemy, _G.AutoFarmNear)
-                    end
-                until not _G.AutoFarmNear
-                or not ClosestEnemy.Parent
-                or (ClosestEnemy:FindFirstChild("Humanoid") and ClosestEnemy.Humanoid.Health <= 0)
-                or not Root.Parent
-            end
-        end)
-    end
-end)
 -- Delay do sistema (pode ajustar)
 local Sec = 0.5
 
@@ -5019,7 +4915,7 @@ spawn(function()
 end)
 end
 if World3 then
-outros:AddSeperator("Dark Dragger + Valkyrie");
+outros:AddSeperator("Rip_Indra");
 outros:AddToggle({
     Title = "Auto Kill Rip Indra",
     Description = "",
@@ -8699,6 +8595,152 @@ E:AddInput({
             desiredJump = num
             applyStats()
         end
+    end
+})
+
+E:AddSeperator("Other");
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CollectionService = game:GetService("CollectionService")
+local player = Players.LocalPlayer
+
+------------------------------
+-- Toggle 1: Dr Auto Active Ken
+------------------------------
+E:AddToggle({
+    Title = "Auto Active Ken",
+    Description = "",
+    Default = false,
+    Callback = function(state)
+        _G.AutoKenToggle = state
+    end
+})
+
+local commE = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommE")
+
+local function HasKen()
+    local char = player.Character
+    if not char then return false end
+    return CollectionService:HasTag(char, "Ken")
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if _G.AutoKenToggle then
+            if HasKen() then
+                pcall(function()
+                    commE:FireServer("Ken", true)
+                end)
+            end
+        end
+    end
+end)
+
+------------------------------
+-- Toggle 2: Dash No Cooldown
+------------------------------
+local DodgeNoCooldownModule = {}
+local OriginalCooldown = 0.4
+local FoundFunction = nil
+local NoDodgeCoroutine = nil
+local DodgeNoCooldownEnabled = false
+
+local function FindDodgeFunction()
+    if FoundFunction then return FoundFunction end
+
+    local character = player.Character
+    if not character then return nil end
+
+    local dodgeScript = character:FindFirstChild("Dodge")
+    if not dodgeScript then return nil end
+
+    for _, v in next, getgc() do
+        if typeof(v) == "function" and getfenv(v).script == dodgeScript then
+            for i, v2 in next, getupvalues(v) do
+                if tostring(v2) == tostring(OriginalCooldown) then
+                    FoundFunction = {func = v, index = i, value = v2}
+                    return FoundFunction
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local function ToggleNoCooldown(enable)
+    if enable then
+        if NoDodgeCoroutine then
+            task.cancel(NoDodgeCoroutine)
+            NoDodgeCoroutine = nil
+        end
+        NoDodgeCoroutine = task.spawn(function()
+            while DodgeNoCooldownEnabled do
+                local dodgeFunc = FindDodgeFunction()
+                if dodgeFunc then
+                    pcall(function()
+                        setupvalue(dodgeFunc.func, dodgeFunc.index, 0)
+                    end)
+                else
+                    for _ = 1, 10 do
+                        task.wait(0.1)
+                        dodgeFunc = FindDodgeFunction()
+                        if dodgeFunc then break end
+                    end
+                end
+                task.wait(0.2)
+            end
+            if FoundFunction then
+                pcall(function()
+                    setupvalue(FoundFunction.func, FoundFunction.index, FoundFunction.value)
+                end)
+            end
+            NoDodgeCoroutine = nil
+        end)
+    else
+        if NoDodgeCoroutine then
+            task.cancel(NoDodgeCoroutine)
+            NoDodgeCoroutine = nil
+        end
+        if FoundFunction then
+            pcall(function()
+                setupvalue(FoundFunction.func, FoundFunction.index, FoundFunction.value)
+            end)
+        end
+    end
+end
+
+local function OnCharacterAdded()
+    FoundFunction = nil
+    for _ = 1, 20 do
+        if player.Character and player.Character:FindFirstChild("Dodge") then
+            break
+        end
+        task.wait(0.1)
+    end
+    if DodgeNoCooldownEnabled then
+        ToggleNoCooldown(true)
+    end
+end
+
+player.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    OnCharacterAdded()
+end)
+
+if player.Character then
+    OnCharacterAdded()
+end
+
+-- Toggle do UI
+E:AddToggle({
+    Title = "Dash No Cooldown",
+    Description = "",
+    Default = false,
+    Callback = function(state)
+        DodgeNoCooldownEnabled = state
+        ToggleNoCooldown(state)
     end
 })
 
