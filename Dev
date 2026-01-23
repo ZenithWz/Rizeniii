@@ -137,13 +137,18 @@ function I:NewWindow(config)
         ScriptFolder = "DiamondHubConfig"
     })
 
-    -- Configuração do Minimizer
+    -- Configuração do Minimizer (Botão de abrir/fechar)
     local Minimizer = Window:NewMinimizer({
         KeyCode = Enum.KeyCode.RightControl
     })
+    
+    -- Botão Mobile Personalizado: Arredondado, um pouco maior e com borda preta fosca
     Minimizer:CreateMobileMinimizer({
-        Image = "rbxassetid://105245380363493", 
-        BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        Image = "rbxassetid://135264546140981", 
+        Size = UDim2.new(0, 50, 0, 50), -- Tamanho levemente aumentado
+        BackgroundColor3 = Color3.fromRGB(25, 25, 25), -- Fundo escuro fosco
+        BorderColor3 = Color3.fromRGB(10, 10, 10), -- Borda preta fosca
+        CornerRadius = UDim.new(0, 12) -- Garantir que fique arredondado
     })
 
     local WindowWrapper = {}
@@ -157,9 +162,8 @@ function I:NewWindow(config)
 
         local TabWrapper = {}
 
-        -- Função para criar Seções (Corrigido para usar AddSection nativo)
+        -- Função para criar Seções
         function TabWrapper:AddSection(sectionName)
-            -- Cria a seção visualmente correta sem Paragraph
             Tab:AddSection(sectionName)
 
             local SectionWrapper = {}
@@ -214,12 +218,12 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Paragraph (Apenas quando solicitado explicitamente)
+            -- Paragraph
             function SectionWrapper:AddParagraph(config)
                 return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")
             end
 
-            -- Separator (Agora usa AddSection para manter o padrão visual)
+            -- Separator
             function SectionWrapper:AddSeperator(text)
                 Tab:AddSection(text)
             end
@@ -229,11 +233,12 @@ function I:NewWindow(config)
                 return Tab:AddParagraph(text, "")
             end
 
-            -- Discord Invite
+            -- Discord Invite (Link e Foto atualizados)
             function SectionWrapper:AddDiscord(title, link)
                 Tab:AddDiscordInvite({
-                    Title = title,
-                    Invite = "https://discord.gg/" .. link,
+                    Title = title or "Diamond Hub Community",
+                    Invite = "https://discord.gg/rnA3pcNWa",
+                    Image = "rbxassetid://135264546140981"
                 })
             end
 
@@ -242,10 +247,10 @@ function I:NewWindow(config)
         return TabWrapper
     end
 
-    -- Notificações
+    -- Notificações (Título fixo como Diamond Hub Notify)
     function WindowWrapper:Notify(config)
         Window:Notify({
-            Title = config.Title or "Diamond Hub",
+            Title = "Diamond Hub Notify",
             Content = config.Content or config.Text or "",
             Duration = config.Duration or 5
         })
@@ -253,6 +258,7 @@ function I:NewWindow(config)
 
     return WindowWrapper
 end
+
 
 
 
