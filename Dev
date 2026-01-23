@@ -137,28 +137,30 @@ function I:NewWindow(config)
         ScriptFolder = "DiamondHubConfig"
     })
 
-local Minimizer = Window:NewMinimizer({
-        KeyCode = Enum.KeyCode.LeftControl
-    })
+local Minimizer = Window:NewMinimizer({  
+    KeyCode = Enum.KeyCode.LeftControl  
+})  
 
-    local MobileButton = Minimizer:CreateMobileMinimizer({
-        Image = "rbxassetid://135264546140981",
-        BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    })
+local MobileButton = Minimizer:CreateMobileMinimizer({  
+    Image = "rbxassetid://135264546140981",  
+    BackgroundColor3 = Color3.fromRGB(30, 30, 30)  
+})  
 
-    if MobileButton then
-        MobileButton.Size = UDim2.new(0, 55, 0, 55)
+if MobileButton then  
+    -- Diminuindo um pouco o tamanho e mantendo quadrado
+    MobileButton.Size = UDim2.new(0, 50, 0, 50)  
 
-        local UICorner = Instance.new("UICorner")
-        UICorner.CornerRadius = UDim.new(1, 0)
-        UICorner.Parent = MobileButton
+    -- Bordas arredondadas suaves
+    local UICorner = Instance.new("UICorner")  
+    UICorner.CornerRadius = UDim.new(0, 8)  -- 8 pixels de arredondamento
+    UICorner.Parent = MobileButton  
 
-        local UIStroke = Instance.new("UIStroke")
-        UIStroke.Thickness = 1.5
-        UIStroke.Color = Color3.fromRGB(0, 0, 0)
-        UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-        UIStroke.Parent = MobileButton
-    end
+    local UIStroke = Instance.new("UIStroke")  
+    UIStroke.Thickness = 1.5  
+    UIStroke.Color = Color3.fromRGB(0, 0, 0)  
+    UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border  
+    UIStroke.Parent = MobileButton  
+end
 
     local WindowWrapper = {}
 
