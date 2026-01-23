@@ -123,27 +123,32 @@ Marines = function()
 Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
+-- [[ 1. CARREGAMENTO DA UI (redz-V5) ]] --
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/redz-V5-remake/main.luau"))()
 
+-- [[ 2. ADAPTADOR (DIAMOND HUB -> REDZ V5) ]] --
 local I = {}
 
 function I:NewWindow(config)
+    -- Cria a janela principal
     local Window = Library:MakeWindow({
         Title = "Diamond Hub ・ By wz7xwz",
         SubTitle = "Blox Fruits",
         ScriptFolder = "DiamondHubConfig"
     })
 
+    -- Configuração do Minimizer (Ícone de abrir/fechar)
     local Minimizer = Window:NewMinimizer({
         KeyCode = Enum.KeyCode.RightControl
     })
     Minimizer:CreateMobileMinimizer({
-        Image = "rbxassetid://135264546140981", 
+        Image = "rbxassetid://135264546140981", -- Sua Logo
         BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     })
 
     local WindowWrapper = {}
 
+    -- Função para criar Abas
     function WindowWrapper:T(name, iconId)
         local Tab = Window:MakeTab({
             Title = name,
@@ -152,11 +157,13 @@ function I:NewWindow(config)
 
         local TabWrapper = {}
 
+        -- Função para criar Seções
         function TabWrapper:AddSection(sectionName)
             Tab:AddSection(sectionName)
 
             local SectionWrapper = {}
 
+            -- Toggle
             function SectionWrapper:AddToggle(config)
                 return Tab:AddToggle({
                     Name = config.Title,
@@ -165,6 +172,7 @@ function I:NewWindow(config)
                 })
             end
 
+            -- Button
             function SectionWrapper:AddButton(config)
                 return Tab:AddButton({
                     Name = config.Title,
@@ -172,6 +180,7 @@ function I:NewWindow(config)
                 })
             end
 
+            -- Dropdown
             function SectionWrapper:AddDropdown(config)
                 return Tab:AddDropdown({
                     Name = config.Title,
@@ -182,6 +191,7 @@ function I:NewWindow(config)
                 })
             end
 
+            -- Slider
             function SectionWrapper:AddSlider(config)
                 return Tab:AddSlider({
                     Name = config.Title,
@@ -193,6 +203,7 @@ function I:NewWindow(config)
                 })
             end
 
+            -- Input
             function SectionWrapper:AddInput(config)
                 return Tab:AddTextBox({
                     Name = config.Title,
@@ -202,16 +213,20 @@ function I:NewWindow(config)
                 })
             end
 
+            -- Convite do Discord Customizado
             function SectionWrapper:AddDiscord()
                 Tab:AddDiscordInvite({
                     Title = "Join Discord Diamond Hub",
-                    Description = "",
+                    Description = "Entre no nosso servidor para atualizações!",
                     Banner = "rbxassetid://135264546140981", 
                     Logo = "rbxassetid://135264546140981",
-                    Invite = "https://discord.gg/tkb6jUY3gC"
+                    Invite = "https://discord.gg/tkb6jUY3gC",
+                    Members = 5000, 
+                    Online = 1200
                 })
             end
 
+            -- Outros utilitários
             function SectionWrapper:AddLabel(text)
                 return Tab:AddParagraph(text, "")
             end
@@ -225,6 +240,7 @@ function I:NewWindow(config)
         return TabWrapper
     end
 
+    -- Notificações alteradas para: Diamond Hub Notify
     function WindowWrapper:Notify(config)
         Window:Notify({
             Title = "Diamond Hub Notify",
@@ -235,6 +251,8 @@ function I:NewWindow(config)
 
     return WindowWrapper
 end
+
+
 
 
 
