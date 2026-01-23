@@ -123,32 +123,27 @@ Marines = function()
 Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
--- [[ 1. CARREGAMENTO DA NOVA UI (redz-V5) ]] --
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/redz-V5-remake/main.luau"))()
 
--- [[ 2. ADAPTADOR (DIAMOND HUB -> REDZ V5) ]] --
 local I = {}
 
 function I:NewWindow(config)
-    -- Cria a janela principal com as novas credenciais
     local Window = Library:MakeWindow({
         Title = "Diamond Hub ・ By wz7xwz",
         SubTitle = "Blox Fruits",
         ScriptFolder = "DiamondHubConfig"
     })
 
-    -- Configuração do Minimizer
     local Minimizer = Window:NewMinimizer({
         KeyCode = Enum.KeyCode.RightControl
     })
     Minimizer:CreateMobileMinimizer({
-        Image = "rbxassetid://105245380363493", 
+        Image = "rbxassetid://135264546140981", 
         BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     })
 
     local WindowWrapper = {}
 
-    -- Função para criar Abas
     function WindowWrapper:T(name, iconId)
         local Tab = Window:MakeTab({
             Title = name,
@@ -157,14 +152,11 @@ function I:NewWindow(config)
 
         local TabWrapper = {}
 
-        -- Função para criar Seções (Corrigido para usar AddSection nativo)
         function TabWrapper:AddSection(sectionName)
-            -- Cria a seção visualmente correta sem Paragraph
             Tab:AddSection(sectionName)
 
             local SectionWrapper = {}
 
-            -- Toggle (Interruptor)
             function SectionWrapper:AddToggle(config)
                 return Tab:AddToggle({
                     Name = config.Title,
@@ -173,7 +165,6 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Button (Botão)
             function SectionWrapper:AddButton(config)
                 return Tab:AddButton({
                     Name = config.Title,
@@ -181,7 +172,6 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Dropdown
             function SectionWrapper:AddDropdown(config)
                 return Tab:AddDropdown({
                     Name = config.Title,
@@ -192,7 +182,6 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Slider
             function SectionWrapper:AddSlider(config)
                 return Tab:AddSlider({
                     Name = config.Title,
@@ -204,7 +193,6 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Input
             function SectionWrapper:AddInput(config)
                 return Tab:AddTextBox({
                     Name = config.Title,
@@ -214,27 +202,22 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Paragraph (Apenas quando solicitado explicitamente)
-            function SectionWrapper:AddParagraph(config)
-                return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")
+            function SectionWrapper:AddDiscord()
+                Tab:AddDiscordInvite({
+                    Title = "Join Discord Diamond Hub",
+                    Description = "",
+                    Banner = "rbxassetid://135264546140981", 
+                    Logo = "rbxassetid://135264546140981",
+                    Invite = "https://discord.gg/tkb6jUY3gC"
+                })
             end
 
-            -- Separator (Agora usa AddSection para manter o padrão visual)
-            function SectionWrapper:AddSeperator(text)
-                Tab:AddSection(text)
-            end
-            
-            -- Label
             function SectionWrapper:AddLabel(text)
                 return Tab:AddParagraph(text, "")
             end
 
-            -- Discord Invite
-            function SectionWrapper:AddDiscord(title, link)
-                Tab:AddDiscordInvite({
-                    Title = title,
-                    Invite = "https://discord.gg/" .. link,
-                })
+            function SectionWrapper:AddParagraph(config)
+                return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")
             end
 
             return SectionWrapper
@@ -242,10 +225,9 @@ function I:NewWindow(config)
         return TabWrapper
     end
 
-    -- Notificações
     function WindowWrapper:Notify(config)
         Window:Notify({
-            Title = config.Title or "Diamond Hub",
+            Title = "Diamond Hub Notify",
             Content = config.Content or config.Text or "",
             Duration = config.Duration or 5
         })
