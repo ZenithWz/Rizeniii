@@ -1211,7 +1211,6 @@ Hop = function()
 			end;
 		end);
 	end;
-local plr = game.Players.LocalPlayer
 local C = Instance.new("Part", workspace);
 C.Size = Vector3.new(1, 1, 1);
 C.Name = "Rip_Indra";
@@ -1222,92 +1221,137 @@ C.Transparency = 1;
 
 local M = workspace:FindFirstChild(C.Name);
 if M and M ~= C then
-    M:Destroy();
+	M:Destroy();
 end;
 
--- Controle de Farm/Colisão
+-- Loop de controle do Farm
 task.spawn(function()
-    while task.wait() do
-        if C and C.Parent == workspace then
-            getgenv().OnFarm = shouldTween and true or false
-        else
-            getgenv().OnFarm = false
-        end
-    end
+	while task.wait() do
+		if C and C.Parent == workspace then
+			if shouldTween then
+				(getgenv()).OnFarm = true;
+			else
+				(getgenv()).OnFarm = false;
+			end;
+		else
+			(getgenv()).OnFarm = false;
+		end;
+	end;
 end);
 
+-- Loop que faz o Personagem seguir a Peça C
 task.spawn(function()
-    repeat task.wait() until plr.Character and plr.Character:FindFirstChild("HumanoidRootPart");
-    C.CFrame = plr.Character.HumanoidRootPart.CFrame;
+	local I = game.Players.LocalPlayer;
+	repeat task.wait() until I.Character and I.Character.PrimaryPart;
 
-    while task.wait() do
-        pcall(function()
-            local char = plr.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            
-            if getgenv().OnFarm and hrp then
-                -- Grudar o player na peça C
-                if (hrp.Position - C.Position).Magnitude <= 300 then
-                    hrp.CFrame = C.CFrame
-                else
-                    C.CFrame = hrp.CFrame
-                end
-                
-                -- Desativar Colisões
-                for _, v in pairs(char:GetChildren()) do
-                    if v:IsA("BasePart") then v.CanCollide = false end
-                end
-            else
-                -- Reativar Colisões se não estiver em farm
-                if char then
-                    for _, v in pairs(char:GetChildren()) do
-                        if v:IsA("BasePart") then v.CanCollide = true end
-                    end
-                end
-            end
-        end)
-    end
+	C.CFrame = I.Character.PrimaryPart.CFrame;
+
+	while task.wait() do
+		pcall(function()
+			if (getgenv()).OnFarm then
+				if C and C.Parent == workspace then
+					local e = I.Character and I.Character.PrimaryPart;
+					if e and (e.Position - C.Position).Magnitude <= 200 then
+						e.CFrame = C.CFrame;
+					else
+						C.CFrame = e.CFrame;
+					end;
+				end;
+
+				local e = I.Character;
+				if e then
+					for _, v in pairs(e:GetChildren()) do
+						if v:IsA("BasePart") then
+							v.CanCollide = false;
+						end;
+					end;
+				end;
+			else
+				local e = I.Character;
+				if e then
+					for _, v in pairs(e:GetChildren()) do
+						if v:IsA("BasePart") then
+							v.CanCollide = true;
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
 end);
 
 -- =======================
--- CONFIGURAÇÕES DE VELOCIDADE
+-- TWEEN COM SISTEMA DE ALTURA (SKY BRIDGE)
 -- =======================
-getgenv().TweenSpeedFar = 370
-getgenv().TweenSpeedNear = 600
 
-_tp = function(targetCFrame)
-    local char = plr.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    
-    shouldTween = true
-    getgenv().OnFarm = false -- Pausa o farm para focar no movimento
-    
-    -- Função interna para criar e esperar o Tween
-    local function move(targetPos)
-        if not shouldTween then return end
-        local dist = (C.Position - targetPos.Position).Magnitude
-        local speed = dist <= 15 and getgenv().TweenSpeedNear or getgenv().TweenSpeedFar
-        
-        local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)
-        local tween = game:GetService("TweenService"):Create(C, info, {CFrame = targetPos})
-        
-        tween:Play()
-        tween.Completed:Wait()
+getgenv().TweenSpeedFar = 370   
+getgenv().TweenSpeedNear = 600  
+
+_tp = function(I)
+    local plr = game.Players.LocalPlayer
+    local e = plr.Character;
+    if not e or not e:FindFirstChild("HumanoidRootPart") then return; end;
+
+    local HRP = e.HumanoidRootPart;  
+    local targetPos = I.p
+    local currentPos = C.Position
+    local dist = (targetPos - currentPos).Magnitude  
+
+    -- ===============================================================
+    -- SE ESTIVER PERTO (FARMANDO), NÃO SOBE 700. VAI DIRETO.
+    -- Isso evita o boneco ficar pulando enquanto mata o mob.
+    -- ===============================================================
+    if dist < 50 then
+        shouldTween = true
+        getgenv().OnFarm = false
+        C.CFrame = I
+        task.wait(0.1)
+        getgenv().OnFarm = true
+        return
     end
 
-    -- [1] SUBIR: 700 studs acima da posição atual
-    local flyHeight = 700
-    local startUp = CFrame.new(C.Position.X, targetCFrame.Y + flyHeight, C.Position.Z)
-    move(startUp)
+    -- ===============================================================
+    -- SE FOR LONGE, ATIVA O SISTEMA DE ALTURA
+    -- ===============================================================
+    shouldTween = true  
+    getgenv().OnFarm = false  
 
-    -- [2] IR PARA O ALVO: Mantendo a altura de 700 studs
-    local skyTarget = CFrame.new(targetCFrame.X, targetCFrame.Y + flyHeight, targetCFrame.Z)
-    move(skyTarget)
+    if HRP.Anchored then HRP.Anchored = false end  
 
-    -- [3] DESCER: Para o destino final
-    move(targetCFrame)
+    -- 1. SOBE 700 NO Y INSTANTÂNEO
+    C.CFrame = C.CFrame * CFrame.new(0, 700, 0)
+    task.wait(0.05)
 
-    getgenv().OnFarm = true
+    -- 2. AJUSTA VELOCIDADE E TWEEN NA ALTURA
+    local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 370)
+    local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)  
+    
+    -- Calcula o destino mantendo a altura de 700 studs
+    local skyTarget = CFrame.new(targetPos.X, currentPos.Y + 700, targetPos.Z)
+    local tween = game:GetService("TweenService"):Create(C, info, { CFrame = skyTarget })  
+
+    -- Caso esteja sentado  
+    if e.Humanoid.Sit == true then  
+        C.CFrame = CFrame.new(C.Position.X, skyTarget.Y, C.Position.Z)  
+    end  
+
+    tween:Play()  
+
+    -- Monitora o Tween
+    while tween.PlaybackState == Enum.PlaybackState.Playing do  
+        if not shouldTween then  
+            tween:Cancel()  
+            break  
+        end  
+        task.wait()  
+    end  
+
+    -- 3. CHEGOU NO DESTINO? DESCE INSTANTÂNEO PARA A POSIÇÃO REAL
+    if shouldTween then
+        C.CFrame = I
+    end
+
+    getgenv().OnFarm = true  
 end
 
 TeleportToTarget = function(I)
@@ -1315,7 +1359,7 @@ TeleportToTarget = function(I)
 end
 
 notween = function(I)
-    plr.Character.HumanoidRootPart.CFrame = I
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = I
 end
 
 
