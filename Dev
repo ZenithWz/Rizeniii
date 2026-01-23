@@ -130,28 +130,25 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlred
 local I = {}
 
 function I:NewWindow(config)
+    -- Cria a janela principal com as novas credenciais
     local Window = Library:MakeWindow({
         Title = "Diamond Hub ・ By wz7xwz",
         SubTitle = "Blox Fruits",
         ScriptFolder = "DiamondHubConfig"
     })
 
-    -- [[ MINIMIZER PERSONALIZADO ]] --
+    -- Configuração do Minimizer
     local Minimizer = Window:NewMinimizer({
         KeyCode = Enum.KeyCode.RightControl
     })
-
     Minimizer:CreateMobileMinimizer({
-        Image = "rbxassetid://135264546140981",
-        Size = UDim2.fromOffset(64, 64), -- um pouco maior
-        BackgroundColor3 = Color3.fromRGB(20, 20, 20),
-        CornerRadius = UDim.new(1, 0), -- totalmente arredondado
-        StrokeColor = Color3.fromRGB(0, 0, 0), -- borda preta fosca
-        StrokeThickness = 1 -- borda fina
+        Image = "rbxassetid://105245380363493", 
+        BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     })
 
     local WindowWrapper = {}
 
+    -- Função para criar Abas
     function WindowWrapper:T(name, iconId)
         local Tab = Window:MakeTab({
             Title = name,
@@ -160,11 +157,14 @@ function I:NewWindow(config)
 
         local TabWrapper = {}
 
+        -- Função para criar Seções (Corrigido para usar AddSection nativo)
         function TabWrapper:AddSection(sectionName)
+            -- Cria a seção visualmente correta sem Paragraph
             Tab:AddSection(sectionName)
 
             local SectionWrapper = {}
 
+            -- Toggle (Interruptor)
             function SectionWrapper:AddToggle(config)
                 return Tab:AddToggle({
                     Name = config.Title,
@@ -173,6 +173,7 @@ function I:NewWindow(config)
                 })
             end
 
+            -- Button (Botão)
             function SectionWrapper:AddButton(config)
                 return Tab:AddButton({
                     Name = config.Title,
@@ -180,6 +181,7 @@ function I:NewWindow(config)
                 })
             end
 
+            -- Dropdown
             function SectionWrapper:AddDropdown(config)
                 return Tab:AddDropdown({
                     Name = config.Title,
@@ -190,6 +192,7 @@ function I:NewWindow(config)
                 })
             end
 
+            -- Slider
             function SectionWrapper:AddSlider(config)
                 return Tab:AddSlider({
                     Name = config.Title,
@@ -201,6 +204,7 @@ function I:NewWindow(config)
                 })
             end
 
+            -- Input
             function SectionWrapper:AddInput(config)
                 return Tab:AddTextBox({
                     Name = config.Title,
@@ -210,27 +214,26 @@ function I:NewWindow(config)
                 })
             end
 
+            -- Paragraph (Apenas quando solicitado explicitamente)
             function SectionWrapper:AddParagraph(config)
-                return Tab:AddParagraph(
-                    config.Title or "Info",
-                    config.Desc or config.Content or ""
-                )
+                return Tab:AddParagraph(config.Title or "Info", config.Desc or config.Content or "")
             end
 
+            -- Separator (Agora usa AddSection para manter o padrão visual)
             function SectionWrapper:AddSeperator(text)
                 Tab:AddSection(text)
             end
             
+            -- Label
             function SectionWrapper:AddLabel(text)
                 return Tab:AddParagraph(text, "")
             end
 
-            -- [[ DISCORD FIXO ]] --
-            function SectionWrapper:AddDiscord(title)
+            -- Discord Invite
+            function SectionWrapper:AddDiscord(title, link)
                 Tab:AddDiscordInvite({
                     Title = title,
-                    Invite = "https://discord.gg/rnA3pcNWa",
-                    Image = "rbxassetid://135264546140981"
+                    Invite = "https://discord.gg/" .. link,
                 })
             end
 
@@ -239,10 +242,10 @@ function I:NewWindow(config)
         return TabWrapper
     end
 
-    -- [[ NOTIFICAÇÕES PADRÃO ]] --
+    -- Notificações
     function WindowWrapper:Notify(config)
         Window:Notify({
-            Title = "Diamond Hub Notify",
+            Title = config.Title or "Diamond Hub",
             Content = config.Content or config.Text or "",
             Duration = config.Duration or 5
         })
@@ -2485,7 +2488,7 @@ local g        = V:T("Shop","rbxassetid://134556077676632")
 local y        = V:T("Main","rbxassetid://127561653320876")
 local c        = V:T("Settings","rbxassetid://10734950309")
 
-local x        = V:T("Quests/Boss","rbxassetid://10734975692")
+local x        = V:T("Quests/Boss","rbxassetid://72448332143088")
 local l        = V:T("Sea Events","rbxassetid://10734910680")
 local t        = V:T("Island","rbxassetid://96788654458681")
 local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
@@ -2493,11 +2496,11 @@ local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
 local VI       = V:T("Visuals And Esp","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
 
-local R        = V:T("Get Itens And Upgrade","rbxassetid://10734975486")
+local R        = V:T("Get Itens And Upgrade","rbxassetid://10709782582")
 local B        = V:T("Raid And Fruit","rbxassetid://10709790875")
 
 -- SECTIONS (somente nomes alterados)
-local b    = y:AddSection("Main");
+local b    = y:AddSection("Auto Farm main");
 
 
 local D    = g:AddSection("Shop, Styles & Accessories");
