@@ -148,7 +148,7 @@ local MobileButton = Minimizer:CreateMobileMinimizer({
 
 if MobileButton then  
     -- Diminuindo um pouco o tamanho e mantendo quadrado
-    MobileButton.Size = UDim2.new(0, 50, 0, 50)  
+    MobileButton.Size = UDim2.new(0, 47, 0, 47)  
 
     -- Bordas arredondadas suaves
     local UICorner = Instance.new("UICorner")  
@@ -3874,7 +3874,7 @@ task.spawn(function()
 end)
 
 
-Discord_Info:AddDiscord("Diamond Hub Discord", "tkb6jUY3gC")
+Discord_Info:AddDiscord("Diamond Hub Discord", "6EFa3gfCa")
 
 Discord_Info:AddSeperator("Server  Status");
 
@@ -3931,19 +3931,7 @@ local PlaceInfo = Discord_Info:AddParagraph({
 PlaceInfo:SetDesc("Current PlaceId: " .. tostring(game.PlaceId))
 
 
-Discord_Info:AddSeperator("information")
 
-Discord_Info:AddParagraph({
-    Title = "Script Information",
-    Content = [[Credits to Astral Hub for the reference to 
-the base structure, used with the developer's permission.
-The project has been extensively modified, reworked, and expanded with new systems.]]
-})
-
-Discord_Info:AddParagraph({
-    Title = "Thank you X2Velaric and x2Moodz", 
-    Content = "ﾠ" -- Adicionei um espaço só por segurança, mas vazio deve funcionar
-})
 
 b:AddSeperator("Farming")
 b:AddDropdown({
