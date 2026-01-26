@@ -5287,7 +5287,7 @@ outros:AddToggle({
 -- Toggles da UI
 outros:AddToggle({
     Title = "Auto Farm Tyrant Of The Skies",
-    Description = "",
+    Description = "Prioridade: Mobs > Vasos (Só com 4 Olhos)",
     Default = false,
     Callback = function(Value)
         _G.AutoTyrant = Value
@@ -5336,7 +5336,7 @@ local function GetEyesCount()
     return count
 end
 
--- Skills de Área com Filtro de Itens Kitsune
+-- Skills com Filtro Kitsune
 local function UseAllCategorySkills()
     local VirtualInputManager = game:GetService("VirtualInputManager")
     local VirtualUser = game:GetService("VirtualUser")
@@ -5346,13 +5346,12 @@ local function UseAllCategorySkills()
     for _, toolType in ipairs(categories) do
         local tool = nil
         for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-            -- Filtro: Se o item tiver 'Kitsune' no nome, ele ignora e passa para o próximo
+            -- Filtro rigoroso para não pegar itens Kitsune
             if v:IsA("Tool") and v.ToolTip == toolType and not string.find(v.Name, "Kitsune") then 
                 tool = v 
                 break 
             end
         end
-        
         if tool then
             game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
             for i = 1, 3 do
@@ -5379,87 +5378,89 @@ spawn(function()
                 local boss = workspace.Enemies:FindFirstChild("Tyrant of the Skies")
                 local eyes = GetEyesCount()
 
-                -- [1] PRIORIDADE: BOSS
+                -- [1] PRIORIDADE MÁXIMA: BOSS
                 if boss and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
                     _tp(boss.HumanoidRootPart.CFrame * CFrame.new(0, _G.MobHeight, 0))
                     EquipWeapon(_G.SelectWeapon)
                     _G.Kill(boss, true)
 
-                -- [2] PRIORIDADE: QUEBRAR VASOS
-                elseif eyes > 0 then
-                    local targetsty = {
-                        CFrame.new(-16335.1, 158.1, 1465.6), CFrame.new(-16288.6, 158.1, 1470.3),
-                        CFrame.new(-16258.0, 156.7, 1461.4), CFrame.new(-16212.4, 158.1, 1466.3),
-                        CFrame.new(-16335.0, 159.3, 1324.8), CFrame.new(-16286.0, 155.9, 1323.8),
-                        CFrame.new(-16250.3, 159.3, 1316.3)
-                    }
-                    
-                    local pos = targetsty[VaseIndex]
-                    if pos then
-                        local distance = (char.HumanoidRootPart.Position - pos.Position).Magnitude
-                        
-                        -- Se estiver longe (foi empurrado), volta usando TP
-                        if distance > 15 then
-                            _tp(pos)
-                        else
-                            -- Se estiver perto, ataca sem ancorar
-                            if _G.UseSkullSummon then
-                                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("LoadItem", "Skull Guitar")
-                                EquipWeapon("Skull Guitar")
-                                local guitar = char:FindFirstChild("Skull Guitar")
-                                if guitar and guitar:FindFirstChild("RemoteEvent") then
-                                    guitar.RemoteEvent:FireServer("TAP", pos.Position)
-                                    game:GetService("ReplicatedStorage").Remotes.Validator2:FireServer(8359618, 0)
-                                end
-                            else
-                                UseAllCategorySkills()
-                            end
-                            
-                            task.wait(0.2)
-                            VaseIndex = (VaseIndex % #targetsty) + 1
-                        end
-                    end
-
-                -- [3] PRIORIDADE: FARM NORMAL / QUEST
+                -- [2] PRIORIDADE MÉDIA: FARM DE QUEST / MOBS (Se não tiver boss)
+                -- Só sai daqui se não houver inimigos vivos e os olhos estiverem prontos
                 else
                     local TargetData = GetTargetByLevel()
                     local hasQuest = plr.PlayerGui.Main.Quest.Visible
-
-                    if _G.AcceptQuestTyrant and not hasQuest then
-                        if (char.HumanoidRootPart.Position - TargetData.QuestPos.Position).Magnitude <= 5 then
-                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(TargetData.QuestArgs))
-                        else
-                            _tp(TargetData.QuestPos)
-                        end
-                    else
-                        local closestEnemy = nil
-                        local shortestDistance = math.huge
-                        local AllMobs = {"Skull Slayer", "Serpent Hunter", "Isle Champion", "Sun-kissed Warrior", "Island Boy", "Isle Outlaw"}
-                        
-                        for _, v in pairs(workspace.Enemies:GetChildren()) do
-                            if table.find(AllMobs, v.Name) and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
-                                local dist = (char.HumanoidRootPart.Position - v.HumanoidRootPart.Position).Magnitude
-                                if dist < shortestDistance then
-                                    shortestDistance = dist
-                                    closestEnemy = v
-                                end
+                    
+                    -- Busca inimigos próximos primeiro
+                    local closestEnemy = nil
+                    local shortestDistance = math.huge
+                    local AllMobs = {"Skull Slayer", "Serpent Hunter", "Isle Champion", "Sun-kissed Warrior", "Island Boy", "Isle Outlaw"}
+                    
+                    for _, v in pairs(workspace.Enemies:GetChildren()) do
+                        if table.find(AllMobs, v.Name) and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+                            local dist = (char.HumanoidRootPart.Position - v.HumanoidRootPart.Position).Magnitude
+                            if dist < shortestDistance then
+                                shortestDistance = dist
+                                closestEnemy = v
                             end
                         end
+                    end
 
-                        if closestEnemy then
-                            -- Ataca sem usar Anchor
+                    -- Se houver inimigos ou precisar pegar quest, foca neles antes dos vasos
+                    if (closestEnemy) or (not hasQuest and _G.AcceptQuestTyrant) then
+                        if _G.AcceptQuestTyrant and not hasQuest then
+                            if (char.HumanoidRootPart.Position - TargetData.QuestPos.Position).Magnitude <= 5 then
+                                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(TargetData.QuestArgs))
+                            else
+                                _tp(TargetData.QuestPos)
+                            end
+                        elseif closestEnemy then
                             _tp(closestEnemy.HumanoidRootPart.CFrame * CFrame.new(0, _G.MobHeight, 0))
                             EquipWeapon(_G.SelectWeapon)
                             _G.Kill(closestEnemy, true)
-                        else
-                            _tp(TargetData.FarmPos)
                         end
+
+                    -- [3] PRIORIDADE BAIXA: QUEBRAR VASOS (SÓ SE TIVER 4 OLHOS ACESOS)
+                    elseif eyes >= 4 then
+                        local targetsty = {
+                            CFrame.new(-16335.1, 158.1, 1465.6), CFrame.new(-16288.6, 158.1, 1470.3),
+                            CFrame.new(-16258.0, 156.7, 1461.4), CFrame.new(-16212.4, 158.1, 1466.3),
+                            CFrame.new(-16335.0, 159.3, 1324.8), CFrame.new(-16286.0, 155.9, 1323.8),
+                            CFrame.new(-16250.3, 159.3, 1316.3)
+                        }
+                        
+                        local pos = targetsty[VaseIndex]
+                        if pos then
+                            local distToVase = (char.HumanoidRootPart.Position - pos.Position).Magnitude
+                            
+                            -- Se o ataque lançar pra longe, volta pelo _tp
+                            if distToVase > 15 then
+                                _tp(pos)
+                            else
+                                if _G.UseSkullSummon then
+                                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("LoadItem", "Skull Guitar")
+                                    EquipWeapon("Skull Guitar")
+                                    local guitar = char:FindFirstChild("Skull Guitar")
+                                    if guitar and guitar:FindFirstChild("RemoteEvent") then
+                                        guitar.RemoteEvent:FireServer("TAP", pos.Position)
+                                        game:GetService("ReplicatedStorage").Remotes.Validator2:FireServer(8359618, 0)
+                                    end
+                                else
+                                    UseAllCategorySkills()
+                                end
+                                task.wait(0.2)
+                                VaseIndex = (VaseIndex % #targetsty) + 1
+                            end
+                        end
+                    else
+                        -- Caso não tenha mob e nem 4 olhos, fica no FarmPos aguardando spawn
+                        _tp(TargetData.FarmPos)
                     end
                 end
             end)
         end
     end
 end)
+
 
 
 
