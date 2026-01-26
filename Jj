@@ -1344,7 +1344,6 @@ getgenv().notween = TP
 getgenv().StopTween = StopTween
 
 
-
 function BTP(I)
 	local e = game.Players.LocalPlayer;
 	local K = e.Character.HumanoidRootPart;
@@ -4922,98 +4921,8 @@ spawn(function()
     end
 end)
 end
-if World3 then
-outros:AddSeperator("Rip_Indra");
-outros:AddToggle({
-    Title = "Auto Kill Rip Indra",
-    Description = "",
-    -- 1. Carrega se estava ligado ou não
-    Default = GetSetting("AutoRipIndra_Save", false),
-    Callback = function(I)
-        _G.AutoRipIngay = I
-        
-        -- 2. Salva na tabela
-        _G.SaveData["AutoRipIndra_Save"] = I
-        
-        -- 3. Grava no arquivo Settings.json
-        SaveSettings()
-    end,
-})
 
-spawn(function()
-	while wait(Sec) do
-		pcall(function()
-			if _G.AutoRipIngay then
-				local I = GetConnectionEnemies("rip_indra");
-				if not GetWP("Dark Dagger") or not GetIn("Valkyrie") and I then
-					repeat
-						wait();
-						G.Kill(I, _G.AutoRipIngay);
-					until not _G.AutoRipIngay or not I.Parent or I.Humanoid.Health <= 0;
-				else
-					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5097.93164, 316.447021, -3142.66602, -0.405007899, -4.31682743e-08, .914313197, -1.90943332e-08, 1, 3.8755779e-08, -0.914313197, -1.76180437e-09, -0.405007899));
-					wait(.1);
-					_tp(CFrame.new(-5344.822265625, 423.98541259766, -2725.0930175781));
-				end;
-			end;
-		end);
-	end;
-end);
-outros:AddToggle({
-    Title = "Auto Active Cores",
-    Description = "",
-    -- 1. Carrega o estado salvo ou false por padrão
-    Default = GetSetting("AutoActiveCores_Save", false),
-    Callback = function(I)
-        _G.AutoUnHaki = I
-        
-        -- 2. Guarda na tabela de salvamento
-        _G.SaveData["AutoActiveCores_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
-        SaveSettings()
-    end,
-})
 
-AuraSkin = function(I)
-		local e = { [1] = { StorageName = I, Type = "AuraSkin", Context = "Equip" } };
-		(((replicated:WaitForChild("Modules")):WaitForChild("Net")):WaitForChild("RF/FruitCustomizerRF")):InvokeServer(unpack(e));
-	end;
-VaildColor = function(I)
-		if I and I.BrickColor then
-			return tostring(I.BrickColor) == "Lime green";
-		end;
-	end;
-HakiCalculate = function(I)
-		local e = { ["Really red"] = "Pure Red", Oyster = "Snow White", ["Hot pink"] = "Winter Sky" };
-		if I and I.BrickColor then
-			return e[tostring(I.BrickColor)];
-		end;
-	end;
-spawn(function()
-	while wait(Sec) do
-		if _G.AutoUnHaki then
-			pcall(function()
-				local I = workspace.Map["Boat Castle"]:FindFirstChild("Summoner");
-				if I and I:FindFirstChild("Circle") then
-					for I, e in pairs((I:FindFirstChild("Circle")):GetChildren()) do
-						if e.Name == "Part" then
-							local I = e:FindFirstChild("Part");
-							if VaildColor(I) == false then
-								AuraSkin(HakiCalculate(e));
-								repeat
-									wait();
-									_tp(e.CFrame);
-								until VaildColor(I) == true or not _G.AutoUnHaki;
-							end;
-						end;
-					end;
-				end;
-			end);
-		end;
-	end;
-end);
-end
 T:AddSeperator("Settings");
 
 
@@ -5201,12 +5110,510 @@ T:AddInput({
 
 outros:AddSeperator("Raid Boss")
 
-outros:AddParagraph({
-    Title = "Coming Soon", 
-    Content = "This feature is under development and will be available soon." -- Adicionei um espaço só por segurança, mas vazio deve funcionar
+
+outros:AddToggle({
+	Title = "Auto Elite Hunter",
+	Description = "",
+	-- 1. Carrega o estado salvo ou false por padrão
+	Default = GetSetting("AutoEliteQuest_Save", false),
+	Callback = function(I)
+		_G.FarmEliteHunt = I
+        
+        -- 2. Guarda na tabela de salvamento
+        _G.SaveData["AutoEliteQuest_Save"] = I
+        
+        -- 3. Salva no arquivo Settings.json
+        SaveSettings()
+	end,
+})
+spawn(function()
+	while wait(Sec) do
+		pcall(function()
+			if _G.FarmEliteHunt then
+				if plr.PlayerGui.Main.Quest.Visible == true then
+					if string.find(plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Diablo") or string.find(plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Urban") or string.find(plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Deandre") then
+						for I, e in pairs(replicated:GetChildren()) do
+							if string.find(e.Name, "Diablo") or string.find(e.Name, "Urban") or string.find(e.Name, "Deandre") then
+								_tp(e.HumanoidRootPart.CFrame);
+							end;
+						end;
+						for I, e in pairs(Enemies:GetChildren()) do
+							if (string.find(e.Name, "Diablo") or string.find(e.Name, "Urban") or string.find(e.Name, "Deandre")) and G.Alive(e) then
+								repeat
+									wait();
+									G.Kill(e, _G.FarmEliteHunt);
+								until not _G.FarmEliteHunt or plr.PlayerGui.Main.Quest.Visible == false or not e.Parent or e.Humanoid.Health <= 0;
+							end;
+						end;
+					end;
+				else
+					replicated.Remotes.CommF_:InvokeServer("EliteHunter");
+				end;
+			end;
+		end);
+	end;
+end);
+
+outros:AddToggle({
+    Title = "Auto Kill Rip Indra",
+    Description = "",
+    -- 1. Carrega se estava ligado ou não
+    Default = GetSetting("AutoRipIndra_Save", false),
+    Callback = function(I)
+        _G.AutoRipIngay = I
+        
+        -- 2. Salva na tabela
+        _G.SaveData["AutoRipIndra_Save"] = I
+        
+        -- 3. Grava no arquivo Settings.json
+        SaveSettings()
+    end,
+})
+
+spawn(function()
+	while wait(Sec) do
+		pcall(function()
+			if _G.AutoRipIngay then
+				local I = GetConnectionEnemies("rip_indra");
+				if not GetWP("Dark Dagger") or not GetIn("Valkyrie") and I then
+					repeat
+						wait();
+						G.Kill(I, _G.AutoRipIngay);
+					until not _G.AutoRipIngay or not I.Parent or I.Humanoid.Health <= 0;
+				else
+					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5097.93164, 316.447021, -3142.66602, -0.405007899, -4.31682743e-08, .914313197, -1.90943332e-08, 1, 3.8755779e-08, -0.914313197, -1.76180437e-09, -0.405007899));
+					wait(.1);
+					_tp(CFrame.new(-5344.822265625, 423.98541259766, -2725.0930175781));
+				end;
+			end;
+		end);
+	end;
+end);
+
+outros:AddToggle({
+    Title = "Auto Law Raid",
+    Description = "",
+    Default = false,
+    Callback = function(state)
+        _G.AutoLawKak = state
+    end,
+});
+
+spawn(function()
+    while wait(Sec) do
+        if _G.AutoLawKak then
+            pcall(function()
+                -- Comprar o Microchip
+                replicated.Remotes.CommF_:InvokeServer("BlackbeardReward", "Microchip", "2")
+                
+                -- Iniciar a raid
+                fireclickdetector(workspace.Map.CircleIsland.RaidSummon.Button.Main.ClickDetector)
+                
+                -- Procurar inimigo "Order"
+                local enemy = GetConnectionEnemies("Order")
+                if enemy then
+                    repeat
+                        task.wait()
+                        G.Kill(enemy, _G.AutoLawKak)
+                    until not _G.AutoLawKak or not enemy.Parent or enemy.Humanoid.Health <= 0
+                else
+                    _tp(CFrame.new(-6217.2021484375, 28.047645568848, -5053.1357421875))
+                end
+            end)
+        end
+    end
+end)
+
+
+
+-- Toggle 2: O Farm Principal (com o sistema Anti-Queda)
+outros:AddToggle({
+    Title = "Auto Farm Cake Prince",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoFarm_Cake = Value
+        _G.StartFarm = Value
+
+        if Value then
+            spawn(function()
+                while _G.AutoFarm_Cake do
+                    task.wait()
+                    pcall(function()
+                        local plr = game.Players.LocalPlayer
+                        local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+                        if not hrp then return end
+                        
+                        -- SISTEMA ANTI-QUEDA (Mantém a altura constante)
+                        if not hrp:FindFirstChild("VelocityLock") then
+                            local bv = Instance.new("BodyVelocity")
+                            bv.Name = "VelocityLock"
+                            bv.Velocity = Vector3.new(0, 0, 0)
+                            bv.MaxForce = Vector3.new(0, math.huge, 0)
+                            bv.Parent = hrp
+                        end
+
+                        local enemies = workspace:FindFirstChild("Enemies")  
+                        if not enemies then return end  
+                        
+                        local CakePos = CFrame.new(-2091.91, 70.00, -12142.83)  
+                        local PortalEntrance = CFrame.new(-2151.82, 149.32, -12404.91)  
+                        local mirror = workspace.Map:FindFirstChild("CakeLoaf")  
+                        mirror = mirror and mirror:FindFirstChild("BigMirror")  
+                        local other = mirror and mirror:FindFirstChild("Other")  
+                        local portalOpen = other and other.Transparency == 0  
+                        local boss = enemies:FindFirstChild("Cake Prince") or enemies:FindFirstChild("Dough King")  
+
+                        -- Prioridade 1: Boss ou Portal Aberto
+                        if boss or portalOpen then  
+                            if boss and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss.PrimaryPart then  
+                                local bossPos = boss.PrimaryPart.CFrame * CFrame.new(0, 25, 0) * CFrame.Angles(math.rad(-90), 0, 0)  
+                                _tp(bossPos)  
+                                G.Kill(boss, true)  
+                                return  
+                            end  
+                            if (hrp.Position - PortalEntrance.Position).Magnitude < 500 then  
+                                _tp(PortalEntrance)
+                            end  
+                            return  
+                        end  
+
+                        -- Prioridade 2: Quest (Com espera de 1.5s)
+                        if _G.AcceptQuest and not plr.PlayerGui.Main.Quest.Visible then  
+                            local questPos = CFrame.new(-1927.92, 45, -12842.54)
+                            _tp(questPos) -- Vai até o NPC
+                            
+                            -- Verifica se chegou perto do NPC
+                            if (hrp.Position - questPos.Position).Magnitude <= 40 then  
+                                task.wait(1.5) -- ESPERA DE 1.5 SEGUNDOS SOLICITADA
+                                
+                                -- Checa novamente se ainda está no NPC e se a quest ainda não foi pega
+                                if _G.AutoFarm_Cake and _G.AcceptQuest and not plr.PlayerGui.Main.Quest.Visible then
+                                    local q = {{"StartQuest", "CakeQuest2", 2}, {"StartQuest", "CakeQuest2", 1}, {"StartQuest", "CakeQuest1", 1}, {"StartQuest", "CakeQuest1", 2}}  
+                                    game.ReplicatedStorage.Remotes.CommF_:InvokeServer(unpack(q[math.random(1, 4)]))  
+                                end
+                            end  
+                            return  
+                        end  
+
+                        -- Prioridade 3: Mobs comuns
+                        local CAKE_MOBS = {"Cookie Crafter", "Cake Guard", "Baking Staff", "Head Baker"}  
+                        local bestMob = nil  
+                        local bestDist = math.huge  
+                        
+                        for _, mob in ipairs(enemies:GetChildren()) do  
+                            if table.find(CAKE_MOBS, mob.Name) and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then  
+                                local dist = (mob.HumanoidRootPart.Position - hrp.Position).Magnitude  
+                                if dist < bestDist then 
+                                    bestDist = dist 
+                                    bestMob = mob 
+                                end  
+                            end  
+                        end  
+
+                        if bestMob then  
+                            repeat task.wait()
+                                if not _G.AutoFarm_Cake or not bestMob.Parent or bestMob.Humanoid.Health <= 0 then break end
+                                if (workspace.Map.CakeLoaf.BigMirror.Other.Transparency == 0) or enemies:FindFirstChild("Cake Prince") then break end
+                                
+                                local combatPos = bestMob.HumanoidRootPart.CFrame * CFrame.new(0, 25, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+                                _tp(combatPos)
+                                G.Kill(bestMob, true)
+                            until false
+                        else  
+                            -- Se não houver mobs, mantém altura numa posição segura
+                            _tp(CFrame.new(-1927.92, 100, -12842.54))
+                        end  
+                    end)
+                end
+            end)
+        else
+            -- Limpeza ao desligar o farm
+            pcall(function()
+                local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if hrp and hrp:FindFirstChild("VelocityLock") then
+                    hrp.VelocityLock:Destroy()
+                end
+            end)
+        end
+    end
 })
 
 
+-- Toggles da UI
+outros:AddToggle({
+    Title = "Auto Farm Tyrant Of The Skies",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoTyrant = Value
+        _G.StartFarm = Value
+    end
+})
+
+
+
+_G.MobHeight = _G.MobHeight or 37
+
+local function GetTargetByLevel()
+    local myLevel = game.Players.LocalPlayer.Data.Level.Value
+    if myLevel >= 2575 then
+        return {Name = "Skull Slayer", QuestArgs = {"StartQuest", "TikiQuest3", 2}, QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743), FarmPos = CFrame.new(-16709.49, 419.68, 1751.09)}
+    elseif myLevel > 2550 then
+        return {Name = "Serpent Hunter", QuestArgs = {"StartQuest", "TikiQuest3", 1}, QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743), FarmPos = CFrame.new(-16645.64, 163.09, 1352.87)}
+    elseif myLevel >= 2525 then
+        return {Name = "Isle Champion", QuestArgs = {"StartQuest", "TikiQuest2", 2}, QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311), FarmPos = CFrame.new(-16602.1015625, 130.38734436035, 1087.2456054688)}
+    elseif myLevel >= 2500 then
+        return {Name = "Sun-kissed Warrior", QuestArgs = {"StartQuest", "TikiQuest2", 1}, QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311), FarmPos = CFrame.new(-16347, 64, 984)}
+    elseif myLevel >= 2475 then
+        return {Name = "Island Boy", QuestArgs = {"StartQuest", "TikiQuest1", 2}, QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311), FarmPos = CFrame.new(-16670, 43, -270)}
+    else
+        return {Name = "Isle Outlaw", QuestArgs = {"StartQuest", "TikiQuest1", 1}, QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311), FarmPos = CFrame.new(-16350, 45, -180)}
+    end
+end
+
+local function GetEyesCount()
+    local model = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("TikiOutpost") and workspace.Map.TikiOutpost:FindFirstChild("IslandModel")
+    local count = 0
+    if model then
+        local eye1 = model:FindFirstChild("Eye1")
+        local eye2 = model:FindFirstChild("Eye2")
+        local chunks = model:FindFirstChild("IslandChunks")
+        local eye3 = chunks and chunks:FindFirstChild("E") and chunks.E:FindFirstChild("Eye3")
+        local eye4 = chunks and chunks:FindFirstChild("E") and chunks.E:FindFirstChild("Eye4")
+        if eye1 and eye1.Transparency == 0 then count = count + 1 end
+        if eye2 and eye2.Transparency == 0 then count = count + 1 end
+        if eye3 and eye3.Transparency == 0 then count = count + 1 end
+        if eye4 and eye4.Transparency == 0 then count = count + 1 end
+    end
+    return count
+end
+
+local function UseAllCategorySkills()
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    local VirtualUser = game:GetService("VirtualUser")
+    local categories = {"Melee", "Blox Fruit", "Sword", "Gun"}
+    local skills = {"Z", "X", "C"}
+
+    for _, toolType in ipairs(categories) do
+        local tool = nil
+        for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+            if v:IsA("Tool") and v.ToolTip == toolType then tool = v break end
+        end
+        if tool then
+            game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
+            for i = 1, 3 do
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton1(Vector2.new(851, 158))
+                VirtualInputManager:SendKeyEvent(true, skills[i], false, game)
+                task.wait(0.05)
+                VirtualInputManager:SendKeyEvent(false, skills[i], false, game)
+                task.wait(0.1)
+            end
+        end
+    end
+end
+
+spawn(function()
+    local VaseIndex = 1
+    
+    while task.wait() do
+        if _G.AutoTyrant then
+            pcall(function()
+                local plr = game.Players.LocalPlayer
+                local char = plr.Character
+                local boss = workspace.Enemies:FindFirstChild("Tyrant of the Skies")
+                local eyes = GetEyesCount()
+
+                if boss and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
+                    _tp(boss.HumanoidRootPart.CFrame * CFrame.new(0, _G.MobHeight, 0))
+                    EquipWeapon(_G.SelectWeapon)
+                    _G.Kill(boss, true)
+
+                elseif eyes > 0 then
+                    local targetsty = {
+                        CFrame.new(-16335.1, 158.1, 1465.6), CFrame.new(-16288.6, 158.1, 1470.3),
+                        CFrame.new(-16258.0, 156.7, 1461.4), CFrame.new(-16212.4, 158.1, 1466.3),
+                        CFrame.new(-16335.0, 159.3, 1324.8), CFrame.new(-16286.0, 155.9, 1323.8),
+                        CFrame.new(-16250.3, 159.3, 1316.3)
+                    }
+                    
+                    local pos = targetsty[VaseIndex]
+                    if pos then
+                        _tp(pos)
+                        if (char.HumanoidRootPart.Position - pos.Position).Magnitude < 15 then
+                            
+                            if _G.UseSkullSummon then
+                                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("LoadItem", "Skull Guitar")
+                                EquipWeapon("Skull Guitar")
+                                local guitar = char:FindFirstChild("Skull Guitar")
+                                if guitar and guitar:FindFirstChild("RemoteEvent") then
+                                    guitar.RemoteEvent:FireServer("TAP", pos.Position)
+                                    game:GetService("ReplicatedStorage").Remotes.Validator2:FireServer(8359618, 0)
+                                end
+                            else
+                                UseAllCategorySkills()
+                            end
+                            
+                            task.wait(0.2)
+                            VaseIndex = (VaseIndex % #targetsty) + 1
+                        end
+                    end
+
+                else
+                    local TargetData = GetTargetByLevel()
+                    local hasQuest = plr.PlayerGui.Main.Quest.Visible
+
+                    if _G.AcceptQuestTyrant and not hasQuest then
+                        if (char.HumanoidRootPart.Position - TargetData.QuestPos.Position).Magnitude <= 5 then
+                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(TargetData.QuestArgs))
+                        else
+                            _tp(TargetData.QuestPos)
+                        end
+                    else
+                        local closestEnemy = nil
+                        local shortestDistance = math.huge
+                        local AllMobs = {"Skull Slayer", "Serpent Hunter", "Isle Champion", "Sun-kissed Warrior", "Island Boy", "Isle Outlaw"}
+                        
+                        for _, v in pairs(workspace.Enemies:GetChildren()) do
+                            if table.find(AllMobs, v.Name) and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+                                local dist = (char.HumanoidRootPart.Position - v.HumanoidRootPart.Position).Magnitude
+                                if dist < shortestDistance then
+                                    shortestDistance = dist
+                                    closestEnemy = v
+                                end
+                            end
+                        end
+
+                        if closestEnemy then
+                            _tp(closestEnemy.HumanoidRootPart.CFrame * CFrame.new(0, _G.MobHeight, 0))
+                            EquipWeapon(_G.SelectWeapon)
+                            _G.Kill(closestEnemy, true)
+                        else
+                            _tp(TargetData.FarmPos)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+
+
+
+outros:AddSeperator("Misc Raid Boss")
+
+outros:AddToggle({
+    Title = "Stop when got God Chalice in Elite Hunter",
+    Description = "",
+    -- 1. Carrega o estado salvo ou inicia como true (padrão do seu script)
+    Default = GetSetting("StopChalice_Save", true),
+    Callback = function(I)
+        _G.StopWhenChalice = I
+        
+        -- 2. Guarda na tabela de salvamento
+        _G.SaveData["StopChalice_Save"] = I
+        
+        -- 3. Salva no arquivo Settings.json
+        SaveSettings()
+    end,
+})
+spawn(function()
+	while wait(.2) do
+		if _G.StopWhenChalice and _G.FarmEliteHunt then
+			pcall(function()
+				if GetBP("God\'s Chalice") or GetBP("Sweet Chalice") or GetBP("Fist of Darkness") then
+					_G.FarmEliteHunt = false;
+				end;
+			end);
+		end;
+	end;
+end);
+
+
+outros:AddToggle({
+    Title = "Auto Active Cores Haki Rip_Indra",
+    Description = "",
+    -- 1. Carrega o estado salvo ou false por padrão
+    Default = GetSetting("AutoActiveCores_Save", false),
+    Callback = function(I)
+        _G.AutoUnHaki = I
+        
+        -- 2. Guarda na tabela de salvamento
+        _G.SaveData["AutoActiveCores_Save"] = I
+        
+        -- 3. Salva no arquivo Settings.json
+        SaveSettings()
+    end,
+})
+
+AuraSkin = function(I)
+		local e = { [1] = { StorageName = I, Type = "AuraSkin", Context = "Equip" } };
+		(((replicated:WaitForChild("Modules")):WaitForChild("Net")):WaitForChild("RF/FruitCustomizerRF")):InvokeServer(unpack(e));
+	end;
+VaildColor = function(I)
+		if I and I.BrickColor then
+			return tostring(I.BrickColor) == "Lime green";
+		end;
+	end;
+HakiCalculate = function(I)
+		local e = { ["Really red"] = "Pure Red", Oyster = "Snow White", ["Hot pink"] = "Winter Sky" };
+		if I and I.BrickColor then
+			return e[tostring(I.BrickColor)];
+		end;
+	end;
+spawn(function()
+	while wait(Sec) do
+		if _G.AutoUnHaki then
+			pcall(function()
+				local I = workspace.Map["Boat Castle"]:FindFirstChild("Summoner");
+				if I and I:FindFirstChild("Circle") then
+					for I, e in pairs((I:FindFirstChild("Circle")):GetChildren()) do
+						if e.Name == "Part" then
+							local I = e:FindFirstChild("Part");
+							if VaildColor(I) == false then
+								AuraSkin(HakiCalculate(e));
+								repeat
+									wait();
+									_tp(e.CFrame);
+								until VaildColor(I) == true or not _G.AutoUnHaki;
+							end;
+						end;
+					end;
+				end;
+			end);
+		end;
+	end;
+end);
+
+
+outros:AddToggle({
+    Title = "Accept Quest Cake Prince",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.AcceptQuest = Value
+    end
+})
+
+outros:AddToggle({
+    Title = "Use Soul Guitar on Vases",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.UseSkullSummon = Value
+    end
+})
+
+outros:AddToggle({
+    Title = "Accept Quest Tyrant",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.AcceptQuestTyrant = Value
+    end
+})
 
 local plr = game.Players.LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
@@ -5710,76 +6117,6 @@ spawn(function()
 		end);
 	end;
 end);
-outros:AddSeperator("Elite Hunter");
-
-outros:AddToggle({
-	Title = "Auto Elite Hunter",
-	Description = "",
-	-- 1. Carrega o estado salvo ou false por padrão
-	Default = GetSetting("AutoEliteQuest_Save", false),
-	Callback = function(I)
-		_G.FarmEliteHunt = I
-        
-        -- 2. Guarda na tabela de salvamento
-        _G.SaveData["AutoEliteQuest_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
-        SaveSettings()
-	end,
-})
-spawn(function()
-	while wait(Sec) do
-		pcall(function()
-			if _G.FarmEliteHunt then
-				if plr.PlayerGui.Main.Quest.Visible == true then
-					if string.find(plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Diablo") or string.find(plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Urban") or string.find(plr.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Deandre") then
-						for I, e in pairs(replicated:GetChildren()) do
-							if string.find(e.Name, "Diablo") or string.find(e.Name, "Urban") or string.find(e.Name, "Deandre") then
-								_tp(e.HumanoidRootPart.CFrame);
-							end;
-						end;
-						for I, e in pairs(Enemies:GetChildren()) do
-							if (string.find(e.Name, "Diablo") or string.find(e.Name, "Urban") or string.find(e.Name, "Deandre")) and G.Alive(e) then
-								repeat
-									wait();
-									G.Kill(e, _G.FarmEliteHunt);
-								until not _G.FarmEliteHunt or plr.PlayerGui.Main.Quest.Visible == false or not e.Parent or e.Humanoid.Health <= 0;
-							end;
-						end;
-					end;
-				else
-					replicated.Remotes.CommF_:InvokeServer("EliteHunter");
-				end;
-			end;
-		end);
-	end;
-end);
-outros:AddToggle({
-    Title = "Stop when got God Chalice",
-    Description = "",
-    -- 1. Carrega o estado salvo ou inicia como true (padrão do seu script)
-    Default = GetSetting("StopChalice_Save", true),
-    Callback = function(I)
-        _G.StopWhenChalice = I
-        
-        -- 2. Guarda na tabela de salvamento
-        _G.SaveData["StopChalice_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
-        SaveSettings()
-    end,
-})
-spawn(function()
-	while wait(.2) do
-		if _G.StopWhenChalice and _G.FarmEliteHunt then
-			pcall(function()
-				if GetBP("God\'s Chalice") or GetBP("Sweet Chalice") or GetBP("Fist of Darkness") then
-					_G.FarmEliteHunt = false;
-				end;
-			end);
-		end;
-	end;
-end);
 
 end
 if World2 or World3 then
@@ -5999,41 +6336,8 @@ spawn(function()
 	end;
 end);
 
-RR:AddSeperator("Law");
 
-RR:AddToggle({
-    Title = "Auto Law Raid",
-    Description = "",
-    Default = false,
-    Callback = function(state)
-        _G.AutoLawKak = state
-    end,
-});
 
-spawn(function()
-    while wait(Sec) do
-        if _G.AutoLawKak then
-            pcall(function()
-                -- Comprar o Microchip
-                replicated.Remotes.CommF_:InvokeServer("BlackbeardReward", "Microchip", "2")
-                
-                -- Iniciar a raid
-                fireclickdetector(workspace.Map.CircleIsland.RaidSummon.Button.Main.ClickDetector)
-                
-                -- Procurar inimigo "Order"
-                local enemy = GetConnectionEnemies("Order")
-                if enemy then
-                    repeat
-                        task.wait()
-                        G.Kill(enemy, _G.AutoLawKak)
-                    until not _G.AutoLawKak or not enemy.Parent or enemy.Humanoid.Health <= 0
-                else
-                    _tp(CFrame.new(-6217.2021484375, 28.047645568848, -5053.1357421875))
-                end
-            end)
-        end
-    end
-end)
 end
 if World1 then
 RR:AddSeperator("world 1 items");
@@ -9814,30 +10118,116 @@ local function c5(I, e)
 	end;
 	return d;
 end;
---[[ 
-    Auto-Attack Otimizado (Substituto TOTAL do FastAttack antigo)
-    Use com armas Melee ou Sword
---]]
+_G.Seriality = true
+if not _G.Seriality then return end
+
+repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 
-local player = Players.LocalPlayer
+local Player = Players.LocalPlayer
+repeat task.wait() until Player.Character
+local Character = Player.Character
 
--- Pastas usadas para descobrir remotes dinamicamente
-local foldersToScan = {
-    ReplicatedStorage:WaitForChild("Util"),
-    ReplicatedStorage:WaitForChild("Common"),
-    ReplicatedStorage:WaitForChild("Remotes"),
-    ReplicatedStorage:WaitForChild("Assets"),
-    ReplicatedStorage:WaitForChild("FX"),
+-- Função para pegar apenas o inimigo MAIS PRÓXIMO
+local function GetSingleTarget()
+    local target = nil
+    local maxDist = 60
+    local hrp = Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+
+    for _, folder in pairs({Workspace.Enemies, Workspace.Characters}) do
+        for _, v in pairs(folder:GetChildren()) do
+            if v ~= Character and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                local d = (v.HumanoidRootPart.Position - hrp.Position).Magnitude
+                if d < maxDist then
+                    maxDist = d
+                    target = v
+                end
+            end
+        end
+    end
+    return target
+end
+
+-- Primeiro Loop de Ataque (Ajustado para 1 alvo)
+task.spawn(function()
+    while task.wait() do
+        pcall(function()
+            local tool = Player.Character and Player.Character:FindFirstChild("EquippedWeapon")
+            if not tool then return end
+
+            local target = GetSingleTarget()
+            if not target then return end
+
+            local Net = ReplicatedStorage.Modules.Net
+            Net["RE/RegisterAttack"]:FireServer(-math.huge)
+
+            -- Ataca apenas as partes do alvo selecionado
+            local targetParts = {}
+            for _, part in pairs(target:GetChildren()) do
+                if part:IsA("BasePart") then
+                    table.insert(targetParts, {target, part})
+                end
+            end
+
+            Net["RE/RegisterHit"]:FireServer(target:FindFirstChild("Head"), targetParts)
+        end)
+    end
+end)
+
+-- Configurações e FastAttack Class
+local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Net = Modules:WaitForChild("Net")
+local RegisterAttack = Net["RE/RegisterAttack"]
+local RegisterHit = Net["RE/RegisterHit"]
+
+local Config = {
+    AttackDistance = 65,
+    AttackCooldown = 0.01,
+    AutoClickEnabled = true
 }
 
-local secureRemote
-local secureId
+local FastAttack = {}
+FastAttack.__index = FastAttack
 
--- Descobre Remote protegido automaticamente
+function FastAttack.new()
+    return setmetatable({ Debounce = 0 }, FastAttack)
+end
+
+function FastAttack:Attack()
+    if not Config.AutoClickEnabled or tick() - self.Debounce < Config.AttackCooldown then return end
+    local c = Player.Character
+    if not c or not c:FindFirstChildOfClass("Tool") then return end
+
+    local target = GetSingleTarget()
+    if not target then return end
+
+    local hrp = target:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    RegisterAttack:FireServer(0)
+    RegisterHit:FireServer(hrp, {{target, hrp}})
+
+    self.Debounce = tick()
+end
+
+local AttackInstance = FastAttack.new()
+
+-- Loop Secundário (Stepped)
+RunService.Stepped:Connect(function()
+    pcall(function()
+        AttackInstance:Attack()
+    end)
+end)
+
+-- Terceiro Loop (Segurança/Verificação de Remotos)
+local secureRemote, secureId
+local foldersToScan = { ReplicatedStorage:WaitForChild("Util"), ReplicatedStorage:WaitForChild("Remotes") }
+
 for _, folder in ipairs(foldersToScan) do
     for _, obj in ipairs(folder:GetChildren()) do
         if obj:IsA("RemoteEvent") and obj:GetAttribute("Id") then
@@ -9845,87 +10235,44 @@ for _, folder in ipairs(foldersToScan) do
             secureId = obj:GetAttribute("Id")
         end
     end
-
-    folder.ChildAdded:Connect(function(obj)
-        if obj:IsA("RemoteEvent") and obj:GetAttribute("Id") then
-            secureRemote = obj
-            secureId = obj:GetAttribute("Id")
-        end
-    end)
 end
 
-local function Alive(model)
-    local hum = model and model:FindFirstChild("Humanoid")
-    return hum and hum.Health > 0
-end
-
+-- Loop de Ataque com Verificação de Segurança (Single Target)
 RunService.Heartbeat:Connect(function()
     if not _G.Seriality then return end
 
-    local char = player.Character
-    local root = char and char:FindFirstChild("HumanoidRootPart")
-    if not root then return end
-
-    local tool = char:FindFirstChildOfClass("Tool")
+    local char = Player.Character
+    local tool = char and char:FindFirstChildOfClass("Tool")
     if not tool then return end
 
-    local weaponType = tool:GetAttribute("WeaponType")
-    if weaponType ~= "Melee" and weaponType ~= "Sword" then return end
+    local target = GetSingleTarget()
+    if not target then return end
 
-    local targets = {}
-    local folders = {
-        workspace:FindFirstChild("Enemies"),
-        workspace:FindFirstChild("Characters")
-    }
+    local head = target:FindFirstChild("Head")
+    local root = target:FindFirstChild("HumanoidRootPart")
+    if not head or not root then return end
 
-    for _, folder in ipairs(folders) do
-        if folder then
-            for _, enemy in ipairs(folder:GetChildren()) do
-                if enemy ~= char and Alive(enemy) then
-                    local eroot = enemy:FindFirstChild("HumanoidRootPart")
-                    if eroot and (eroot.Position - root.Position).Magnitude <= 60 then
-                        for _, part in ipairs(enemy:GetChildren()) do
-                            if part:IsA("BasePart") then
-                                table.insert(targets, {enemy, part})
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    if #targets == 0 then return end
-
-    local net = ReplicatedStorage.Modules.Net
-    local head = targets[1][1]:FindFirstChild("Head")
-
-    if not head then return end
+    -- Apenas partes do alvo atual
+    local targetData = {{target, root}, {target, head}}
 
     pcall(function()
+        local net = ReplicatedStorage.Modules.Net
         net["RE/RegisterAttack"]:FireServer()
-
         net["RE/RegisterHit"]:FireServer(
             head,
-            targets,
+            targetData,
             {},
-            tostring(player.UserId):sub(2, 4) ..
-            string.sub(tostring(coroutine.running()), 11, 15)
+            tostring(Player.UserId):sub(2, 4) .. string.sub(tostring(coroutine.running()), 11, 15)
         )
 
         if secureRemote and secureId then
             secureRemote:FireServer(
                 string.gsub("RE/RegisterHit", ".", function(c)
-                    return string.char(
-                        bit32.bxor(
-                            string.byte(c),
-                            math.floor(workspace:GetServerTimeNow() / 10 % 10) + 1
-                        )
-                    )
+                    return string.char(bit32.bxor(string.byte(c), math.floor(workspace:GetServerTimeNow() / 10 % 10) + 1))
                 end),
                 bit32.bxor(secureId + 909090, net.seed:InvokeServer() * 2),
                 head,
-                targets
+                targetData
             )
         end
     end)
