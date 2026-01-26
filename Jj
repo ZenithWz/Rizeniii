@@ -1208,7 +1208,7 @@ local LocalPlayer = Players.LocalPlayer
 -- Configurações Globais
 _G.distance = 250 
 _G.BypassTp = false
-getgenv().TweenSpeedFar = 300
+getgenv().TweenSpeedFar = 360
 getgenv().IsTweening = false -- Variável de controle vital
 
 local currentTween = nil -- Armazena o tween atual para cancelá-lo
@@ -5096,7 +5096,7 @@ T:AddInput({
 T:AddInput({
     Title = "Tween Speed",
     Description = "",
-    PlaceHolder = "300",
+    PlaceHolder = "360",
     Default = tostring(getgenv().TweenSpeedFar),
     Callback = function(I)
         local val = tonumber(I)
@@ -5340,164 +5340,6 @@ outros:AddToggle({
 })
 
 
--- Toggles da UI
-outros:AddToggle({
-    Title = "Auto Farm Tyrant Of The Skies",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoTyrant = Value
-        _G.StartFarm = Value
-    end
-})
-
-
-
-_G.MobHeight = _G.MobHeight or 37
-
-local function GetTargetByLevel()
-    local myLevel = game.Players.LocalPlayer.Data.Level.Value
-    if myLevel >= 2575 then
-        return {Name = "Skull Slayer", QuestArgs = {"StartQuest", "TikiQuest3", 2}, QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743), FarmPos = CFrame.new(-16709.49, 419.68, 1751.09)}
-    elseif myLevel > 2550 then
-        return {Name = "Serpent Hunter", QuestArgs = {"StartQuest", "TikiQuest3", 1}, QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743), FarmPos = CFrame.new(-16645.64, 163.09, 1352.87)}
-    elseif myLevel >= 2525 then
-        return {Name = "Isle Champion", QuestArgs = {"StartQuest", "TikiQuest2", 2}, QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311), FarmPos = CFrame.new(-16602.1015625, 130.38734436035, 1087.2456054688)}
-    elseif myLevel >= 2500 then
-        return {Name = "Sun-kissed Warrior", QuestArgs = {"StartQuest", "TikiQuest2", 1}, QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311), FarmPos = CFrame.new(-16347, 64, 984)}
-    elseif myLevel >= 2475 then
-        return {Name = "Island Boy", QuestArgs = {"StartQuest", "TikiQuest1", 2}, QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311), FarmPos = CFrame.new(-16670, 43, -270)}
-    else
-        return {Name = "Isle Outlaw", QuestArgs = {"StartQuest", "TikiQuest1", 1}, QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311), FarmPos = CFrame.new(-16350, 45, -180)}
-    end
-end
-
-local function GetEyesCount()
-    local model = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("TikiOutpost") and workspace.Map.TikiOutpost:FindFirstChild("IslandModel")
-    local count = 0
-    if model then
-        local eye1 = model:FindFirstChild("Eye1")
-        local eye2 = model:FindFirstChild("Eye2")
-        local chunks = model:FindFirstChild("IslandChunks")
-        local eye3 = chunks and chunks:FindFirstChild("E") and chunks.E:FindFirstChild("Eye3")
-        local eye4 = chunks and chunks:FindFirstChild("E") and chunks.E:FindFirstChild("Eye4")
-        if eye1 and eye1.Transparency == 0 then count = count + 1 end
-        if eye2 and eye2.Transparency == 0 then count = count + 1 end
-        if eye3 and eye3.Transparency == 0 then count = count + 1 end
-        if eye4 and eye4.Transparency == 0 then count = count + 1 end
-    end
-    return count
-end
-
-local function UseAllCategorySkills()
-    local VirtualInputManager = game:GetService("VirtualInputManager")
-    local VirtualUser = game:GetService("VirtualUser")
-    local categories = {"Melee", "Blox Fruit", "Sword", "Gun"}
-    local skills = {"Z", "X", "C"}
-
-    for _, toolType in ipairs(categories) do
-        local tool = nil
-        for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-            if v:IsA("Tool") and v.ToolTip == toolType then tool = v break end
-        end
-        if tool then
-            game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
-            for i = 1, 3 do
-                VirtualUser:CaptureController()
-                VirtualUser:ClickButton1(Vector2.new(851, 158))
-                VirtualInputManager:SendKeyEvent(true, skills[i], false, game)
-                task.wait(0.05)
-                VirtualInputManager:SendKeyEvent(false, skills[i], false, game)
-                task.wait(0.1)
-            end
-        end
-    end
-end
-
-spawn(function()
-    local VaseIndex = 1
-    
-    while task.wait() do
-        if _G.AutoTyrant then
-            pcall(function()
-                local plr = game.Players.LocalPlayer
-                local char = plr.Character
-                local boss = workspace.Enemies:FindFirstChild("Tyrant of the Skies")
-                local eyes = GetEyesCount()
-
-                if boss and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
-                    _tp(boss.HumanoidRootPart.CFrame * CFrame.new(0, _G.MobHeight, 0))
-                    EquipWeapon(_G.SelectWeapon)
-                    _G.Kill(boss, true)
-
-                elseif eyes > 0 then
-                    local targetsty = {
-                        CFrame.new(-16335.1, 158.1, 1465.6), CFrame.new(-16288.6, 158.1, 1470.3),
-                        CFrame.new(-16258.0, 156.7, 1461.4), CFrame.new(-16212.4, 158.1, 1466.3),
-                        CFrame.new(-16335.0, 159.3, 1324.8), CFrame.new(-16286.0, 155.9, 1323.8),
-                        CFrame.new(-16250.3, 159.3, 1316.3)
-                    }
-                    
-                    local pos = targetsty[VaseIndex]
-                    if pos then
-                        _tp(pos)
-                        if (char.HumanoidRootPart.Position - pos.Position).Magnitude < 15 then
-                            
-                            if _G.UseSkullSummon then
-                                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("LoadItem", "Skull Guitar")
-                                EquipWeapon("Skull Guitar")
-                                local guitar = char:FindFirstChild("Skull Guitar")
-                                if guitar and guitar:FindFirstChild("RemoteEvent") then
-                                    guitar.RemoteEvent:FireServer("TAP", pos.Position)
-                                    game:GetService("ReplicatedStorage").Remotes.Validator2:FireServer(8359618, 0)
-                                end
-                            else
-                                UseAllCategorySkills()
-                            end
-                            
-                            task.wait(0.2)
-                            VaseIndex = (VaseIndex % #targetsty) + 1
-                        end
-                    end
-
-                else
-                    local TargetData = GetTargetByLevel()
-                    local hasQuest = plr.PlayerGui.Main.Quest.Visible
-
-                    if _G.AcceptQuestTyrant and not hasQuest then
-                        if (char.HumanoidRootPart.Position - TargetData.QuestPos.Position).Magnitude <= 5 then
-                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(TargetData.QuestArgs))
-                        else
-                            _tp(TargetData.QuestPos)
-                        end
-                    else
-                        local closestEnemy = nil
-                        local shortestDistance = math.huge
-                        local AllMobs = {"Skull Slayer", "Serpent Hunter", "Isle Champion", "Sun-kissed Warrior", "Island Boy", "Isle Outlaw"}
-                        
-                        for _, v in pairs(workspace.Enemies:GetChildren()) do
-                            if table.find(AllMobs, v.Name) and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
-                                local dist = (char.HumanoidRootPart.Position - v.HumanoidRootPart.Position).Magnitude
-                                if dist < shortestDistance then
-                                    shortestDistance = dist
-                                    closestEnemy = v
-                                end
-                            end
-                        end
-
-                        if closestEnemy then
-                            _tp(closestEnemy.HumanoidRootPart.CFrame * CFrame.new(0, _G.MobHeight, 0))
-                            EquipWeapon(_G.SelectWeapon)
-                            _G.Kill(closestEnemy, true)
-                        else
-                            _tp(TargetData.FarmPos)
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end)
 
 
 
@@ -5597,23 +5439,6 @@ outros:AddToggle({
     end
 })
 
-outros:AddToggle({
-    Title = "Use Soul Guitar on Vases",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.UseSkullSummon = Value
-    end
-})
-
-outros:AddToggle({
-    Title = "Accept Quest Tyrant",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.AcceptQuestTyrant = Value
-    end
-})
 
 local plr = game.Players.LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
@@ -5657,16 +5482,7 @@ local function GoToBoss(targetBoss)
     if not bossHRP then return end
 
     local safeHeight = 22   
-    local targetPos = bossHRP.Position + Vector3.new(0, safeHeight, 0)  
-    local targetCFrame = CFrame.new(targetPos)  
-    local distToSafeSpot = (hrp.Position - targetPos).Magnitude  
-
-    EquipWeapon()  
-
-    if distToSafeSpot <= 5 then  
-        hrp.CFrame = targetCFrame  
-        hrp.Velocity = Vector3.zero  
-        hrp.AssemblyLinearVelocity = Vector3.zero 
+    local targl
         hum.AutoRotate = false 
         
         -- Auto Attack
@@ -10118,116 +9934,30 @@ local function c5(I, e)
 	end;
 	return d;
 end;
-_G.Seriality = true
-if not _G.Seriality then return end
-
-repeat task.wait() until game:IsLoaded()
+--[[ 
+    Auto-Attack Otimizado (Substituto TOTAL do FastAttack antigo)
+    Use com armas Melee ou Sword
+--]]
 
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 
-local Player = Players.LocalPlayer
-repeat task.wait() until Player.Character
-local Character = Player.Character
+local player = Players.LocalPlayer
 
--- Função para pegar apenas o inimigo MAIS PRÓXIMO
-local function GetSingleTarget()
-    local target = nil
-    local maxDist = 60
-    local hrp = Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return nil end
-
-    for _, folder in pairs({Workspace.Enemies, Workspace.Characters}) do
-        for _, v in pairs(folder:GetChildren()) do
-            if v ~= Character and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
-                local d = (v.HumanoidRootPart.Position - hrp.Position).Magnitude
-                if d < maxDist then
-                    maxDist = d
-                    target = v
-                end
-            end
-        end
-    end
-    return target
-end
-
--- Primeiro Loop de Ataque (Ajustado para 1 alvo)
-task.spawn(function()
-    while task.wait() do
-        pcall(function()
-            local tool = Player.Character and Player.Character:FindFirstChild("EquippedWeapon")
-            if not tool then return end
-
-            local target = GetSingleTarget()
-            if not target then return end
-
-            local Net = ReplicatedStorage.Modules.Net
-            Net["RE/RegisterAttack"]:FireServer(-math.huge)
-
-            -- Ataca apenas as partes do alvo selecionado
-            local targetParts = {}
-            for _, part in pairs(target:GetChildren()) do
-                if part:IsA("BasePart") then
-                    table.insert(targetParts, {target, part})
-                end
-            end
-
-            Net["RE/RegisterHit"]:FireServer(target:FindFirstChild("Head"), targetParts)
-        end)
-    end
-end)
-
--- Configurações e FastAttack Class
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local Net = Modules:WaitForChild("Net")
-local RegisterAttack = Net["RE/RegisterAttack"]
-local RegisterHit = Net["RE/RegisterHit"]
-
-local Config = {
-    AttackDistance = 65,
-    AttackCooldown = 0.01,
-    AutoClickEnabled = true
+-- Pastas usadas para descobrir remotes dinamicamente
+local foldersToScan = {
+    ReplicatedStorage:WaitForChild("Util"),
+    ReplicatedStorage:WaitForChild("Common"),
+    ReplicatedStorage:WaitForChild("Remotes"),
+    ReplicatedStorage:WaitForChild("Assets"),
+    ReplicatedStorage:WaitForChild("FX"),
 }
 
-local FastAttack = {}
-FastAttack.__index = FastAttack
+local secureRemote
+local secureId
 
-function FastAttack.new()
-    return setmetatable({ Debounce = 0 }, FastAttack)
-end
-
-function FastAttack:Attack()
-    if not Config.AutoClickEnabled or tick() - self.Debounce < Config.AttackCooldown then return end
-    local c = Player.Character
-    if not c or not c:FindFirstChildOfClass("Tool") then return end
-
-    local target = GetSingleTarget()
-    if not target then return end
-
-    local hrp = target:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    RegisterAttack:FireServer(0)
-    RegisterHit:FireServer(hrp, {{target, hrp}})
-
-    self.Debounce = tick()
-end
-
-local AttackInstance = FastAttack.new()
-
--- Loop Secundário (Stepped)
-RunService.Stepped:Connect(function()
-    pcall(function()
-        AttackInstance:Attack()
-    end)
-end)
-
--- Terceiro Loop (Segurança/Verificação de Remotos)
-local secureRemote, secureId
-local foldersToScan = { ReplicatedStorage:WaitForChild("Util"), ReplicatedStorage:WaitForChild("Remotes") }
-
+-- Descobre Remote protegido automaticamente
 for _, folder in ipairs(foldersToScan) do
     for _, obj in ipairs(folder:GetChildren()) do
         if obj:IsA("RemoteEvent") and obj:GetAttribute("Id") then
@@ -10235,44 +9965,87 @@ for _, folder in ipairs(foldersToScan) do
             secureId = obj:GetAttribute("Id")
         end
     end
+
+    folder.ChildAdded:Connect(function(obj)
+        if obj:IsA("RemoteEvent") and obj:GetAttribute("Id") then
+            secureRemote = obj
+            secureId = obj:GetAttribute("Id")
+        end
+    end)
 end
 
--- Loop de Ataque com Verificação de Segurança (Single Target)
+local function Alive(model)
+    local hum = model and model:FindFirstChild("Humanoid")
+    return hum and hum.Health > 0
+end
+
 RunService.Heartbeat:Connect(function()
     if not _G.Seriality then return end
 
-    local char = Player.Character
-    local tool = char and char:FindFirstChildOfClass("Tool")
+    local char = player.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+
+    local tool = char:FindFirstChildOfClass("Tool")
     if not tool then return end
 
-    local target = GetSingleTarget()
-    if not target then return end
+    local weaponType = tool:GetAttribute("WeaponType")
+    if weaponType ~= "Melee" and weaponType ~= "Sword" then return end
 
-    local head = target:FindFirstChild("Head")
-    local root = target:FindFirstChild("HumanoidRootPart")
-    if not head or not root then return end
+    local targets = {}
+    local folders = {
+        workspace:FindFirstChild("Enemies"),
+        workspace:FindFirstChild("Characters")
+    }
 
-    -- Apenas partes do alvo atual
-    local targetData = {{target, root}, {target, head}}
+    for _, folder in ipairs(folders) do
+        if folder then
+            for _, enemy in ipairs(folder:GetChildren()) do
+                if enemy ~= char and Alive(enemy) then
+                    local eroot = enemy:FindFirstChild("HumanoidRootPart")
+                    if eroot and (eroot.Position - root.Position).Magnitude <= 60 then
+                        for _, part in ipairs(enemy:GetChildren()) do
+                            if part:IsA("BasePart") then
+                                table.insert(targets, {enemy, part})
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if #targets == 0 then return end
+
+    local net = ReplicatedStorage.Modules.Net
+    local head = targets[1][1]:FindFirstChild("Head")
+
+    if not head then return end
 
     pcall(function()
-        local net = ReplicatedStorage.Modules.Net
         net["RE/RegisterAttack"]:FireServer()
+
         net["RE/RegisterHit"]:FireServer(
             head,
-            targetData,
+            targets,
             {},
-            tostring(Player.UserId):sub(2, 4) .. string.sub(tostring(coroutine.running()), 11, 15)
+            tostring(player.UserId):sub(2, 4) ..
+            string.sub(tostring(coroutine.running()), 11, 15)
         )
 
         if secureRemote and secureId then
             secureRemote:FireServer(
                 string.gsub("RE/RegisterHit", ".", function(c)
-                    return string.char(bit32.bxor(string.byte(c), math.floor(workspace:GetServerTimeNow() / 10 % 10) + 1))
+                    return string.char(
+                        bit32.bxor(
+                            string.byte(c),
+                            math.floor(workspace:GetServerTimeNow() / 10 % 10) + 1
+                        )
+                    )
                 end),
                 bit32.bxor(secureId + 909090, net.seed:InvokeServer() * 2),
                 head,
-                targetData
+                targets
             )
         end
     end)
