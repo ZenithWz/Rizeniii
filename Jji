@@ -1,4 +1,9 @@
---// This file was created by XHider https://discord.gg/infinityscript
+local Lighting = game:GetService("Lighting")
+
+-- Full bright automático (bem pouquinho mais escuro)
+Lighting.Ambient = Color3.new(0.695, 0.695, 0.695)
+Lighting.ColorShift_Bottom = Color3.new(0.695, 0.695, 0.695)
+Lighting.ColorShift_Top = Color3.new(0.695, 0.695, 0.695
 
 	do
 		ply = game.Players
@@ -33,13 +38,24 @@
 	end
 
 	repeat
-		local start = plr.PlayerGui:WaitForChild("Main"):WaitForChild("Loading") and game:IsLoaded()
-		wait()
-	until start
-	World1 = game.PlaceId == 2753915549
-	World2 = game.PlaceId == 4442272183
-	World3 = game.PlaceId == 7449423635
-	Sea = World1 or World2 or World3 or plr:Kick("❌ Error : A[12]Blox Fruits ❌")
+	local start = plr.PlayerGui:WaitForChild("Main"):WaitForChild("Loading") and game:IsLoaded()
+	task.wait()
+until start
+
+-- Detectar Mundo / Sea
+World1 =
+	game.PlaceId == 2753915549 or -- Sea 1 (old)
+	game.PlaceId == 85211729168715 -- Sea 1 (new)
+
+World2 =
+	game.PlaceId == 4442272183 or  -- Sea 2 (old)
+	game.PlaceId == 79091703265657 -- Sea 2 (new)
+
+World3 =
+	game.PlaceId == 7449423635 or  -- Sea 3 (old)
+	game.PlaceId == 100117331123089 -- Sea 3 (new)
+
+Sea = World1 or World2 or World3 or plr:Kick("❌ Error : A[12] Blox Fruits ❌")
 	Marines = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Marines")
 	end
@@ -790,103 +806,148 @@
 			end
 		end)
 	end
-	local block = Instance.new("Part", workspace)
-	block.Size = Vector3.new(1, 1, 1)
-	block.Name = "Rip_Indra"
-	block.Anchored = true
-	block.CanCollide = false
-	block.CanTouch = false
-	block.Transparency = 1
-	local blockfind = workspace:FindFirstChild(block.Name)
-	if blockfind and blockfind ~= block then
-		blockfind:Destroy()
-	end
-	task.spawn(function()
-		while task.wait() do
-			if block and block.Parent == workspace then
-				if shouldTween then
-					getgenv().OnFarm = true
-				else
-					getgenv().OnFarm = false
-				end
-			else
-				getgenv().OnFarm = false
-			end
-		end
-	end)
-	task.spawn(function()
-		local a = game.Players.LocalPlayer;
-		repeat
-			task.wait()
-		until a.Character and a.Character.PrimaryPart;
-		block.CFrame = a.Character.PrimaryPart.CFrame;
-		while task.wait() do
-			pcall(function()
-				if getgenv().OnFarm then
-					if block and block.Parent == workspace then
-						local b = a.Character and a.Character.PrimaryPart;
-						if b and (b.Position - block.Position).Magnitude <= 200 then
-							b.CFrame = block.CFrame
-						else
-							block.CFrame = b.CFrame
-						end
-					end;
-					local c = a.Character;
-					if c then
-						for d, e in pairs(c:GetChildren()) do
-							if e:IsA("BasePart") then
-								e.CanCollide = false
-							end
-						end
-					end
-				else
-					local c = a.Character;
-					if c then
-						for d, e in pairs(c:GetChildren()) do
-							if e:IsA("BasePart") then
-								e.CanCollide = true
-							end
-						end
-					end
-				end
-			end)
-		end
-	end)
-	_tp = function(target)
-		local character = plr.Character
-		if not character or not character:FindFirstChild("HumanoidRootPart") then
-			return
-		end
-		local rootPart = character.HumanoidRootPart
-		local distance = (target.Position - rootPart.Position).Magnitude
-		local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
-		local tween = game:GetService("TweenService"):Create(block, tweenInfo, {
-			CFrame = target
-		})
-		if plr.Character.Humanoid.Sit == true then
-			block.CFrame = CFrame.new(block.Position.X, target.Y, block.Position.Z)
-		end
-		tween:Play()
-		task.spawn(function()
-			while tween.PlaybackState == Enum.PlaybackState.Playing do
-				if not shouldTween then
-					tween:Cancel()
-					break
-				end
-				task.wait(0.1)
-			end
-		end)
-	end
-	TeleportToTarget = function(targetCFrame)
-		if (targetCFrame.Position - plr.Character.HumanoidRootPart.Position).Magnitude > 1000 then
-			_tp(targetCFrame)
-		else
-			_tp(targetCFrame)
-		end
-	end
-	notween = function(p)
-		plr.Character.HumanoidRootPart.CFrame = p
-	end
+	local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Configurações Globais
+_G.distance = 250 
+_G.BypassTp = false
+getgenv().TweenSpeedFar = 300
+getgenv().IsTweening = false -- Variável de controle vital
+
+local currentTween = nil -- Armazena o tween atual para cancelá-lo
+
+-- =======================
+-- FUNÇÃO DE TELEPORTE (TP)
+-- =======================
+local function TP(TargetCFrame)
+    local Character = LocalPlayer.Character
+    if not Character or not Character:FindFirstChild("HumanoidRootPart") then return end
+    
+    local HRP = Character.HumanoidRootPart
+    local dist = (TargetCFrame.Position - HRP.Position).Magnitude
+    
+    -- Se já houver um tween rodando, cancela ele antes de começar outro
+    if currentTween then currentTween:Cancel() end
+    
+    -- Se estiver perto, teleporte instantâneo e para
+    if dist <= _G.distance then
+        HRP.CFrame = TargetCFrame
+        getgenv().IsTweening = false
+        return
+    end
+    
+    getgenv().IsTweening = true -- Ativa o modo de voo/noclip
+
+    -- Configuração do Tween
+    local tweenTime = dist / getgenv().TweenSpeedFar
+    local tweenInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Linear)
+    
+    currentTween = TweenService:Create(HRP, tweenInfo, { ["CFrame"] = TargetCFrame })
+    
+    -- Ajuste de altura inicial apenas se estiver longe
+    if dist > 50 then
+        HRP.CFrame = CFrame.new(HRP.CFrame.X, TargetCFrame.Position.Y, HRP.CFrame.Z)
+    end
+    
+    -- Lógica de Bypass
+    if _G.BypassTp and dist >= 3000 then
+        if Character:FindFirstChild("Humanoid") then
+            Character.Humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+        end
+        HRP.CFrame = TargetCFrame
+        task.wait()
+        HRP.CFrame = TargetCFrame
+    end
+    
+    currentTween:Play()
+
+    -- Detecta quando o tween acaba sozinho
+    currentTween.Completed:Connect(function()
+        getgenv().IsTweening = false
+    end)
+end
+
+-- =======================
+-- FUNÇÃO STOP TWEEN (CORRIGIDA)
+-- =======================
+local function StopTween()
+    getgenv().IsTweening = false -- Desliga o suporte de voo
+    if currentTween then 
+        currentTween:Cancel() -- Para o movimento imediatamente
+    end
+    
+    local Character = LocalPlayer.Character
+    if Character then
+        local HRP = Character:FindFirstChild("HumanoidRootPart")
+        local Humanoid = Character:FindFirstChild("Humanoid")
+        
+        -- Remove o BodyVelocity para você não ficar travado no ar
+        if HRP and HRP:FindFirstChild("BodyClip") then
+            HRP.BodyClip:Destroy()
+        end
+        
+        -- Devolve a física ao Humanoid
+        if Humanoid then
+            Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
+    end
+end
+
+-- =======================
+-- LOOP DE SUPORTE (DINÂMICO)
+-- =======================
+task.spawn(function()
+    while true do
+        task.wait()
+        pcall(function()
+            local Character = LocalPlayer.Character
+            if Character and Character:FindFirstChild("HumanoidRootPart") then
+                local HRP = Character.HumanoidRootPart
+                
+                -- SÓ APLICA NOCLIP E VELOCITY SE ESTIVER TWEENANDO
+                if getgenv().IsTweening then
+                    -- Cria ou mantém o BodyVelocity (para não cair)
+                    local bv = HRP:FindFirstChild("BodyClip")
+                    if not bv then
+                        bv = Instance.new("BodyVelocity")
+                        bv.Name = "BodyClip"
+                        bv.Parent = HRP
+                        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                    end
+                    bv.Velocity = Vector3.new(0, 0, 0)
+                    
+                    -- Noclip (desativa colisão)
+                    for _, v in pairs(Character:GetDescendants()) do
+                        if v:IsA("BasePart") then
+                            v.CanCollide = false
+                        end
+                    end
+                else
+                    -- SE NÃO ESTIVER TWEENANDO: Limpa e devolve a colisão
+                    if HRP:FindFirstChild("BodyClip") then
+                        HRP.BodyClip:Destroy()
+                    end
+                    -- Reativa colisão básica para não atravessar o chão
+                    if Character:FindFirstChild("UpperTorso") then
+                         Character.UpperTorso.CanCollide = true
+                    elseif Character:FindFirstChild("Torso") then
+                         Character.Torso.CanCollide = true
+                    end
+                    HRP.CanCollide = true
+                end
+            end
+        end)
+    end
+end)
+
+-- Interceptadores Globais
+getgenv()._tp = TP
+getgenv().TeleportToTarget = TP
+getgenv().notween = TP
+getgenv().StopTween = StopTween
+
 	function BTP(p)
 		local player = game.Players.LocalPlayer
 		local humanoidRootPart = player.Character.HumanoidRootPart
@@ -2001,52 +2062,39 @@
 		}
 	end
 
-	local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/discoart/FluentPlus/refs/heads/main/Beta.lua"))()
+	local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 	local Window = Fluent:CreateWindow({
-		Title = "Scarlet Hub",
+		Title = "Safira Hub",
 		SubTitle = "",
 		TabWidth = 160,
 		Theme = "Dark",
 		Acrylic = false,
-		Size = UDim2.fromOffset(525, 460),
+		Size = UDim2.fromOffset(520, 440),
 		MinimizeKey = Enum.KeyCode.End
 	})
 
 	
 	local Tabs = {
-	Info = Window:AddTab({
-		Title = "Information",
-		Icon = "info"
-	}),
-
-	Discord = Window:AddTab({
-		Title = "Discord",
-		Icon = "message-circle"
-	}),
 	Server = Window:AddTab({
 		Title = "Server",
 		Icon = "server"
 	}),
 	Main = Window:AddTab({
-		Title = "Farming",
-		Icon = "sword"
+		Title = "Main",
+		Icon = "home"
 	}),
 	Settings = Window:AddTab({
 		Title = "Settings",
 		Icon = "settings"
 	}),
-	Melee = Window:AddTab({
-		Title = "Auto Get Fighting Style V2",
-		Icon = "swords"
-	}),
-	
+		
 	Fruit = Window:AddTab({
 		Title = "Fruit",
 		Icon = "apple"
 	}),
 	
 	Quests = Window:AddTab({
-		Title = "Quests - Items",
+		Title = "Quests/Items",
 		Icon = "scroll"
 	}),
 	SeaEvent = Window:AddTab({
@@ -5009,363 +5057,7 @@ end)
 		end
 	end)
 
-	Tabs.Melee:AddSection("Fighting Melee Styles")
-	local SuperHuman = Tabs.Melee:AddToggle("SuperHuman", {
-		Title = "Auto Superhuman",
-		Description = "",
-		Default = false
-	})
-	SuperHuman:OnChanged(function(Value)
-		_G.Auto_SuperHuman = Value
-	end)
-	spawn(function()
-		while wait(Sec) do
-			pcall(function()
-				if _G.Auto_SuperHuman then
-					local M_Beli = plr.Data.Beli.Value
-					local M_Frag = plr.Data.Fragments.Value
-					if plr:FindFirstChild("WeaponAssetCache") then
-						if not GetBP("Superhuman") then
-							if not GetBP("Black Leg") then
-								if (M_Beli >= 150000) then
-									replicated.Remotes.CommF_:InvokeServer("BuyBlackLeg")
-								end
-							elseif GetBP("Black Leg") and GetBP("Black Leg").Level.Value < 299 then
-								_G.Level = true
-							elseif GetBP("Black Leg") and GetBP("Black Leg").Level.Value >= 300 then
-								_G.Level = false
-							end
-							if not GetBP("Electro") then
-								if (M_Beli >= 500000) then
-									replicated.Remotes.CommF_:InvokeServer("BuyElectro")
-								end
-							elseif GetBP("Electro") and GetBP("Electro").Level.Value < 299 then
-								_G.Level = true
-							elseif GetBP("Electro") and GetBP("Electro").Level.Value >= 300 then
-								_G.Level = false
-							end
-							if not GetBP("Fishman Karate") then
-								if (M_Beli >= 750000) then
-									replicated.Remotes.CommF_:InvokeServer("BuyFishmanKarate")
-								end
-							elseif GetBP("Fishman Karate") and GetBP("Fishman Karate").Level.Value < 299 then
-								_G.Level = true
-							elseif GetBP("Fishman Karate") and GetBP("Fishman Karate").Level.Value >= 300 then
-								_G.Level = false
-							end
-							if not GetBP("Dragon Claw") then
-								if (M_Frag >= 1500) then
-									replicated.Remotes.CommF_:InvokeServer("BlackbeardReward", "DragonClaw", "2")
-								end
-							elseif GetBP("Dragon Claw") and GetBP("Dragon Claw").Level.Value < 299 then
-								_G.Level = true
-							elseif GetBP("Dragon Claw") and GetBP("Dragon Claw").Level.Value >= 300 then
-								_G.Level = false
-							end
-							replicated.Remotes.CommF_:InvokeServer("BuySuperhuman")
-						end
-					end
-				end
-			end)
-		end
-	end)
-	local DeathStep = Tabs.Melee:AddToggle("DeathStep", {
-		Title = "Auto DeathStep",
-		Description = "",
-		Default = false
-	})
-	DeathStep:OnChanged(function(Value)
-		_G.AutoDeathStep = Value
-	end)
-	spawn(function()
-		while wait(Sec) do
-			if _G.AutoDeathStep then
-				pcall(function()
-					if plr:FindFirstChild("WeaponAssetCache") then
-						if not GetBP("Death Step") then
-							if not GetBP("Black Leg") then
-								replicated.Remotes.CommF_:InvokeServer("BuyBlackLeg")
-							end
-							if GetBP("Black Leg") and GetBP("Black Leg").Level.Value >= 400 then
-								replicated.Remotes.CommF_:InvokeServer("BuyDeathStep")
-								_G.Level = false
-							elseif GetBP("Black Leg") and GetBP("Black Leg").Level.Value < 399 then
-								_G.Level = true
-							end
-							if GetBP("Black Leg") or GetBP("Black Leg").Level.Value >= 400 then
-								if workspace.Map.IceCastle.Hall.LibraryDoor.PhoeyuDoor.Transparency == 0 then
-									if GetBP("Library Key") then
-										repeat
-											wait()
-											_tp(CFrame.new(6371.2001953125, 296.63433837890625, -6841.18115234375))
-										until not _G.AutoDeathStep or (Root.Position == CFrame.new(6371.2001953125, 296.63433837890625, -6841.18115234375).Position)
-										if (Root.CFrame == CFrame.new(6371.2001953125, 296.63433837890625, -6841.18115234375)) then
-											replicated.Remotes.CommF_:InvokeServer("BuyDeathStep")
-										end
-									elseif not GetBP("Library Key") then
-										local v = GetConnectionEnemies("Awakened Ice Admiral")
-										if v then
-											repeat
-												wait()
-												Attack.Kill(v, _G.AutoDeathStep)
-											until not v.Parent or v.Humanoid.Health <= 0 or _G.AutoDeathStep == false or GetBP("Library Key") or GetBP("Death Step")
-										else
-											_tp(CFrame.new(5668.9780273438, 28.519989013672, -6483.3520507813))
-										end
-									end
-								end
-							end
-						end
-					end
-				end)
-			end
-		end
-	end)
-	local SharkManV2 = Tabs.Melee:AddToggle("SharkManV2", {
-		Title = "Auto Sharkman Karate",
-		Description = "",
-		Default = false
-	})
-	SharkManV2:OnChanged(function(Value)
-		_G.Auto_SharkMan_Karate = Value
-	end)
-	spawn(function()
-		while wait(Sec) do
-			if _G.Auto_SharkMan_Karate then
-				pcall(function()
-					if plr:FindFirstChild("WeaponAssetCache") then
-						if not GetBP("Sharkman Karate") then
-							if not GetBP("Fishman Karate") then
-								replicated.Remotes.CommF_:InvokeServer("BuyFishmanKarate")
-							end
-							if GetBP("Fishman Karate") and GetBP("Fishman Karate").Level.Value >= 400 then
-								replicated.Remotes.CommF_:InvokeServer("BuySharkmanKarate")
-								_G.Level = false
-							elseif GetBP("Fishman Karate") and GetBP("Fishman Karate").Level.Value < 399 then
-								_G.Level = true
-							end
-							if GetBP("Fishman Karate") or GetBP("Fishman Karate").Level.Value >= 400 then
-								if GetBP("Water Key") then
-									if string.find(replicated.Remotes.CommF_:InvokeServer("BuySharkmanKarate"), "keys") then
-										if GetBP("Water Key") then
-											repeat
-												wait()
-												_tp(CFrame.new(-2604.6958, 239.432526, -10315.1982, 0.0425701365, 0, -0.999093413, 0, 1, 0, 0.999093413, 0, 0.0425701365))
-											until not _G.Auto_SharkMan_Karate or (Root.Position == CFrame.new(-2604.6958, 239.432526, -10315.1982, 0.0425701365, 0, -0.999093413, 0, 1, 0, 0.999093413, 0, 0.0425701365).Position)
-											replicated.Remotes.CommF_:InvokeServer("BuySharkmanKarate")
-										end
-									end
-								elseif not GetBP("Water Key") then
-									local v = GetConnectionEnemies("Tide Keeper")
-									if v then
-										repeat
-											wait()
-											Attack.Kill(v, _G.Auto_SharkMan_Karate)
-										until not v.Parent or v.Humanoid.Health <= 0 or _G.Auto_SharkMan_Karate == false or GetBP("Water Key") or GetBP("Sharkman Karate")
-									else
-										_tp(CFrame.new(-3053.9814453125, 237.18954467773, -10145.0390625))
-									end
-								end
-							end
-						end
-					end
-				end)
-			end
-		end
-	end)
-	local ElectricClaw = Tabs.Melee:AddToggle("ElectricClaw", {
-		Title = "Auto ElectricClaw",
-		Description = "",
-		Default = false
-	})
-	ElectricClaw:OnChanged(function(Value)
-		_G.Auto_Electric_Claw = Value
-	end)
-	spawn(function()
-		while wait(Sec) do
-			if _G.Auto_Electric_Claw then
-				pcall(function()
-					if plr:FindFirstChild("WeaponAssetCache") then
-						if not GetBP("Electro") then
-							replicated.Remotes.CommF_:InvokeServer("BuyElectro")
-						end
-						if GetBP("Electro") and GetBP("Electro").Level.Value >= 400 then
-							if replicated.Remotes.CommF_:InvokeServer("BuyElectricClaw", "Start") == nil then
-								notween(CFrame.new(-12548, 337, -7481))
-							end
-							replicated.Remotes.CommF_:InvokeServer("BuyElectricClaw")
-						elseif GetBP("Electro") and GetBP("Electro").Level.Value < 400 then
-							repeat
-								_G.AutoFarm_Bone = true
-								wait()
-							until not _G.Auto_Electric_Claw or GetBP("Electric Claw")
-							_G.AutoFarm_Bone = false
-						end
-					end
-				end)
-			end
-		end
-	end)
-	local DragonTalon = Tabs.Melee:AddToggle("DragonTalon", {
-		Title = "Auto DragonTalon",
-		Description = "",
-		Default = false
-	})
-	DragonTalon:OnChanged(function(Value)
-		_G.AutoDragonTalon = Value
-	end)
-	spawn(function()
-		while wait(Sec) do
-			if _G.AutoDragonTalon then
-				pcall(function()
-					if plr:FindFirstChild("WeaponAssetCache") then
-						if not GetBP("Dragon Claw") then
-							replicated.Remotes.CommF_:InvokeServer("BlackbeardReward", "DragonClaw", "2")
-						end
-						if GetBP("Dragon Claw") and GetBP("Dragon Claw").Level.Value >= 400 then
-							replicated.Remotes.CommF_:InvokeServer("Bones", "Buy", 1, 1)
-							replicated.Remotes.CommF_:InvokeServer("BuyDragonTalon")
-						elseif GetBP("Dragon Claw") and GetBP("Dragon Claw").Level.Value < 400 then
-							repeat
-								_G.AutoFarm_Bone = true
-								wait()
-							until not _G.AutoDragonTalon or GetBP("Dragon Talon")
-							_G.AutoFarm_Bone = false
-						end
-					end
-				end)
-			end
-		end
-	end)
-	local Godhuman = Tabs.Melee:AddToggle("Godhuman", {
-		Title = "Auto Godhuman",
-		Description = "",
-		Default = false
-	})
-	Godhuman:OnChanged(function(Value)
-		_G.Auto_God_Human = Value
-	end)
-	spawn(function()
-		while wait() do
-			pcall(function()
-				if _G.AutoGodHuman then
-					if replicated.Remotes.CommF_:InvokeServer("BuyGodhuman", true) == "Bring me 20 Fish Tails, 20 Magma Ore, 10 Dragon Scales and 10 Mystic Droplets." then
-						if GetM("Dragon Scale") == false or GetM("Dragon Scale") < 10 then
-							if World3 then
-								Lv = 1575
-								_G.Level = true
-							else
-								replicated.Remotes.CommF_:InvokeServer("TravelZou")
-							end
-						elseif GetM("Fish Tail") == false or GetM("Fish Tail") < 20 then
-							if World3 then
-								Lv = 1775
-								_G.Level = true
-							else
-								replicated.Remotes.CommF_:InvokeServer("TravelZou")
-							end
-						elseif GetM("Mystic Droplet") == false or GetM("Mystic Droplet") < 10 then
-							if World2 then
-								Lv = 1425
-								_G.Level = true
-							else
-								replicated.Remotes.CommF_:InvokeServer("TravelDressrosa")
-							end
-						elseif GetM("Magma Ore") == false or GetM("Magma Ore") < 20 then
-							if World2 then
-								Lv = 1175
-								_G.Level = true
-							else
-								replicated.Remotes.CommF_:InvokeServer("TravelDressrosa")
-							end
-						end
-					elseif replicated.Remotes.CommF_:InvokeServer("BuyGodhuman", true) == 3 then
-						return nil
-					else
-						replicated.Remotes.CommF_:InvokeServer("BuyGodhuman")
-					end
-				end
-			end)
-		end
-	end)
-	local SanguineArt = Tabs.Melee:AddToggle("SanguineArt", {
-		Title = "Auto SanguineArt",
-		Description = "",
-		Default = false
-	})
-	SanguineArt:OnChanged(function(Value)
-		_G.snaguine = Value
-	end)
-	spawn(function()
-		while wait(Sec) do
-			if _G.snaguine then
-				pcall(function()
-					if not GetBP("Sanguine Art") then
-						replicated.Remotes.CommF_:InvokeServer("Sanguine Art")
-					end
-					if not GetBP("Sanguine Art") then
-						if GetM("Leviathan Heart") >= 1 then
-							print("Completed!!")
-						else
-							if World3 then
-								_G.DangerSc = "Lv Infinite"
-								_G.SailBoats = true;
-							else
-								_G.SailBoats = false;
-							end
-						end
-						if GetM("Vampire Fang") <= 19 then
-							if World2 then
-								local n = GetConnectionEnemies("Vampire")
-								if n then
-									repeat
-										task.wait()
-										Attack.Kill(n, _G.snaguine)
-									until not _G.snaguine or n.Humanoid.Health <= 0 or not n.Parent
-								else
-									_tp(CFrame.new(-6041.29248046875, 6.402710914611816, -1304.63330078125))
-								end
-							else
-								replicated.Remotes.CommF_:InvokeServer("TravelDressrosa")
-							end
-						end
-						if GetM("Vampire Fang") >= 20 and GetM("Demonic Wisp") <= 19 then
-							if World3 then
-								local n = GetConnectionEnemies("Demonic Soul")
-								if n then
-									repeat
-										task.wait()
-										Attack.Kill(n, _G.snaguine)
-									until not _G.snaguine or n.Humanoid.Health <= 0 or not n.Parent
-								else
-									_tp(CFrame.new(-9495.6806640625, 453.58624267578125, 5977.3486328125))
-								end
-							else
-								replicated.Remotes.CommF_:InvokeServer("TravelZou")
-							end
-						end
-						if GetM("Vampire Fang") >= 20 and GetM("Demonic Wisp") >= 20 and GetM("Dark Fragment") <= 1 then
-							if World2 then
-								local n = GetConnectionEnemies("Darkbeard")
-								if n then
-									repeat
-										task.wait()
-										Attack.Kill(black, _G.snaguine)
-									until _G.snaguine or black.Humanoid.Health <= 0 or not black.Parent
-								else
-									_tp(CFrame.new(3798.4575195313, 13.826690673828, -3399.806640625))
-								end
-							else
-								replicated.Remotes.CommF_:InvokeServer("TravelDressrosa")
-							end
-						end
-					else
-						replicated.Remotes.CommF_:InvokeServer("BuySanguineArt")
-					end
-				end)
-			end
-		end
-	end)
+	
 
 	Tabs.Quests:AddSection("Tushita + Yama")
 	local Process = Tabs.Quests:AddParagraph({
