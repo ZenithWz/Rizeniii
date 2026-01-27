@@ -8444,6 +8444,63 @@ FB:AddButton({
     end
 })
 
+FB:AddSeperator("Feedback");
+
+_G.FeedbackText = ""
+
+FB:AddInput({
+    Title = "Feedback",
+    Description = "Share your thoughts, suggestions, or ideas to help improve this script.",
+    PlaceHolder = "Example: The UI looks great, but adding hotkeys would be useful...",
+    Default = "",
+    Callback = function(Value)
+        _G.FeedbackText = Value
+    end
+})
+
+FB:AddButton({
+    Title = "Send Feedback",
+    Description = "Send your feedback to the development team.",
+    Callback = function()
+        if _G.FeedbackText == "" then return end
+
+        local payload = {
+            username = "Feedback System",
+            avatar_url = "https://cdn.discordapp.com/attachments/1465741799418236970/1465763961776374036/1eb1a2e4-f69c-4d18-8079-fda26cdfa524.jpg",
+            embeds = {{
+                title = "💭 New Feedback",
+                description = _G.FeedbackText,
+                color = 3447003,
+                footer = {
+                    text = "Sent from in-game Feedback system"
+                }
+            }}
+        }
+
+        local body = game:GetService("HttpService"):JSONEncode(payload)
+
+        local requestFunc =
+            request or
+            http_request or
+            syn and syn.request or
+            fluxus and fluxus.request
+
+        if not requestFunc then
+            warn("Executor does not support HTTP requests.")
+            return
+        end
+
+        requestFunc({
+            Url = "https://discord.com/api/webhooks/1465754516124074184/wRF9Nl-y4l0z31DcBaL1e48ojQvLi_Afc51xdcrGqOmp0Un2P6saw_Z0M9pnnvDNI9st",
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = body
+        })
+    end
+})
+
 kk:AddSeperator("Open");
 kk:AddButton({ Title = "Open Awakenings Expert", Description = "", Callback = function()
 		plr.PlayerGui.Main.AwakeningToggler.Visible = true;
