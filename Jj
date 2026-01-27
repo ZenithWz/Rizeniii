@@ -97,85 +97,80 @@ Marines = function()
 Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
--- [[ 1. CARREGAMENTO DA NOVA UI (ModernUI/Diamond) ]] --
-local ModernUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Rizeniii/diamond/main/zero/main"))()
+-- [[ 1. CARREGAMENTO DA SUA UI ]] --
+-- SUBSTITUA O LINK ABAIXO PELO SEU LINK RAW DO 'ID THEME'
+local ModernUI_URL = "https://pastefy.app/EXKWades/raw" 
+local Library = loadstring(game:HttpGet(ModernUI_URL))()
 
--- [[ 2. ADAPTADOR (DIAMOND HUB -> MODERN UI) ]] --
+-- [[ 2. ADAPTADOR (NIGHT MYSTIC -> MODERN UI ATUALIZADA) ]] --
 local I = {}
 
 function I:NewWindow(config)
-    -- Inicializa a janela principal conforme os parâmetros da nova UI
-    local UI = ModernUI.new({
-        Title = "Diamond Hub ・ By Victor7zk",
-        SubTitle = "Blox Fruits",
-        Icon = {
-            "rbxassetid://135264546140981", -- Ícone principal
-            "rbxassetid://110961158970233"
-        },
-        IconFPS = 0.1,
-        FloatingButton = {
-            Icon = {"rbxassetid://135264546140981"},
-            Size = 52,
-            Position = UDim2.new(1, -70, 0.5, -26)
-        }
+    -- Cria a janela principal usando a ModernUI
+    local Window = Library.new({
+        Title = "Diamond Hub By Victor7zk",
+        SubTitle = "Discord.gg//",
+        Icon = {"rbxassetid://105245380363493"}, 
+        IconFPS = 0
     })
 
     local WindowWrapper = {}
 
-    -- Função para criar Abas (T)
+    -- Função para criar Abas
     function WindowWrapper:T(name, iconId)
-        local Tab = UI:CreateTab({
+        local Tab = Window:CreateTab({
             Name = name,
-            Icon = {iconId or "rbxassetid://135264546140981"}
+            Icon = iconId or "rbxassetid://7733960981"
         })
 
         local TabWrapper = {}
 
         -- Função para criar Seções
         function TabWrapper:AddSection(sectionName)
-            UI:AddSection(Tab, { Name = sectionName })
+            -- Cria o cabeçalho visual da seção
+            Window:AddSection(Tab, { Name = sectionName })
 
             local SectionWrapper = {}
 
             -- Toggle (Interruptor)
             function SectionWrapper:AddToggle(config)
-                return UI:AddToggle(Tab, {
+                return Window:AddToggle(Tab, {
                     Name = config.Title,
-                    Default = config.Default or false,
+                    Default = config.Default,
                     Callback = config.Callback
                 })
             end
 
             -- Button (Botão)
             function SectionWrapper:AddButton(config)
-                return UI:AddButton(Tab, {
+                return Window:AddButton(Tab, {
                     Name = config.Title,
                     Callback = config.Callback
                 })
             end
 
-            -- Dropdown (Suporta Multi ou Single)
+            -- Dropdown (Lista de seleção)
             function SectionWrapper:AddDropdown(config)
                 if config.Multi then
-                    return UI:AddMultiDropdown(Tab, {
+                    return Window:AddMultiDropdown(Tab, {
                         Name = config.Title,
-                        Options = config.Values or {},
-                        Default = config.Default or {},
+                        Options = config.Values,
+                        Default = config.Default,
                         Callback = config.Callback
                     })
                 else
-                    return UI:AddDropdown(Tab, {
+                    return Window:AddDropdown(Tab, {
                         Name = config.Title,
-                        Options = config.Values or {},
+                        Options = config.Values,
                         Default = config.Default,
                         Callback = config.Callback
                     })
                 end
             end
 
-            -- Slider
+            -- Slider (Barra de valor)
             function SectionWrapper:AddSlider(config)
-                return UI:AddSlider(Tab, {
+                return Window:AddSlider(Tab, {
                     Name = config.Title,
                     Min = config.Min or 0,
                     Max = config.Max or 100,
@@ -184,39 +179,63 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Discord Invite
-            function SectionWrapper:AddDiscord(title, link)
-                UI:AddInviteDiscord(Tab, {
-                    Name = title,
-                    Link = "discord.gg/" .. link,
-                    Icon = "rbxassetid://135264546140981",
-                    ButtonText = "Join"
+            -- Input (Caixa de Texto) -> AGORA USA A FUNÇÃO NATIVA DA UI!
+            function SectionWrapper:AddInput(config)
+                return Window:AddInput(Tab, {
+                    Name = config.Title,
+                    Default = config.Default,
+                    PlaceHolder = config.PlaceHolder,
+                    Callback = config.Callback
                 })
             end
 
-            -- Label / Paragraph (Adaptado para Section na ModernUI)
-            function SectionWrapper:AddLabel(text)
-                UI:AddSection(Tab, { Name = text })
+            -- Paragraph (Texto de Status) -> AGORA USA A FUNÇÃO NATIVA!
+            function SectionWrapper:AddParagraph(config)
+                return Window:AddParagraph(Tab, {
+                    Name = config.Title,
+                    Content = config.Desc or config.Content
+                })
+            end
+
+            -- Separator (Separador visual)
+            function SectionWrapper:AddSeperator(text)
+                Window:AddSection(Tab, {Name = text})
             end
             
-            function SectionWrapper:AddParagraph(config)
-                UI:AddSection(Tab, { Name = config.Title .. ": " .. (config.Desc or config.Content or "") })
+            -- Label (Texto simples)
+            function SectionWrapper:AddLabel(text)
+                 return Window:AddParagraph(Tab, {
+                    Name = text,
+                    Content = ""
+                })
             end
+
+            --  Button (Botão especial)
+            function SectionWrapper:AddDiscord(title, link)
+    -- Chama a nova função que criamos na UI
+           if Window.AddDiscord then
+           Window:AddDiscord(Tab, {
+            Title = title,
+            Invite = link
+        })
+    else
+         -- Fallback caso a UI não tenha atualizado
+          Window:AddButton(Tab, {
+            Name = "Join " .. title,
+            Callback = function() setclipboard("https://discord.gg/"..link) end
+        })
+    end
+end
+
+function WindowWrapper:Notify(notificationConfig)
+    Window:Notify(notificationConfig)
+end
+
 
             return SectionWrapper
         end
         return TabWrapper
     end
-
-    -- Notificações
-    function WindowWrapper:Notify(config)
-        UI:Notify({
-            Title = config.Title or "Diamond Hub",
-            Body = config.Content or config.Text or "",
-            Duration = config.Duration or 5
-        })
-    end
-
     return WindowWrapper
 end
 
