@@ -6731,7 +6731,6 @@ end);
 end
 
 
-end
 if World2 then
 h:AddSeperator("Upgrade Races");
 h:AddToggle({
