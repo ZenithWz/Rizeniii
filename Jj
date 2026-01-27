@@ -3893,14 +3893,15 @@ spawn(function()
 end)
 
 
-_G.SelectedFarmMode = "Level"
-_G.StartFarm = false
+-- // Configurações Iniciais
 _G.Level = false
 _G.AutoFarm_Bone = false
 _G.AutoFarmNear = false
+_G.StartFarm = false
 _G.AcceptQuest = false
 _G.MaxFarmDistance = 325
 
+-- // Funções de Suporte (Mantidas do original)
 local CurrentMobLevel = nil
 local TELEPORT_DISTANCE_THRESHOLD = 15 
 
@@ -3912,84 +3913,158 @@ local function TeleportConditional(hrp, targetCFrame, threshold)
     end
 end
 
-b:AddDropdown({
-    Title = "Select Farm Mode",
-    Values = {"Level", "Bone", "Near"},
-    Default = "Level",
-    Callback = function(v)
-        _G.SelectedFarmMode = v
-    end
-})
+-- // UI SECTION: TOGGLES
+-- // ----------------------------------------------------------------
 
 b:AddToggle({
-    Title = "Start Farm",
+    Title = "Auto Farm Level",
+    Description = "Automatically completes quests to level up your character.",
     Default = false,
     Callback = function(v)
+        _G.Level = v
         _G.StartFarm = v
-        _G.Level = false  
-        _G.AutoFarm_Bone = false  
-        _G.AutoFarmNear = false
-        if v then  
-            if _G.SelectedFarmMode == "Level" then  
-                _G.Level = true  
-            elseif _G.SelectedFarmMode == "Bone" then  
-                _G.AutoFarm_Bone = true  
-            elseif _G.SelectedFarmMode == "Near" then  
-                _G.AutoFarmNear = true
-            end  
+        if v then
+            _G.AutoFarm_Bone = false
+            _G.AutoFarmNear = false
         end
     end
 })
 
 b:AddToggle({
-    Title = "Accept Quests",
+    Title = "Farm Mobs Nearest",
+    Description = "Automatically attacks the closest enemies within range.",
+    Default = false,
+    Callback = function(v)
+        _G.AutoFarmNear = v
+        _G.StartFarm = v
+        if v then
+            _G.Level = false
+            _G.AutoFarm_Bone = false
+        end
+    end
+})
+
+b:AddToggle({
+    Title = "Auto Farm Bone",
+    Description = "Farms bones efficiently at the Haunted Castle area.",
+    Default = false,
+    Callback = function(v)
+        _G.AutoFarm_Bone = v
+        _G.StartFarm = v
+        if v then
+            _G.Level = false
+            _G.AutoFarmNear = false
+        end
+    end
+})
+
+b:AddToggle({
+    Title = "Accept Quest",
+    Description = "Required for Level and Bone farms to take NPC tasks.",
     Default = false,
     Callback = function(v)
         _G.AcceptQuest = v
     end
 })
 
+if World3 then
+b:AddSeperator("Bones");
+
+-- AUTO RANDOM BONES
+b:AddToggle({
+    Title = "Auto Random Bone",
+    Default = false,
+    Callback = function(v)
+        _G.Auto_Random_Bone = v
+    end,
+})
+
 spawn(function()
-    while task.wait() do
-        pcall(function()
-            if not _G.AutoFarmNear or not _G.StartFarm then return end
-            local Plr = game.Players.LocalPlayer
-            local Char = Plr.Character or Plr.CharacterAdded:Wait()
-            local Root = Char:FindFirstChild("HumanoidRootPart")
-            if not Root then return end
-            local ClosestEnemy = nil
-            local ShortestDistance = math.huge
-            if workspace:FindFirstChild("Enemies") then
-                for _, e in pairs(workspace.Enemies:GetChildren()) do
-                    if e:FindFirstChild("Humanoid") and e:FindFirstChild("HumanoidRootPart") and e.Humanoid.Health > 0 then
-                        local dist = (Root.Position - e.HumanoidRootPart.Position).Magnitude
-                        if dist < ShortestDistance then
-                            ShortestDistance = dist
-                            ClosestEnemy = e
-                        end
-                    end
-                end
-            end
-            if not ClosestEnemy and game.ReplicatedStorage:FindFirstChild("Enemies") then
-                for _, e in pairs(game.ReplicatedStorage.Enemies:GetChildren()) do
-                    if e:IsA("Model") and e:FindFirstChild("Humanoid") then
-                        ClosestEnemy = e
-                        break
-                    end
-                end
-            end
-            if ClosestEnemy and (ShortestDistance <= _G.MaxFarmDistance) then
-                repeat
-                    task.wait()
-                    if G and G.Kill then
-                        G.Kill(ClosestEnemy, true)
-                    end
-                until not _G.AutoFarmNear or not _G.StartFarm or not ClosestEnemy.Parent or (ClosestEnemy:FindFirstChild("Humanoid") and ClosestEnemy.Humanoid.Health <= 0)
-            end
-        end)
+    while wait(Sec) do
+        if _G.Auto_Random_Bone then
+            replicated.Remotes.CommF_:InvokeServer("Bones","Buy",1,1)
+        end
     end
 end)
 
+-- AUTO SOUL REAPER
+b:AddToggle({
+    Title = "Auto Soul Reaper",
+    Default = false,
+    Callback = function(v)
+        _G.AutoHytHallow = v
+    end,
+})
+
+spawn(function()
+    while wait(Sec) do
+        if _G.AutoHytHallow then
+            pcall(function()
+
+                local mob = GetConnectionEnemies("Soul Reaper")
+
+                if mob then
+                    repeat task.wait()
+                        G.Kill(mob,_G.AutoHytHallow)
+                    until mob.Humanoid.Health <= 0 or not _G.AutoHytHallow
+
+                else
+                    if not GetBP("Hallow Essence") then
+                        repeat task.wait(.1)
+                            replicated.Remotes.CommF_:InvokeServer("Bones","Buy",1,1)
+                        until not _G.AutoHytHallow or GetBP("Hallow Essence")
+                    else
+                        local pos = CFrame.new(-8932.32,146.83,6062.55)
+                        repeat wait(.1)
+                            _tp(pos)
+                        until not _G.AutoHytHallow or plr.Character.HumanoidRootPart.CFrame == pos
+                        EquipWeapon("Hallow Essence")
+                    end
+                end
+
+            end)
+        end
+    end
+end)
+end
+
+-- // LOGIC LOOPS (Mantidos e adaptados)
+-- // ----------------------------------------------------------------
+
+-- Loop: Near Farm
+spawn(function()
+    while task.wait() do
+        if _G.AutoFarmNear and _G.StartFarm then
+            pcall(function()
+                local Plr = game.Players.LocalPlayer
+                local Char = Plr.Character or Plr.CharacterAdded:Wait()
+                local Root = Char:FindFirstChild("HumanoidRootPart")
+                if not Root then return end
+                local ClosestEnemy = nil
+                local ShortestDistance = math.huge
+                if workspace:FindFirstChild("Enemies") then
+                    for _, e in pairs(workspace.Enemies:GetChildren()) do
+                        if e:FindFirstChild("Humanoid") and e:FindFirstChild("HumanoidRootPart") and e.Humanoid.Health > 0 then
+                            local dist = (Root.Position - e.HumanoidRootPart.Position).Magnitude
+                            if dist < ShortestDistance then
+                                ShortestDistance = dist
+                                ClosestEnemy = e
+                            end
+                        end
+                    end
+                end
+                if ClosestEnemy and (ShortestDistance <= _G.MaxFarmDistance) then
+                    repeat
+                        task.wait()
+                        if G and G.Kill then G.Kill(ClosestEnemy, true) end
+                    until not _G.AutoFarmNear or not _G.StartFarm or not ClosestEnemy.Parent or (ClosestEnemy:FindFirstChild("Humanoid") and ClosestEnemy.Humanoid.Health <= 0)
+                end
+            end)
+        end
+    end
+end)
+
+-- Loop: Bone Farm
 spawn(function()
     while task.wait() do
         if _G.AutoFarm_Bone and _G.StartFarm then
@@ -4002,16 +4077,9 @@ spawn(function()
                 local npcPos = CFrame.new(-9516.99, 172.01, 6078.46)
                 if _G.AcceptQuest and not QuestUI.Visible then      
                     local distToNPC = (npcPos.Position - hrp.Position).Magnitude
-                    if distToNPC > 5 then
-                        _tp(npcPos)
-                    else
+                    if distToNPC > 5 then _tp(npcPos) else
                         task.wait(0.5)
-                        local quests = {
-                            {"StartQuest","HauntedQuest1",1}, 
-                            {"StartQuest","HauntedQuest1",2},
-                            {"StartQuest","HauntedQuest2",1}, 
-                            {"StartQuest","HauntedQuest2",2}
-                        }
+                        local quests = {{"StartQuest","HauntedQuest1",1}, {"StartQuest","HauntedQuest1",2},{"StartQuest","HauntedQuest2",1}, {"StartQuest","HauntedQuest2",2}}
                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(quests[math.random(1,#quests)]))
                         task.wait(1)
                     end
@@ -4022,10 +4090,7 @@ spawn(function()
                             for _, mob in pairs(workspace.Enemies:GetChildren()) do      
                                 if mob.Name == mobName and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then      
                                     local dist = (mob.PrimaryPart.Position - hrp.Position).Magnitude      
-                                    if dist < shortest then 
-                                        shortest = dist 
-                                        closest = mob 
-                                    end      
+                                    if dist < shortest then shortest = dist closest = mob end      
                                 end      
                             end      
                         end      
@@ -4036,30 +4101,15 @@ spawn(function()
                         _tp(mob.PrimaryPart.CFrame)      
                         EquipWeapon(_G.SelectWeapon)
                         G.Kill(mob, true)
-                    else      
-                        _tp(CFrame.new(-9495.68, 453.58, 5977.34))      
-                    end      
+                    else _tp(CFrame.new(-9495.68, 453.58, 5977.34)) end      
                 end
             end)  
         end  
     end
 end)
 
+-- Loop: Level Farm
 local CurrentMob = nil
-local function GetNearestMob(TargetName)
-    local plr = game.Players.LocalPlayer
-    local Root = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-    if not Root then return nil end
-    local Closest, Dist = nil, math.huge    
-    for _, Mob in pairs(workspace.Enemies:GetChildren()) do    
-        if G.Alive(Mob) and Mob.Name == TargetName and Mob:FindFirstChild("HumanoidRootPart") then    
-            local d = (Mob.HumanoidRootPart.Position - Root.Position).Magnitude    
-            if d < Dist then Dist = d Closest = Mob end    
-        end    
-    end  
-    return Closest
-end
-
 spawn(function()
     while task.wait() do
         if _G.Level and _G.StartFarm then
@@ -4078,6 +4128,18 @@ spawn(function()
                     end      
                     return      
                 end      
+                
+                local function GetNearestMob(TargetName)
+                    local Closest, Dist = nil, math.huge    
+                    for _, Mob in pairs(workspace.Enemies:GetChildren()) do    
+                        if G.Alive(Mob) and Mob.Name == TargetName and Mob:FindFirstChild("HumanoidRootPart") then    
+                            local d = (Mob.HumanoidRootPart.Position - Root.Position).Magnitude    
+                            if d < Dist then Dist = d Closest = Mob end    
+                        end    
+                    end  
+                    return Closest
+                end
+
                 local Nearest = GetNearestMob(Q[1])  
                 if CurrentMob and G.Alive(CurrentMob) and CurrentMob.Parent then      
                     G.Kill(CurrentMob, true)      
@@ -4813,66 +4875,7 @@ spawn(function()
 	end;
 end);
 
-if World3 then
-b:AddSeperator("Bones");
 
--- AUTO RANDOM BONES
-b:AddToggle({
-    Title = "Auto Random Bone",
-    Default = false,
-    Callback = function(v)
-        _G.Auto_Random_Bone = v
-    end,
-})
-
-spawn(function()
-    while wait(Sec) do
-        if _G.Auto_Random_Bone then
-            replicated.Remotes.CommF_:InvokeServer("Bones","Buy",1,1)
-        end
-    end
-end)
-
--- AUTO SOUL REAPER
-b:AddToggle({
-    Title = "Auto Soul Reaper",
-    Default = false,
-    Callback = function(v)
-        _G.AutoHytHallow = v
-    end,
-})
-
-spawn(function()
-    while wait(Sec) do
-        if _G.AutoHytHallow then
-            pcall(function()
-
-                local mob = GetConnectionEnemies("Soul Reaper")
-
-                if mob then
-                    repeat task.wait()
-                        G.Kill(mob,_G.AutoHytHallow)
-                    until mob.Humanoid.Health <= 0 or not _G.AutoHytHallow
-
-                else
-                    if not GetBP("Hallow Essence") then
-                        repeat task.wait(.1)
-                            replicated.Remotes.CommF_:InvokeServer("Bones","Buy",1,1)
-                        until not _G.AutoHytHallow or GetBP("Hallow Essence")
-                    else
-                        local pos = CFrame.new(-8932.32,146.83,6062.55)
-                        repeat wait(.1)
-                            _tp(pos)
-                        until not _G.AutoHytHallow or plr.Character.HumanoidRootPart.CFrame == pos
-                        EquipWeapon("Hallow Essence")
-                    end
-                end
-
-            end)
-        end
-    end
-end)
-end
 
 
 T:AddSeperator("Settings");
