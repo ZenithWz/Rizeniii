@@ -2486,54 +2486,43 @@ end)
 -- TABS (somente nomes alterados)
 
 local y        = V:T("Main","rbxassetid://127561653320876")
-
 local x        = V:T("Quests/Boss","rbxassetid://10734975692")
-
 local m        = V:T("Race Upgrade","rbxassetid://10734897102")
-
 local R        = V:T("Get Itens/Upgrade","rbxassetid://10734975486")
-
-local VI       = V:T("Visuals And Esp","rbxassetid://10723346959")
-
+local VI       = V:T("Visuals/Esp","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
-
-
-local B        = V:T("Raid And Fruit","rbxassetid://10709790875")
-
+local B        = V:T("Raid/Fruit","rbxassetid://10709790875")
 local g        = V:T("Shop","rbxassetid://134556077676632")
+
+local F        = V:T("Bugs/Feedback","rbxassetid://10734896881")
 
 local c        = V:T("Misc","rbxassetid://10734950309")
 
+
 -- SECTIONS (somente nomes alterados)
-local b    = y:AddSection("Main");
 
+local b        = y:AddSection("Main")
 
-local D    = g:AddSection("Shop, Styles & Accessories");
+local D        = g:AddSection("Shop, Styles & Accessories")
 
-local j    = x:AddSection("Farm events");
-local TT   = x:AddSection("Fishing");
-local outros   = x:AddSection("Farm others");
+local j        = x:AddSection("Farm events")
+local TT       = x:AddSection("Fishing")
+local outros   = x:AddSection("Farm others")
 
+local h        = m:AddSection("Race V2/ V3 / V4")
+local nn       = m:AddSection("Upgrade V4")
 
+local RR       = R:AddSection("Swords & accessories")
 
+local VI_S     = VI:AddSection("ESP & World Visuals")
+local E        = q:AddSection("PVP, Movement & Aimbot")
 
-local h    = m:AddSection("Race V2/ V3 / V4");
+local FB       = F:AddSection("Bugs & Feedback")
 
-local nn    = m:AddSection("Upgrade V4");
+local T        = c:AddSection("Script Settings")
+local kk       = c:AddSection("Misc & Codes")
 
-local RR   = R:AddSection("Swords & accessories");
-
-
-
-local VI_S = VI:AddSection("ESP & World Visuals");
-local E    = q:AddSection("PVP, Movement & Aimbot");
-
-
-local T    = c:AddSection("Script Settings");
-local kk    = c:AddSection("Misc & Codes");
-
-local p    = B:AddSection("Raid & Fruits");
-
+local p        = B:AddSection("Raid & Fruits")
 
 
 -- Secção de Configurações manuais
