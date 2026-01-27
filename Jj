@@ -3855,8 +3855,6 @@ end)
 
 
 
-b:AddSeperator("Global Farming");
-
 
 -- // Configurações Iniciais
 _G.Level = false
@@ -8410,6 +8408,7 @@ FB:AddButton({
 
         local payload = {
             username = "Bug Reporter",
+            avatar_url = "https://cdn.discordapp.com/attachments/1465741799418236970/1465765969287839845/Tokyo_ghoul_oc.jpg",
             embeds = {{
                 title = "🐞 New Bug Report",
                 description = _G.BugReportText,
