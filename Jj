@@ -4309,32 +4309,93 @@ end
 b:AddSeperator("Chest")
 
 local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
 local LocalPlayer = Players.LocalPlayer
-local UncheckedChests, FirstRun = {}, true
-_G.ChestCount = 0
+local HttpService = game:GetService("HttpService")
 
-local function HasSpecialItem()
-    local SpecialItems = {"God's Chalice", "Sweet Chalice", "Fist of Darkness"}
-    for _, item in pairs(LocalPlayer.Backpack:GetChildren()) do
-        if table.find(SpecialItems, item.Name) then return true end
-    end
-    for _, item in pairs(LocalPlayer.Character:GetChildren()) do
-        if table.find(SpecialItems, item.Name) then return true end
+_G.ChestCount = 0
+_G.StopIfRareItem = GetSetting("StopRare_Save", false)
+_G.ChestHop = GetSetting("ChestHop_Save", false)
+_G.AutoFarmChest = GetSetting("AutoFarmChest_Save", false)
+_G.AutoCollectChests = false 
+
+local function SaveSettings()
+    if not _G.SaveData then _G.SaveData = {} end
+    writefile("Settings.json", HttpService:JSONEncode(_G.SaveData))
+end
+
+local function CheckRareItems()
+    local Rares = {"God's Chalice", "Sweet Chalice", "Fist of Darkness"}
+    for _, ItemName in pairs(Rares) do
+        if LocalPlayer.Backpack:FindFirstChild(ItemName) or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(ItemName)) then
+            return true
+        end
     end
     return false
 end
 
 local function ServerHop()
-    local Servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
-    for _, s in pairs(Servers.data) do
-        if s.playing < s.maxPlayers and s.id ~= game.JobId then
-            TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
-            break
+    local PlaceID = game.PlaceId
+    local AllIDs = {}
+    local Found = false
+    local Success, Error = pcall(function()
+        local Site = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceID .. "/servers/Public?sortOrder=Asc&limit=100"))
+        for i, v in pairs(Site.data) do
+            if v.playing < v.maxPlayers then
+                table.insert(AllIDs, v.id)
+            end
         end
+    end)
+    if not Success then return end
+    
+    local Num = math.random(1, #AllIDs)
+    if AllIDs[Num] ~= game.JobId then
+        TeleportService:TeleportToPlaceInstance(PlaceID, AllIDs[Num], LocalPlayer)
     end
 end
+
+b:AddToggle({
+    Title = "Stop If Rare Item",
+    Description = "Gods Chalice, Sweet Chalice, Fist",
+    Default = _G.StopIfRareItem,
+    Callback = function(Value)
+        _G.StopIfRareItem = Value
+        _G.SaveData["StopRare_Save"] = Value
+        SaveSettings()
+    end
+})
+
+b:AddToggle({
+    Title = "Auto Collect Chest Hop",
+    Description = "Hops after 25 Chests",
+    Default = _G.ChestHop,
+    Callback = function(Value)
+        _G.ChestHop = Value
+        _G.ChestCount = 0 
+        _G.SaveData["ChestHop_Save"] = Value
+        SaveSettings()
+    end
+})
+
+b:AddToggle({
+    Title = "Auto Collect Chest Tween",
+    Description = "",
+    Default = _G.AutoFarmChest,
+    Callback = function(Value)
+        _G.AutoFarmChest = Value
+        _G.SaveData["AutoFarmChest_Save"] = Value
+        SaveSettings()
+    end
+})
+
+b:AddToggle({
+    Title = "Auto Collect Chest Bypass",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoCollectChests = Value
+    end
+})
 
 local function toggleNoclip(Toggle)
     if LocalPlayer.Character then
@@ -4356,6 +4417,8 @@ local function Teleport(Goal)
     end
 end
 
+local UncheckedChests, FirstRun = {}, true
+
 local function getChestsSorted()
     if FirstRun then
         FirstRun = false
@@ -4365,12 +4428,14 @@ local function getChestsSorted()
             end
         end
     end
+    
     local Chests = {}
     for _, Chest in pairs(UncheckedChests) do
         if Chest:FindFirstChild("TouchInterest") then
             table.insert(Chests, Chest)
         end
     end
+    
     table.sort(Chests, function(a, b)
         local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if root then
@@ -4378,85 +4443,45 @@ local function getChestsSorted()
         end
         return false
     end)
+    
     return Chests
 end
 
-b:AddToggle({
-    Title = "Auto Collect Chest Tween",
-    Description = "",
-    Default = GetSetting("AutoFarmChest_Save", false),
-    Callback = function(I)
-        _G.AutoFarmChest = I
-        _G.SaveData["AutoFarmChest_Save"] = I
-        SaveSettings()
-    end,
-})
-
-b:AddToggle({
-    Title = "Auto Collect Chest Bypass",
-    Description = "",
-    Default = GetSetting("AutoCollectBypass_Save", false),
-    Callback = function(I)
-        _G.AutoCollectChests = I
-        _G.SaveData["AutoCollectBypass_Save"] = I
-        SaveSettings()
-    end
-})
-
-b:AddToggle({
-    Title = "Stop if Rare Item Found",
-    Description = "",
-    Default = GetSetting("StopRareItem_Save", false),
-    Callback = function(I)
-        _G.StopIfRareFound = I
-        _G.SaveData["StopRareItem_Save"] = I
-        SaveSettings()
-    end
-})
-
-b:AddToggle({
-    Title = "Auto Collect Chest Hop",
-    Description = "",
-    Default = GetSetting("AutoChestHop_Save", false),
-    Callback = function(I)
-        _G.AutoChestHop = I
-        _G.ChestCount = 0
-        _G.SaveData["AutoChestHop_Save"] = I
-        SaveSettings()
-    end
-})
-
 task.spawn(function()
     while task.wait(0.1) do
-        if _G.StopIfRareFound and HasSpecialItem() then
-            _G.AutoCollectChests = false
-            _G.AutoChestHop = false
-            _G.AutoFarmChest = false
-            _G.SaveData["AutoCollectBypass_Save"] = false
-            _G.SaveData["AutoChestHop_Save"] = false
-            _G.SaveData["AutoFarmChest_Save"] = false
-            SaveSettings()
-        else
-            if _G.AutoCollectChests or _G.AutoChestHop or _G.AutoFarmChest then
-                local Chests = getChestsSorted()
-                if #Chests > 0 then
-                    local targetChest = Chests[1]
-                    Teleport(targetChest.Position)
-                    
-                    if _G.AutoChestHop then
-                        repeat task.wait() until not targetChest:FindFirstChild("TouchInterest") or not _G.AutoChestHop
+        if _G.StopIfRareItem then
+            if CheckRareItems() then
+                _G.AutoFarmChest = false
+                _G.AutoCollectChests = false
+                _G.ChestHop = false
+                continue
+            end
+        end
+
+        if _G.AutoCollectChests or _G.AutoFarmChest then
+            local Chests = getChestsSorted()
+            if #Chests > 0 then
+                local TargetChest = Chests[1]
+                Teleport(TargetChest.Position)
+                
+                if _G.ChestHop then
+                    if not TargetChest:FindFirstChild("TouchInterest") or (LocalPlayer.Character.HumanoidRootPart.Position - TargetChest.Position).Magnitude < 10 then
                         _G.ChestCount = _G.ChestCount + 1
-                        
-                        if _G.ChestCount >= 25 then
-                            if _G.StopIfRareFound and HasSpecialItem() then
-                                _G.AutoChestHop = false
-                                _G.SaveData["AutoChestHop_Save"] = false
-                                SaveSettings()
-                            else
-                                ServerHop()
-                            end
+                    end
+                    
+                    if _G.ChestCount >= 25 then
+                        if _G.StopIfRareItem and CheckRareItems() then
+                            _G.AutoFarmChest = false
+                            _G.AutoCollectChests = false
+                            _G.ChestHop = false
+                        else
+                            ServerHop()
                         end
                     end
+                end
+            else
+                if _G.ChestHop then
+                    ServerHop()
                 end
             end
         end
@@ -4465,7 +4490,7 @@ end)
 
 task.spawn(function()
     while task.wait(13) do
-        if _G.AutoCollectChests or _G.AutoChestHop or _G.AutoFarmChest then
+        if _G.AutoCollectChests then
             if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
                 LocalPlayer.Character.Humanoid.Health = 0
             end
@@ -4476,6 +4501,7 @@ end)
 LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
 end)
+
 
 b:AddSeperator("Berry")
 
