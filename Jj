@@ -8390,13 +8390,11 @@ D:AddButton({ Title = "Buy Cyborg Race (2.5k)", Description = "", Callback = fun
 		replicated.Remotes.CommF_:InvokeServer("CyborgTrainer", " Buy");
 	end });
 
-local HttpService = game:GetService("HttpService")
-
 _G.BugReportText = ""
 
 FB:AddInput({
     Title = "Bug Report",
-    Description = "Please describe the bug clearly. This report will be sent to the developer for review and fixing.",
+    Description = "Please describe the bug clearly. This message will be sent to the developer for review and fixing.",
     PlaceHolder = "Example: Auto Farm stops working after teleport...",
     Default = "",
     Callback = function(Value)
@@ -8406,29 +8404,43 @@ FB:AddInput({
 
 FB:AddButton({
     Title = "Send Bug Report",
-    Description = "Click to send your report to the development team.",
+    Description = "Send this bug report to the developer.",
     Callback = function()
         if _G.BugReportText == "" then return end
 
-        local data = {
+        local payload = {
             username = "Bug Reporter",
             embeds = {{
                 title = "🐞 New Bug Report",
                 description = _G.BugReportText,
                 color = 16711680,
                 footer = {
-                    text = "Sent from in-game Bug/Feedback system"
+                    text = "Sent from executor Bug/Feedback system"
                 }
             }}
         }
 
-        local json = HttpService:JSONEncode(data)
+        local body = game:GetService("HttpService"):JSONEncode(payload)
 
-        HttpService:PostAsync(
-            "https://discord.com/api/webhooks/1465754474894332128/ZBobHvYEcEOYNW2L6padM9oXZT3I2ettjHpcjzyHk6A48Ik1efDmnyEjylu2rv06C6Kg",
-            json,
-            Enum.HttpContentType.ApplicationJson
-        )
+        local requestFunc =
+            request or
+            http_request or
+            syn and syn.request or
+            fluxus and fluxus.request
+
+        if not requestFunc then
+            warn("Executor does not support HTTP requests.")
+            return
+        end
+
+        requestFunc({
+            Url = "https://discord.com/api/webhooks/1465754474894332128/ZBobHvYEcEOYNW2L6padM9oXZT3I2ettjHpcjzyHk6A48Ik1efDmnyEjylu2rv06C6Kg",
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = body
+        })
     end
 })
 
