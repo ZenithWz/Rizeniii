@@ -2489,9 +2489,9 @@ local y        = V:T("Main","rbxassetid://127561653320876")
 
 local x        = V:T("Quests/Boss","rbxassetid://10734975692")
 
-local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
+local m        = V:T("Race Upgrade","rbxassetid://10734897102")
 
-local R        = V:T("Get Itens And Upgrade","rbxassetid://10734975486")
+local R        = V:T("Get Itens/Upgrade","rbxassetid://10734975486")
 
 local VI       = V:T("Visuals And Esp","rbxassetid://10723346959")
 
