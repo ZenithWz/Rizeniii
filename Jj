@@ -2492,7 +2492,7 @@ local R  = V:T("Get Itens And Upgrade","rbxassetid://10734975486")
 local VI = V:T("Visuals And Esp","rbxassetid://10723346959")
 local q  = V:T("Local Player","rbxassetid://98870151777863")
 local B  = V:T("Raid And Fruit","rbxassetid://10709790875")
-local Fg = V:T("Fishing","rbxassetid://10734975692")
+local Fg = V:T("Fishing","rbxassetid://127664059821666")
 local g  = V:T("Shop","rbxassetid://134556077676632")
 local F  = V:T("Bugs And Feedback","rbxassetid://10734896881")
 local c  = V:T("Misc","rbxassetid://10734950309")
@@ -2514,7 +2514,7 @@ local E      = q:AddSection("PVP, Movement & Aimbot")
 
 local p      = B:AddSection("Raid & Fruits")
 
-local FISH   = Fg:AddSection("Fishing")
+local FISH   = Fg:AddSection("Bait And Rod Select")
 
 local FB     = F:AddSection("Bugs & Feedback")
 
