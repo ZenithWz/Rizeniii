@@ -4306,39 +4306,36 @@ spawn(function()
     end
 end)
 end
-b:AddSeperator("Collect")
-
--- Botão Auto Collect Chest
-b:AddToggle({
-    Title = "Auto Collect Chest Tween",
-    Description = "",
-    -- 1. Carrega o estado salvo (ou false por padrão)
-    Default = GetSetting("AutoFarmChest_Save", false),
-    Callback = function(I)
-        _G.AutoFarmChest = I
-        
-        -- 2. Guarda na tabela de salvamento
-        _G.SaveData["AutoFarmChest_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
-        SaveSettings()
-    end,
-})
-
--- Toggle Auto Collect Chest Bypass
-b:AddToggle({
-    Title = "Auto Collect Chest Bypass",
-    Description = "",
-    Default = false,
-    Callback = function(I)
-        _G.AutoCollectChests = I
-    end
-})
+b:AddSeperator("Chest")
 
 local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
 local LocalPlayer = Players.LocalPlayer
+local UncheckedChests, FirstRun = {}, true
+_G.ChestCount = 0
 
--- [2] Função de Noclip
+local function HasSpecialItem()
+    local SpecialItems = {"God's Chalice", "Sweet Chalice", "Fist of Darkness"}
+    for _, item in pairs(LocalPlayer.Backpack:GetChildren()) do
+        if table.find(SpecialItems, item.Name) then return true end
+    end
+    for _, item in pairs(LocalPlayer.Character:GetChildren()) do
+        if table.find(SpecialItems, item.Name) then return true end
+    end
+    return false
+end
+
+local function ServerHop()
+    local Servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+    for _, s in pairs(Servers.data) do
+        if s.playing < s.maxPlayers and s.id ~= game.JobId then
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, LocalPlayer)
+            break
+        end
+    end
+end
+
 local function toggleNoclip(Toggle)
     if LocalPlayer.Character then
         for _, v in pairs(LocalPlayer.Character:GetChildren()) do
@@ -4349,7 +4346,6 @@ local function toggleNoclip(Toggle)
     end
 end
 
--- [3] Função de Teleporte Instantâneo
 local function Teleport(Goal)
     local Character = LocalPlayer.Character
     if Character and Character:FindFirstChild("HumanoidRootPart") then
@@ -4360,9 +4356,6 @@ local function Teleport(Goal)
     end
 end
 
--- [4] Busca e Ordenação de Baús
-local UncheckedChests, FirstRun = {}, true
-
 local function getChestsSorted()
     if FirstRun then
         FirstRun = false
@@ -4372,14 +4365,12 @@ local function getChestsSorted()
             end
         end
     end
-    
     local Chests = {}
     for _, Chest in pairs(UncheckedChests) do
         if Chest:FindFirstChild("TouchInterest") then
             table.insert(Chests, Chest)
         end
     end
-    
     table.sort(Chests, function(a, b)
         local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if root then
@@ -4387,26 +4378,88 @@ local function getChestsSorted()
         end
         return false
     end)
-    
     return Chests
 end
 
--- [5] Loop Principal de Coleta (rápido, 0.1s)
+b:AddToggle({
+    Title = "Auto Collect Chest Tween",
+    Description = "Collects chests using tween movement",
+    Default = GetSetting("AutoFarmChest_Save", false),
+    Callback = function(I)
+        _G.AutoFarmChest = I
+        _G.SaveData["AutoFarmChest_Save"] = I
+        SaveSettings()
+    end,
+})
+
+b:AddToggle({
+    Title = "Auto Collect Chest Bypass",
+    Description = "Fast teleport collection logic",
+    Default = GetSetting("AutoCollectBypass_Save", false),
+    Callback = function(I)
+        _G.AutoCollectChests = I
+        _G.SaveData["AutoCollectBypass_Save"] = I
+        SaveSettings()
+    end
+})
+
+b:AddToggle({
+    Title = "Stop if Rare Item Found",
+    Description = "Stops all chest farming if you get Chalice or Fist",
+    Default = GetSetting("StopRareItem_Save", false),
+    Callback = function(I)
+        _G.StopIfRareFound = I
+        _G.SaveData["StopRareItem_Save"] = I
+        SaveSettings()
+    end
+})
+
+b:AddToggle({
+    Title = "Auto Collect Chest Hop",
+    Description = "Collects 25 chests then changes server",
+    Default = GetSetting("AutoChestHop_Save", false),
+    Callback = function(I)
+        _G.AutoChestHop = I
+        _G.ChestCount = 0
+        _G.SaveData["AutoChestHop_Save"] = I
+        SaveSettings()
+    end
+})
+
 task.spawn(function()
     while task.wait(0.1) do
-        if _G.AutoCollectChests then
-            local Chests = getChestsSorted()
-            if #Chests > 0 then
-                Teleport(Chests[1].Position)
+        if _G.StopIfRareFound and HasSpecialItem() then
+            _G.AutoCollectChests = false
+            _G.AutoChestHop = false
+            _G.AutoFarmChest = false
+        else
+            if _G.AutoCollectChests or _G.AutoChestHop then
+                local Chests = getChestsSorted()
+                if #Chests > 0 then
+                    local targetChest = Chests[1]
+                    Teleport(targetChest.Position)
+                    
+                    if _G.AutoChestHop then
+                        repeat task.wait() until not targetChest:FindFirstChild("TouchInterest") or not _G.AutoChestHop
+                        _G.ChestCount = _G.ChestCount + 1
+                        
+                        if _G.ChestCount >= 25 then
+                            if _G.StopIfRareFound and HasSpecialItem() then
+                                _G.AutoChestHop = false
+                            else
+                                ServerHop()
+                            end
+                        end
+                    end
+                end
             end
         end
     end
 end)
 
--- [6] Reset Anti-Kick (separado, 13s de delay, só se toggle ligado)
 task.spawn(function()
     while task.wait(13) do
-        if _G.AutoCollectChests then
+        if _G.AutoCollectChests or _G.AutoChestHop then
             if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
                 LocalPlayer.Character.Humanoid.Health = 0
             end
@@ -4414,10 +4467,11 @@ task.spawn(function()
     end
 end)
 
--- Inicialização automática ao spawn
 LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
 end)
+
+b:AddSeperator("Berry")
 
 -- Botão Auto Collect Berry
 b:AddToggle({
