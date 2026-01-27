@@ -98,7 +98,7 @@ Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
 -- [[ 1. CARREGAMENTO DA NOVA UI (ModernUI/Diamond) ]] --
-local ModernUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Rizeniii/diamond/refs/heads/main/zero/main.luau"))()
+local ModernUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Rizeniii/diamond/main/zero/main"))()
 
 -- [[ 2. ADAPTADOR (DIAMOND HUB -> MODERN UI) ]] --
 local I = {}
