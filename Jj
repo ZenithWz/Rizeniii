@@ -2485,45 +2485,41 @@ end)
 
 -- TABS (somente nomes alterados)
 
-local y        = V:T("Main","rbxassetid://127561653320876")
-local x        = V:T("Quests And Boss","rbxassetid://10734975692")
-local m        = V:T("Race Upgrade","rbxassetid://10734897102")
-local R        = V:T("Get Itens And Upgrade","rbxassetid://10734975486")
-local VI       = V:T("Visuals And Esp","rbxassetid://10723346959")
-local q        = V:T("Local Player","rbxassetid://98870151777863")
-local B        = V:T("Raid And Fruit","rbxassetid://10709790875")
-local g        = V:T("Shop","rbxassetid://134556077676632")
+local y  = V:T("Main","rbxassetid://127561653320876")
+local x  = V:T("Quests And Boss","rbxassetid://10734975692")
+local m  = V:T("Race Upgrade","rbxassetid://10734897102")
+local R  = V:T("Get Itens And Upgrade","rbxassetid://10734975486")
+local VI = V:T("Visuals And Esp","rbxassetid://10723346959")
+local q  = V:T("Local Player","rbxassetid://98870151777863")
+local B  = V:T("Raid And Fruit","rbxassetid://10709790875")
+local Fg = V:T("Fishing","rbxassetid://10734975692")
+local g  = V:T("Shop","rbxassetid://134556077676632")
+local F  = V:T("Bugs And Feedback","rbxassetid://10734896881")
+local c  = V:T("Misc","rbxassetid://10734950309")
 
-local F        = V:T("Bugs And Feedback","rbxassetid://10734896881")
+local b      = y:AddSection("Main")
 
-local c        = V:T("Misc","rbxassetid://10734950309")
+local D      = g:AddSection("Shop, Styles & Accessories")
 
+local j      = x:AddSection("Farm events")
+local outros = x:AddSection("Farm others")
 
--- SECTIONS (somente nomes alterados)
+local h      = m:AddSection("Race V2 / V3 / V4")
+local nn     = m:AddSection("Upgrade V4")
 
-local b        = y:AddSection("Main")
+local RR     = R:AddSection("Swords & accessories")
 
-local D        = g:AddSection("Shop, Styles & Accessories")
+local VI_S   = VI:AddSection("ESP & World Visuals")
+local E      = q:AddSection("PVP, Movement & Aimbot")
 
-local j        = x:AddSection("Farm events")
-local TT       = x:AddSection("Fishing")
-local outros   = x:AddSection("Farm others")
+local p      = B:AddSection("Raid & Fruits")
 
-local h        = m:AddSection("Race V2/ V3 / V4")
-local nn       = m:AddSection("Upgrade V4")
+local FISH   = Fg:AddSection("Fishing")
 
-local RR       = R:AddSection("Swords & accessories")
+local FB     = F:AddSection("Bugs & Feedback")
 
-local VI_S     = VI:AddSection("ESP & World Visuals")
-local E        = q:AddSection("PVP, Movement & Aimbot")
-
-local FB       = F:AddSection("Bugs & Feedback")
-
-local T        = c:AddSection("Script Settings")
-local kk       = c:AddSection("Misc & Codes")
-
-local p        = B:AddSection("Raid & Fruits")
-
+local T      = c:AddSection("Script Settings")
+local kk     = c:AddSection("Misc & Codes")
 
 -- Secção de Configurações manuais
 local ConfigSection = c:AddSection("Manual Save")
@@ -3519,336 +3515,6 @@ end)
 if plr.Character then
     Root = plr.Character:WaitForChild("HumanoidRootPart")
 end
--- =========================================================
--- NOVO SISTEMA DE PESCA (COM SAVE SYSTEM INTEGRADO)
--- =========================================================
-
-local RS = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-
--- Definições de Serviços e Módulos Necessários
-local FishReplicated = RS:WaitForChild("FishReplicated")
-local FishingRequest = FishReplicated:WaitForChild("FishingRequest")
-local FishingClientConfig = require(FishReplicated:WaitForChild("FishingClient"):WaitForChild("Config"))
-local GetWaterHeight = require(RS:WaitForChild("Util"):WaitForChild("GetWaterHeightAtLocation"))
-
-local Net = RS:WaitForChild("Modules"):WaitForChild("Net")
-local CraftRemote = Net:WaitForChild("RF/Craft")
-local JobsRemote = Net:WaitForChild("RF/JobsRemoteFunction")
-local ToolAbilities = Net:WaitForChild("RF/JobToolAbilities")
-
--- =========================================================
--- CONFIGURAÇÃO DA NOTIFICAÇÃO CUSTOMIZADA (FULL BLACK)
--- =========================================================
-
--- Configurações Iniciais Globais (serão sobrescritas pelo Save se existirem)
-_G.SelectedRod = "Fishing Rod"
-_G.SelectedBait = "Basic Bait"
-_G.AutoBuyBait = false
-_G.AutoFishing = false
-_G.AutoFishingQuest = false
-_G.AutoQuestComplete = false
-_G.AutoSellFish = false
-_G.AutoSkillZ = false
-
-
--- 1. SELEÇÃO DE VARA
-TT:AddDropdown({
-    Title = "Select Fishing Rod",
-    Description = "",
-    Values = {
-        "Fishing Rod",
-        "Gold Rod",
-        "Shark Rod",
-        "Shell Rod",
-        "Treasure Rod"
-    },
-    -- Carrega a última vara salva, ou usa "Fishing Rod"
-    Default = GetSetting("Fish_SelectedRod", "Fishing Rod"), 
-    Callback = function(Value)
-        _G.SelectedRod = Value
-        -- Salva a nova escolha
-        _G.SaveData["Fish_SelectedRod"] = Value
-        SaveSettings()
-    end
-})
-
--- 2. SELEÇÃO DE ISCA
-TT:AddDropdown({
-    Title = "Select Bait",
-    Description = "",
-    Values = {
-        "Basic Bait",
-        "Kelp Bait",
-        "Good Bait",
-        "Abyssal Bait",
-        "Frozen Bait",
-        "Epic Bait",
-        "Carnivore Bait"
-    },
-    -- Carrega a última isca salva, ou usa "Basic Bait"
-    Default = GetSetting("Fish_SelectedBait", "Basic Bait"),
-    Callback = function(Value)
-        _G.SelectedBait = Value
-        -- Salva a nova escolha
-        _G.SaveData["Fish_SelectedBait"] = Value
-        SaveSettings()
-
-        if _G.AutoBuyBait then
-            pcall(function()
-                CraftRemote:InvokeServer("Craft", _G.SelectedBait, {})
-            end)
-        end
-    end
-})
-
--- 3. TOGGLE AUTO BUY BAIT
-TT:AddToggle({
-    Title = "Auto Buy Bait",
-    Description = "Crafta a isca selecionada automaticamente",
-    -- Carrega se estava ligado
-    Default = GetSetting("Fish_AutoBuyBait", false),
-    Callback = function(Value)
-        _G.AutoBuyBait = Value
-        -- Salva o estado
-        _G.SaveData["Fish_AutoBuyBait"] = Value
-        SaveSettings()
-
-        if Value then
-            pcall(function()
-                CraftRemote:InvokeServer("Craft", _G.SelectedBait, {})
-            end)
-        end
-    end
-})
-
-task.spawn(function()
-    while task.wait(2) do
-        if _G.AutoBuyBait and _G.SelectedBait then
-            pcall(function()
-                CraftRemote:InvokeServer("Craft", _G.SelectedBait, {})
-            end)
-        end
-    end
-end)
-
--- 4. TOGGLE AUTO FISHING (CAST/CATCH)
-TT:AddToggle({
-    Title = "Auto Fishing",
-    Description = "Lança e puxa a vara automaticamente",
-    -- Carrega se estava ligado
-    Default = GetSetting("Fish_AutoFishing", false),
-    Callback = function(Value)
-        _G.AutoFishing = Value
-        -- Salva o estado
-        _G.SaveData["Fish_AutoFishing"] = Value
-        SaveSettings()
-    end
-})
-
-task.spawn(function()
-    while task.wait(0.5) do
-        if _G.AutoFishing then
-            pcall(function()
-                local plr = Players.LocalPlayer
-                local char = plr.Character or plr.CharacterAdded:Wait()
-                local hrp = char:FindFirstChild("HumanoidRootPart")
-                
-                if not hrp then return end
-
-                local equippedTool = char:FindFirstChildOfClass("Tool")
-                
-                -- Verifica se a vara selecionada está equipada
-                if _G.SelectedRod and (not equippedTool or equippedTool.Name ~= _G.SelectedRod) then
-                    local rodInBag = plr.Backpack:FindFirstChild(_G.SelectedRod)
-                    
-                    if rodInBag then
-                        -- Se tiver na mochila, equipa sozinho
-                        char.Humanoid:EquipTool(rodInBag)
-                        equippedTool = rodInBag
-                    else
-                        -- Notificação de erro se não tiver a vara
-                        pcall(function()
-                            if V and V.Notify then
-                                V:Notify({
-                                    Title = "Erro",
-                                    Body = "Equipe a vara: " .. tostring(_G.SelectedRod),
-                                    Icon = {"rbxassetid://105245380363493"},
-                                    Duration = 3
-                                })
-                            end
-                        end)
-                        return -- Para a execução aqui
-                    end
-                end
-
-                if equippedTool then
-                    local maxLaunch = FishingClientConfig.Rod.MaxLaunchDistance
-                    local waterHeight = GetWaterHeight(hrp.Position)
-                    
-                    local rayOrigin = char.Head.Position
-                    local rayDirection = hrp.CFrame.LookVector * maxLaunch
-                    
-                    local ignoreList = {char, Workspace.Characters, Workspace.Enemies}
-                    local _, hitPos = Workspace:FindPartOnRayWithIgnoreList(Ray.new(rayOrigin, rayDirection), ignoreList)
-                    
-                    local targetPos = hitPos and Vector3.new(hitPos.X, math.max(hitPos.Y, waterHeight), hitPos.Z)
-                    
-                    local state = equippedTool:GetAttribute("State")
-                    local serverState = equippedTool:GetAttribute("ServerState")
-
-                    if targetPos and (state == "ReeledIn" or serverState == "ReeledIn") then
-                        FishingRequest:InvokeServer("StartCasting")
-                        task.wait()
-                        FishingRequest:InvokeServer("CastLineAtLocation", targetPos, 100, true)
-                    
-                    elseif serverState == "Biting" then
-                        FishingRequest:InvokeServer("Catching", true)
-                        task.wait(0.1)
-                        FishingRequest:InvokeServer("Catch", 1)
-                        
-                        -- [[ NOTIFICAÇÃO DA UI ]] --
-                        pcall(function()
-                            if V and V.Notify then
-                                V:Notify({
-                                    Title = "Auto Fish",
-                                    Body = "🎣 New item captured",
-                                    Icon = {"rbxassetid://127664059821666"},
-                                    Duration = 3
-                                })
-                            end
-                        end)
-                    end
-                end
-            end)
-        end
-    end
-end)
-
--- 5. AUTO QUEST FISHING
-TT:AddToggle({
-    Title = "Auto Quest Fishing",
-    Description = "Pega missão com o NPC Angler",
-    -- Carrega se estava ligado
-    Default = GetSetting("Fish_AutoQuest", false),
-    Callback = function(Value)
-        _G.AutoFishingQuest = Value
-        -- Salva o estado
-        _G.SaveData["Fish_AutoQuest"] = Value
-        SaveSettings()
-    end
-})
-
-local function HasQuest()
-    local playerGui = Players.LocalPlayer:FindFirstChild("PlayerGui")
-    if playerGui then
-        local questGui = playerGui:FindFirstChild("Quest") or playerGui:FindFirstChild("QuestGui")
-        if questGui and questGui:FindFirstChild("Container") and questGui.Container:FindFirstChild("QuestTitle") then
-            return true
-        end
-    end
-    return false
-end
-
-task.spawn(function()
-    while task.wait(1) do
-        if _G.AutoFishingQuest then
-            pcall(function()
-                if not HasQuest() then
-                    JobsRemote:InvokeServer("FishingNPC", "Angler", "AskQuest")
-                end
-            end)
-        end
-    end
-end)
-
--- 6. AUTO COMPLETE QUEST
-TT:AddToggle({
-    Title = "Auto Complete Quest",
-    Description = "Entrega a quest automaticamente",
-    -- Carrega se estava ligado
-    Default = GetSetting("Fish_AutoComplete", false),
-    Callback = function(Value)
-        _G.AutoQuestComplete = Value
-        -- Salva o estado
-        _G.SaveData["Fish_AutoComplete"] = Value
-        SaveSettings()
-
-        if Value then
-            pcall(function()
-                JobsRemote:InvokeServer("FishingNPC", "FinishQuest")
-            end)
-        end
-    end
-})
-
-task.spawn(function()
-    while task.wait(5) do
-        if _G.AutoQuestComplete then
-            pcall(function()
-                JobsRemote:InvokeServer("FishingNPC", "FinishQuest")
-            end)
-        end
-    end
-end)
-
--- 7. AUTO SELL FISH
-TT:AddToggle({
-    Title = "Auto Sell Fish",
-    Description = "Vende peixes automaticamente",
-    -- Carrega se estava ligado
-    Default = GetSetting("Fish_AutoSell", false),
-    Callback = function(Value)
-        _G.AutoSellFish = Value
-        -- Salva o estado
-        _G.SaveData["Fish_AutoSell"] = Value
-        SaveSettings()
-
-        if Value then
-            pcall(function()
-                JobsRemote:InvokeServer("FishingNPC", "SellFish")
-            end)
-        end
-    end
-})
-
-task.spawn(function()
-    while task.wait(5) do
-        if _G.AutoSellFish then
-            pcall(function()
-                JobsRemote:InvokeServer("FishingNPC", "SellFish")
-            end)
-        end
-    end
-end)
-
--- 8. AUTO SPAM SKILL Z
-TT:AddToggle({
-    Title = "Auto use skill of the rod",
-    Description = "Spamma a skill Z da ferramenta equipada",
-    -- Carrega se estava ligado
-    Default = GetSetting("Fish_AutoSkillZ", false),
-    Callback = function(Value)
-        _G.AutoSkillZ = Value
-        -- Salva o estado
-        _G.SaveData["Fish_AutoSkillZ"] = Value
-        SaveSettings()
-    end
-})
-
-task.spawn(function()
-    while task.wait(0.5) do
-        if _G.AutoSkillZ then
-            pcall(function()
-                ToolAbilities:InvokeServer("Z", true)
-            end)
-        end
-    end
-end)
 
 
 
@@ -8256,6 +7922,345 @@ task.spawn(function()
         end
     end)
 end)
+
+-- =========================================================
+-- NOVO SISTEMA DE PESCA (COM SAVE SYSTEM INTEGRADO)
+-- =========================================================
+
+local RS = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+
+-- Definições de Serviços e Módulos Necessários
+local FishReplicated = RS:WaitForChild("FishReplicated")
+local FishingRequest = FishReplicated:WaitForChild("FishingRequest")
+local FishingClientConfig = require(FishReplicated:WaitForChild("FishingClient"):WaitForChild("Config"))
+local GetWaterHeight = require(RS:WaitForChild("Util"):WaitForChild("GetWaterHeightAtLocation"))
+
+local Net = RS:WaitForChild("Modules"):WaitForChild("Net")
+local CraftRemote = Net:WaitForChild("RF/Craft")
+local JobsRemote = Net:WaitForChild("RF/JobsRemoteFunction")
+local ToolAbilities = Net:WaitForChild("RF/JobToolAbilities")
+
+-- =========================================================
+-- CONFIGURAÇÃO DA NOTIFICAÇÃO CUSTOMIZADA (FULL BLACK)
+-- =========================================================
+
+-- Configurações Iniciais Globais (serão sobrescritas pelo Save se existirem)
+_G.SelectedRod = "Fishing Rod"
+_G.SelectedBait = "Basic Bait"
+_G.AutoBuyBait = false
+_G.AutoFishing = false
+_G.AutoFishingQuest = false
+_G.AutoQuestComplete = false
+_G.AutoSellFish = false
+_G.AutoSkillZ = false
+
+
+-- 1. SELEÇÃO DE VARA
+FISH:AddDropdown({
+    Title = "Select Fishing Rod",
+    Description = "",
+    Values = {
+        "Fishing Rod",
+        "Gold Rod",
+        "Shark Rod",
+        "Shell Rod",
+        "Treasure Rod"
+    },
+    -- Carrega a última vara salva, ou usa "Fishing Rod"
+    Default = GetSetting("Fish_SelectedRod", "Fishing Rod"), 
+    Callback = function(Value)
+        _G.SelectedRod = Value
+        -- Salva a nova escolha
+        _G.SaveData["Fish_SelectedRod"] = Value
+        SaveSettings()
+    end
+})
+
+-- 2. SELEÇÃO DE ISCA
+FISH:AddDropdown({
+    Title = "Select Bait",
+    Description = "",
+    Values = {
+        "Basic Bait",
+        "Kelp Bait",
+        "Good Bait",
+        "Abyssal Bait",
+        "Frozen Bait",
+        "Epic Bait",
+        "Carnivore Bait"
+    },
+    -- Carrega a última isca salva, ou usa "Basic Bait"
+    Default = GetSetting("Fish_SelectedBait", "Basic Bait"),
+    Callback = function(Value)
+        _G.SelectedBait = Value
+        -- Salva a nova escolha
+        _G.SaveData["Fish_SelectedBait"] = Value
+        SaveSettings()
+
+        if _G.AutoBuyBait then
+            pcall(function()
+                CraftRemote:InvokeServer("Craft", _G.SelectedBait, {})
+            end)
+        end
+    end
+})
+
+
+
+FISH:AddSeperator("Fishing");
+
+-- 4. TOGGLE AUTO FISHING (CAST/CATCH)
+FISH:AddToggle({
+    Title = "Auto Fishing",
+    Description = "Lança e puxa a vara automaticamente",
+    -- Carrega se estava ligado
+    Default = GetSetting("Fish_AutoFishing", false),
+    Callback = function(Value)
+        _G.AutoFishing = Value
+        -- Salva o estado
+        _G.SaveData["Fish_AutoFishing"] = Value
+        SaveSettings()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) do
+        if _G.AutoFishing then
+            pcall(function()
+                local plr = Players.LocalPlayer
+                local char = plr.Character or plr.CharacterAdded:Wait()
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                
+                if not hrp then return end
+
+                local equippedTool = char:FindFirstChildOfClass("Tool")
+                
+                -- Verifica se a vara selecionada está equipada
+                if _G.SelectedRod and (not equippedTool or equippedTool.Name ~= _G.SelectedRod) then
+                    local rodInBag = plr.Backpack:FindFirstChild(_G.SelectedRod)
+                    
+                    if rodInBag then
+                        -- Se tiver na mochila, equipa sozinho
+                        char.Humanoid:EquipTool(rodInBag)
+                        equippedTool = rodInBag
+                    else
+                        -- Notificação de erro se não tiver a vara
+                        pcall(function()
+                            if V and V.Notify then
+                                V:Notify({
+                                    Title = "Erro",
+                                    Body = "Equipe a vara: " .. tostring(_G.SelectedRod),
+                                    Icon = {"rbxassetid://105245380363493"},
+                                    Duration = 3
+                                })
+                            end
+                        end)
+                        return -- Para a execução aqui
+                    end
+                end
+
+                if equippedTool then
+                    local maxLaunch = FishingClientConfig.Rod.MaxLaunchDistance
+                    local waterHeight = GetWaterHeight(hrp.Position)
+                    
+                    local rayOrigin = char.Head.Position
+                    local rayDirection = hrp.CFrame.LookVector * maxLaunch
+                    
+                    local ignoreList = {char, Workspace.Characters, Workspace.Enemies}
+                    local _, hitPos = Workspace:FindPartOnRayWithIgnoreList(Ray.new(rayOrigin, rayDirection), ignoreList)
+                    
+                    local targetPos = hitPos and Vector3.new(hitPos.X, math.max(hitPos.Y, waterHeight), hitPos.Z)
+                    
+                    local state = equippedTool:GetAttribute("State")
+                    local serverState = equippedTool:GetAttribute("ServerState")
+
+                    if targetPos and (state == "ReeledIn" or serverState == "ReeledIn") then
+                        FishingRequest:InvokeServer("StartCasting")
+                        task.wait()
+                        FishingRequest:InvokeServer("CastLineAtLocation", targetPos, 100, true)
+                    
+                    elseif serverState == "Biting" then
+                        FishingRequest:InvokeServer("Catching", true)
+                        task.wait(0.1)
+                        FishingRequest:InvokeServer("Catch", 1)
+                        
+                        -- [[ NOTIFICAÇÃO DA UI ]] --
+                        pcall(function()
+                            if V and V.Notify then
+                                V:Notify({
+                                    Title = "Auto Fish",
+                                    Body = "🎣 New item captured",
+                                    Icon = {"rbxassetid://127664059821666"},
+                                    Duration = 3
+                                })
+                            end
+                        end)
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- 3. TOGGLE AUTO BUY BAIT
+FISH:AddToggle({
+    Title = "Auto Buy Bait",
+    Description = "Crafta a isca selecionada automaticamente",
+    -- Carrega se estava ligado
+    Default = GetSetting("Fish_AutoBuyBait", false),
+    Callback = function(Value)
+        _G.AutoBuyBait = Value
+        -- Salva o estado
+        _G.SaveData["Fish_AutoBuyBait"] = Value
+        SaveSettings()
+
+        if Value then
+            pcall(function()
+                CraftRemote:InvokeServer("Craft", _G.SelectedBait, {})
+            end)
+        end
+    end
+})
+task.spawn(function()
+    while task.wait(2) do
+        if _G.AutoBuyBait and _G.SelectedBait then
+            pcall(function()
+                CraftRemote:InvokeServer("Craft", _G.SelectedBait, {})
+            end)
+        end
+    end
+end)
+
+FISH:AddSeperator("Angler Quest");
+
+-- 5. AUTO QUEST FISHING
+FISH:AddToggle({
+    Title = "Auto Quest Fishing",
+    Description = "Pega missão com o NPC Angler",
+    -- Carrega se estava ligado
+    Default = GetSetting("Fish_AutoQuest", false),
+    Callback = function(Value)
+        _G.AutoFishingQuest = Value
+        -- Salva o estado
+        _G.SaveData["Fish_AutoQuest"] = Value
+        SaveSettings()
+    end
+})
+
+local function HasQuest()
+    local playerGui = Players.LocalPlayer:FindFirstChild("PlayerGui")
+    if playerGui then
+        local questGui = playerGui:FindFirstChild("Quest") or playerGui:FindFirstChild("QuestGui")
+        if questGui and questGui:FindFirstChild("Container") and questGui.Container:FindFirstChild("QuestTitle") then
+            return true
+        end
+    end
+    return false
+end
+
+task.spawn(function()
+    while task.wait(1) do
+        if _G.AutoFishingQuest then
+            pcall(function()
+                if not HasQuest() then
+                    JobsRemote:InvokeServer("FishingNPC", "Angler", "AskQuest")
+                end
+            end)
+        end
+    end
+end)
+
+-- 6. AUTO COMPLETE QUEST
+FISH:AddToggle({
+    Title = "Auto Complete Quest",
+    Description = "Entrega a quest automaticamente",
+    -- Carrega se estava ligado
+    Default = GetSetting("Fish_AutoComplete", false),
+    Callback = function(Value)
+        _G.AutoQuestComplete = Value
+        -- Salva o estado
+        _G.SaveData["Fish_AutoComplete"] = Value
+        SaveSettings()
+
+        if Value then
+            pcall(function()
+                JobsRemote:InvokeServer("FishingNPC", "FinishQuest")
+            end)
+        end
+    end
+})
+
+task.spawn(function()
+    while task.wait(5) do
+        if _G.AutoQuestComplete then
+            pcall(function()
+                JobsRemote:InvokeServer("FishingNPC", "FinishQuest")
+            end)
+        end
+    end
+end)
+
+D:AddSeperator("Misc Fishing");
+
+-- 7. AUTO SELL FISH
+FISH:AddToggle({
+    Title = "Auto Sell Fish",
+    Description = "Vende peixes automaticamente",
+    -- Carrega se estava ligado
+    Default = GetSetting("Fish_AutoSell", false),
+    Callback = function(Value)
+        _G.AutoSellFish = Value
+        -- Salva o estado
+        _G.SaveData["Fish_AutoSell"] = Value
+        SaveSettings()
+
+        if Value then
+            pcall(function()
+                JobsRemote:InvokeServer("FishingNPC", "SellFish")
+            end)
+        end
+    end
+})
+
+task.spawn(function()
+    while task.wait(5) do
+        if _G.AutoSellFish then
+            pcall(function()
+                JobsRemote:InvokeServer("FishingNPC", "SellFish")
+            end)
+        end
+    end
+end)
+
+-- 8. AUTO SPAM SKILL Z
+FISH:AddToggle({
+    Title = "Auto use skill of the rod",
+    Description = "Spamma a skill Z da ferramenta equipada",
+    -- Carrega se estava ligado
+    Default = GetSetting("Fish_AutoSkillZ", false),
+    Callback = function(Value)
+        _G.AutoSkillZ = Value
+        -- Salva o estado
+        _G.SaveData["Fish_AutoSkillZ"] = Value
+        SaveSettings()
+    end
+})
+
+task.spawn(function()
+    while task.wait(0.5) do
+        if _G.AutoSkillZ then
+            pcall(function()
+                ToolAbilities:InvokeServer("Z", true)
+            end)
+        end
+    end
+end)
+
 
 D:AddSeperator("Shop Options");
 D:AddButton({ Title = "Buy Buso", Description = "", Callback = function()
