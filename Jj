@@ -2485,20 +2485,24 @@ end)
 
 -- TABS (somente nomes alterados)
 
-local g        = V:T("Shop","rbxassetid://134556077676632")
 local y        = V:T("Main","rbxassetid://127561653320876")
-local c        = V:T("Settings","rbxassetid://10734950309")
 
 local x        = V:T("Quests/Boss","rbxassetid://10734975692")
 
-
 local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
 
+local R        = V:T("Get Itens And Upgrade","rbxassetid://10734975486")
+
 local VI       = V:T("Visuals And Esp","rbxassetid://10723346959")
+
 local q        = V:T("Local Player","rbxassetid://98870151777863")
 
-local R        = V:T("Get Itens And Upgrade","rbxassetid://10734975486")
+
 local B        = V:T("Raid And Fruit","rbxassetid://10709790875")
+
+local g        = V:T("Shop","rbxassetid://134556077676632")
+
+local c        = V:T("Misc","rbxassetid://10734950309")
 
 -- SECTIONS (somente nomes alterados)
 local b    = y:AddSection("Main");
@@ -4489,100 +4493,6 @@ spawn(function()
                 end
             end)
         end
-    end
-end)
-
---// SERVICES
-local Players = game:GetService("Players")
-local CollectionService = game:GetService("CollectionService")
-local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
-
-local Player = Players.LocalPlayer
-local PlaceId = game.PlaceId
-
---// AUTO BERRY STATE (LOAD SAVE)
-_G.AutoBerry = GetSetting("AutoBerry_Save", false)
-
---// TOGGLE AUTO COLLECT BERRY (COM SAVE)
-b:AddToggle({
-    Title = "Auto Collect Berry Hop",
-    Description = "",
-    Default = _G.AutoBerry,
-    Callback = function(Value)
-        _G.AutoBerry = Value
-        _G.SaveData["AutoBerry_Save"] = Value
-        SaveSettings()
-    end
-})
-
---// SERVER HOP FUNCTION
-local function ServerHop()
-    pcall(function()
-        local Servers = {}
-        local req = game:HttpGet(
-            "https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
-        )
-        local data = HttpService:JSONDecode(req)
-
-        for _, v in pairs(data.data) do
-            if v.playing < v.maxPlayers then
-                table.insert(Servers, v.id)
-            end
-        end
-
-        if #Servers > 0 then
-            TeleportService:TeleportToPlaceInstance(
-                PlaceId,
-                Servers[math.random(1, #Servers)],
-                Player
-            )
-        end
-    end)
-end
-
---// AUTO COLLECT BERRY LOOP
-task.spawn(function()
-    while task.wait(0.4) do
-        if not _G.AutoBerry then continue end
-
-        pcall(function()
-            local Character = Player.Character or Player.CharacterAdded:Wait()
-            local BerryBushes = CollectionService:GetTagged("BerryBush")
-
-            -- Se não existir berry → server hop
-            if #BerryBushes == 0 then
-                ServerHop()
-                return
-            end
-
-            for _, Bush in ipairs(BerryBushes) do
-                if not _G.AutoBerry then break end
-                if not Bush or not Bush.Parent then continue end
-
-                -- Teleporta até o bush
-                _tp(Bush:GetPivot())
-                task.wait(0.1)
-
-                -- Coleta berries do bush
-                for _, Berry in ipairs(Bush:GetChildren()) do
-                    if not _G.AutoBerry then break end
-
-                    local Prompt = Berry:FindFirstChildWhichIsA("ProximityPrompt", true)
-                    if Prompt and Prompt.Enabled then
-                        _tp(Berry:GetPivot())
-                        fireproximityprompt(Prompt, math.huge)
-                        task.wait(0.1)
-                    end
-                end
-            end
-
-            -- Checagem final
-            task.wait(1)
-            if #CollectionService:GetTagged("BerryBush") == 0 then
-                ServerHop()
-            end
-        end)
     end
 end)
 
