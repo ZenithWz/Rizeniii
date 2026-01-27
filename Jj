@@ -3892,10 +3892,11 @@ end
 -- // UI SECTION: TOGGLES
 -- // ----------------------------------------------------------------
 
+-- // 1. Auto Farm Level
 b:AddToggle({
     Title = "Auto Farm Level",
-    Description = "Automatically completes quests to level up your character.",
-    Default = false,
+    Description = "Automatically accepts quests and levels up your character.",
+    Default = _G.Level or false,
     Callback = function(v)
         _G.Level = v
         _G.StartFarm = v
@@ -3903,13 +3904,16 @@ b:AddToggle({
             _G.AutoFarm_Bone = false
             _G.AutoFarmNear = false
         end
+        -- Opcional: Salvar configuração se tiver sistema de save
+        -- SaveSettings() 
     end
 })
 
+-- // 2. Farm Mobs Nearest
 b:AddToggle({
     Title = "Farm Mobs Nearest",
-    Description = "Automatically attacks the closest enemies within range.",
-    Default = false,
+    Description = "Targets and attacks the closest enemies around you.",
+    Default = _G.AutoFarmNear or false,
     Callback = function(v)
         _G.AutoFarmNear = v
         _G.StartFarm = v
@@ -3920,11 +3924,15 @@ b:AddToggle({
     end
 })
 
+
+
 if World3 then
+b:AddSeperator("Bones Farming");
+-- // 3. Auto Farm Bone
 b:AddToggle({
     Title = "Auto Farm Bone",
-    Description = "Farms bones efficiently at the Haunted Castle area.",
-    Default = false,
+    Description = "Travels to Haunted Castle to farm bones from skeletons.",
+    Default = _G.AutoFarm_Bone or false,
     Callback = function(v)
         _G.AutoFarm_Bone = v
         _G.StartFarm = v
