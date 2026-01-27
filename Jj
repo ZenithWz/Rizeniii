@@ -7178,8 +7178,6 @@ end
 
 
 
-
-end
 p:AddSeperator("Raiding");
 e = {
 		"Flame",
