@@ -687,7 +687,7 @@ _G = _G or {}
 _B = false
 PosMon = nil
 
-_G.BringRange = _G.BringRange or 220
+_G.BringRange = _G.BringRange or 180
 _G.MaxBringMobs = _G.MaxBringMobs or 3 -- LIMITE DE MOBS
 
 _G.FarmPriorityElf = _G.FarmPriorityElf or false
@@ -3866,31 +3866,7 @@ end)
 
 
 
-b:AddSeperator("Farming")
-b:AddDropdown({
-    Title = "Select Weapon",
-    Description = "",
-    Values = {"Melee","Sword"}, -- Apenas essas duas agora
-    Default = "Melee",
-    Multi = false,
-    Callback = function(I)
-        _G.ChooseWP = I
-    end,
-})
-
-spawn(function()
-    while wait(Sec) do
-        pcall(function()
-            for _, e in pairs(plr.Backpack:GetChildren()) do
-                if e.ToolTip == _G.ChooseWP then
-                    if plr.Backpack:FindFirstChild(e.Name) then
-                        _G.SelectWeapon = e.Name
-                    end
-                end
-            end
-        end)
-    end
-end)
+b:AddSeperator("Global Farming");
 
 
 -- // Configurações Iniciais
@@ -3944,6 +3920,7 @@ b:AddToggle({
     end
 })
 
+if World3 then
 b:AddToggle({
     Title = "Auto Farm Bone",
     Description = "Farms bones efficiently at the Haunted Castle area.",
@@ -3967,8 +3944,6 @@ b:AddToggle({
     end
 })
 
-if World3 then
-b:AddSeperator("Bones");
 
 -- AUTO RANDOM BONES
 b:AddToggle({
@@ -4881,6 +4856,30 @@ end);
 T:AddSeperator("Settings");
 
 
+T:AddDropdown({
+    Title = "Select Weapon",
+    Description = "",
+    Values = {"Melee","Sword"}, -- Apenas essas duas agora
+    Default = "Melee",
+    Multi = false,
+    Callback = function(I)
+        _G.ChooseWP = I
+    end,
+})
+
+spawn(function()
+    while wait(Sec) do
+        pcall(function()
+            for _, e in pairs(plr.Backpack:GetChildren()) do
+                if e.ToolTip == _G.ChooseWP then
+                    if plr.Backpack:FindFirstChild(e.Name) then
+                        _G.SelectWeapon = e.Name
+                    end
+                end
+            end
+        end)
+    end
+end)
 
 T:AddToggle({
 	Title = "Auto Attack",
@@ -5025,7 +5024,7 @@ T:AddSeperator("Select")
 T:AddInput({
     Title = "Bring Mobs Range",
     Description = "",
-    PlaceHolder = "220",
+    PlaceHolder = "180",
     Default = tostring(_G.BringRange),
     Callback = function(Value)
         local num = tonumber(Value)
