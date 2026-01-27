@@ -4383,7 +4383,7 @@ end
 
 b:AddToggle({
     Title = "Auto Collect Chest Tween",
-    Description = "Collects chests using tween movement",
+    Description = "",
     Default = GetSetting("AutoFarmChest_Save", false),
     Callback = function(I)
         _G.AutoFarmChest = I
@@ -4394,7 +4394,7 @@ b:AddToggle({
 
 b:AddToggle({
     Title = "Auto Collect Chest Bypass",
-    Description = "Fast teleport collection logic",
+    Description = "",
     Default = GetSetting("AutoCollectBypass_Save", false),
     Callback = function(I)
         _G.AutoCollectChests = I
@@ -4405,7 +4405,7 @@ b:AddToggle({
 
 b:AddToggle({
     Title = "Stop if Rare Item Found",
-    Description = "Stops all chest farming if you get Chalice or Fist",
+    Description = "",
     Default = GetSetting("StopRareItem_Save", false),
     Callback = function(I)
         _G.StopIfRareFound = I
@@ -4416,7 +4416,7 @@ b:AddToggle({
 
 b:AddToggle({
     Title = "Auto Collect Chest Hop",
-    Description = "Collects 25 chests then changes server",
+    Description = "",
     Default = GetSetting("AutoChestHop_Save", false),
     Callback = function(I)
         _G.AutoChestHop = I
@@ -4432,8 +4432,12 @@ task.spawn(function()
             _G.AutoCollectChests = false
             _G.AutoChestHop = false
             _G.AutoFarmChest = false
+            _G.SaveData["AutoCollectBypass_Save"] = false
+            _G.SaveData["AutoChestHop_Save"] = false
+            _G.SaveData["AutoFarmChest_Save"] = false
+            SaveSettings()
         else
-            if _G.AutoCollectChests or _G.AutoChestHop then
+            if _G.AutoCollectChests or _G.AutoChestHop or _G.AutoFarmChest then
                 local Chests = getChestsSorted()
                 if #Chests > 0 then
                     local targetChest = Chests[1]
@@ -4446,6 +4450,8 @@ task.spawn(function()
                         if _G.ChestCount >= 25 then
                             if _G.StopIfRareFound and HasSpecialItem() then
                                 _G.AutoChestHop = false
+                                _G.SaveData["AutoChestHop_Save"] = false
+                                SaveSettings()
                             else
                                 ServerHop()
                             end
@@ -4459,7 +4465,7 @@ end)
 
 task.spawn(function()
     while task.wait(13) do
-        if _G.AutoCollectChests or _G.AutoChestHop then
+        if _G.AutoCollectChests or _G.AutoChestHop or _G.AutoFarmChest then
             if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
                 LocalPlayer.Character.Humanoid.Health = 0
             end
