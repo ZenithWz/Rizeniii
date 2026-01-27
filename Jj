@@ -679,38 +679,147 @@ statsSetings = function(I, e)
 
 
 
-BringEnemy = function()
-    if not _B or not PosMon then return end
-    if plr then sethiddenproperty(plr, "SimulationRadius", math.huge) end
+--==================================================
+-- VARIÁVEIS DE CONTROLE NECESSÁRIAS
+--==================================================
+_G = _G or {}
 
-    for _, e in ipairs(workspace.Enemies:GetChildren()) do
-        local h = e:FindFirstChild("Humanoid")
-        local r = e.PrimaryPart
-        if h and r and h.Health > 0 and (r.Position - PosMon).Magnitude <= 175 then
-            r.CFrame = CFrame.new(PosMon)
-            r.CanCollide = true
-            h.WalkSpeed = 16
-            h.JumpPower = 50
-        end
+_B = false
+PosMon = nil
+
+_G.BringRange = _G.BringRange or 220
+_G.MaxBringMobs = _G.MaxBringMobs or 3 -- LIMITE DE MOBS
+
+_G.FarmPriorityElf = _G.FarmPriorityElf or false
+_G.FarmMastery_S   = _G.FarmMastery_S or false
+
+local TweenService = game:GetService("TweenService")
+local TweenInfoBring = TweenInfo.new(
+    0.45, -- velocidade do tween
+    Enum.EasingStyle.Linear,
+    Enum.EasingDirection.Out
+)
+
+--==================================================
+-- FUNÇÃO: VERIFICA SE QUALQUER FARM ESTÁ ATIVO
+--==================================================
+local function FarmAtivo()
+    -- PRIORIDADE ABSOLUTA (ELF)
+    if _G.FarmPriorityElf or _G.FarmElfLevelCustom then
+        return true
+    end
+
+    -- AUTO MASTERY ALL SWORD (INDEPENDENTE DO START FARM)  
+    if _G.FarmMastery_S then  
+        return true  
+    end  
+
+    -- OUTROS FARMS (DEPENDENTES DO START FARM)  
+    return _G.StartFarm and (
+        _G.Level or  
+        _G.AutoFarm_Bone or  
+        _G.AutoFarm_Cake or  
+        _G.FarmMastery_Dev or  
+        _G.FarmMastery_G or  
+        (getgenv()).AutoMaterial or  
+        _G.AutoTyrant or
+        _G.SailBoat_Hydra or _G.WardenBoss or _G.AutoFactory or _G.HighestMirage or _G.HCM or _G.PGB or _G.Leviathan1 or _G.UPGDrago or _G.Complete_Trials or _G.TpDrago_Prehis or _G.BuyDrago or _G.AutoFireFlowers or _G.DT_Uzoth or _G.AutoBerry or _G.Prehis_Find or _G.Prehis_Skills or _G.Prehis_DB or _G.Prehis_DE or _G.FarmBlazeEM or _G.Dojoo or _G.CollectPresent or _G.AutoLawKak or _G.TpLab or _G.AutoPhoenixF or _G.AutoFarmChest or _G.AutoHytHallow or _G.LongsWord or _G.BlackSpikey or _G.AutoHolyTorch or _G.TrainDrago or _G.AutoSaber or _G.FarmMastery_Dev or _G.CitizenQuest or _G.AutoEctoplasm or _G.KeysRen or _G.Auto_Rainbow_Haki or _G.obsFarm or _G.AutoBigmom or _G.Doughv2 or _G.AuraBoss or _G.Raiding or _G.Auto_Cavender or _G.TpPly or _G.Bartilo_Quest or _G.Level or _G.FarmEliteHunt or _G.AutoZou or _G.AutoFarm_Bone or (getgenv()).AutoMaterial or _G.CraftVM or _G.FrozenTP or _G.TPDoor or _G.AcientOne or _G.AutoFarmNear or _G.AutoRaidCastle or _G.DarkBladev3 or _G.AutoFarmRaid or _G.Auto_Cake_Prince or _G.Addealer or _G.TPNpc or _G.TwinHook or _G.FindMirage or _G.FarmChestM or _G.Shark or _G.TerrorShark or _G.Piranha or _G.MobCrew or _G.SeaBeast1 or _G.FishBoat or _G.Auto or _G.AutoPoleV2 or _G.Auto_SuperHuman or _G.AutoDeathStep or _G.Auto_SharkMan_Karate or _G.Auto_Electric_Claw or _G.AutoDragonTalon or _G.Auto_Def_DarkCoat or _G.Auto_God_Human or _G.Auto_Tushita or _G.AutoMatSoul or _G.AutoKenVTWO or _G.AutoSerpentBow or _G.AutoFMon or _G.Auto_Soul_Guitar or _G.TPGEAR or _G.AutoSaw or _G.AutoTridentW2 or _G.Auto_StartRaid or _G.AutoEvoRace or _G.AutoGetQuestBounty or _G.MarinesCoat or _G.TravelDres or _G.Defeating or _G.DummyMan or _G.Auto_Yama or _G.Auto_SwanGG or _G.SwanCoat or _G.AutoEcBoss or _G.Auto_Mink or _G.Auto_Human or _G.Auto_Skypiea or _G.Auto_Fish or _G.CDK_TS or _G.CDK_YM or _G.CDK or _G.AutoFarmGodChalice or _G.AutoFistDarkness or _G.AutoMiror or _G.Teleport or _G.AutoKilo or _G.AutoGetUsoap or _G.Praying or _G.TryLucky or _G.AutoColShad or _G.AutoUnHaki or _G.Auto_DonAcces or _G.AutoRipIngay or _G.DragoV3 or _G.DragoV1 or _G.SailBoats or NextIs or _G.FarmGodChalice or _G.IceBossRen or senth or senth2 or _G.Lvthan or _G.beasthunter or _G.DangerLV or _G.Relic123 or _G.tweenKitsune or _G.Collect_Ember or _G.AutofindKitIs or _G.snaguine or _G.TwFruits or _G.tweenKitShrine or _G.Tp_LgS or _G.Tp_MasterA or _G.tweenShrine or _G.FarmMastery_G or _G.FarmMastery_S
+    )
+end
+
+--==================================================
+-- FUNÇÃO: IGNORA MOBS INDESEJADOS
+--==================================================
+local function IsRaidMob(mob)
+    local n = mob.Name:lower()
+
+    if n:find("raid") or n:find("microchip") or n:find("island") then  
+        return true  
+    end  
+
+    if mob:GetAttribute("IsRaid")  
+        or mob:GetAttribute("RaidMob")  
+        or mob:GetAttribute("IsBoss") then  
+        return true  
+    end  
+
+    local hum = mob:FindFirstChild("Humanoid")  
+    if hum and hum.WalkSpeed == 0 then  
+        return true  
+    end  
+
+    if mob.Parent and tostring(mob.Parent):lower():find("_worldorigin") then  
+        return true  
+    end  
+
+    return false
+end
+
+--==================================================
+-- FUNÇÃO PRINCIPAL: BRING
+--==================================================
+BringEnemy = function()
+    if not FarmAtivo() or not _B then return end
+
+    local plr = game.Players.LocalPlayer  
+    local char = plr.Character  
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")  
+    if not hrp then return end  
+
+    -- Simulation Radius  
+    pcall(function()  
+        sethiddenproperty(plr, "SimulationRadius", math.huge)  
+    end)  
+
+    local targetPos = PosMon or hrp.Position  
+    local enemies = workspace.Enemies:GetChildren()  
+    local count = 0  
+
+    for _, mob in ipairs(enemies) do  
+        if count >= _G.MaxBringMobs then break end  
+
+        local hum = mob:FindFirstChild("Humanoid")  
+        local root = mob:FindFirstChild("HumanoidRootPart")  
+
+        if hum and root and hum.Health > 0 and not IsRaidMob(mob) then  
+            local dist = (root.Position - targetPos).Magnitude  
+
+            if dist <= _G.BringRange and not root:GetAttribute("Tweening") then  
+                count += 1  
+                root:SetAttribute("Tweening", true)  
+
+                local tween = TweenService:Create(  
+                    root,  
+                    TweenInfoBring,  
+                    { CFrame = CFrame.new(targetPos) }  
+                )  
+
+                tween:Play()  
+                tween.Completed:Once(function()  
+                    if root then  
+                        root:SetAttribute("Tweening", false)  
+                    end  
+                end)  
+            end  
+        end  
     end
 end
 
--- THREAD CONTROLADA
+--==================================================
+-- LOOP CONTROLADOR
+--==================================================
 task.spawn(function()
-    while true do
-        -- só roda se estiver ligado
-        if _B then
-            local startTime = tick()
-
-            -- bring por 3 segundos
-            while _B and tick() - startTime < 3 do
-                BringEnemy()
-                task.wait(0.1)
-            end
-        end
-
-        -- espera (mesmo desligado)
-        task.wait(5)
+    while task.wait(1) do
+        if FarmAtivo() and _G.BringMobsUser then
+            _B = true
+            BringEnemy()
+            task.wait(3)
+            _B = false  
+            task.wait(5)  
+        else  
+            _B = false  
+            task.wait(1)  
+        end  
     end
 end)
 
@@ -5180,182 +5289,7 @@ outros:AddToggle({
 })
 
 
--- Toggles da UI
-outros:AddToggle({
-    Title = "Auto Farm Tyrant Of The Skies",
-    Description = "Prioridade: Mobs > Vasos (Só com 4 Olhos)",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoTyrant = Value
-        _G.StartFarm = Value
-    end
-})
 
----
--- CONFIGURAÇÕES E VARIÁVEIS
----
-_G.MobHeight = _G.MobHeight or 37
-
--- Função de Seleção de Quest por Level
-local function GetTargetByLevel()
-    local myLevel = game.Players.LocalPlayer.Data.Level.Value
-    if myLevel >= 2575 then
-        return {Name = "Skull Slayer", QuestArgs = {"StartQuest", "TikiQuest3", 2}, QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743), FarmPos = CFrame.new(-16709.49, 419.68, 1751.09)}
-    elseif myLevel > 2550 then
-        return {Name = "Serpent Hunter", QuestArgs = {"StartQuest", "TikiQuest3", 1}, QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743), FarmPos = CFrame.new(-16645.64, 163.09, 1352.87)}
-    elseif myLevel >= 2525 then
-        return {Name = "Isle Champion", QuestArgs = {"StartQuest", "TikiQuest2", 2}, QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311), FarmPos = CFrame.new(-16602.1015625, 130.38734436035, 1087.2456054688)}
-    elseif myLevel >= 2500 then
-        return {Name = "Sun-kissed Warrior", QuestArgs = {"StartQuest", "TikiQuest2", 1}, QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311), FarmPos = CFrame.new(-16347, 64, 984)}
-    elseif myLevel >= 2475 then
-        return {Name = "Island Boy", QuestArgs = {"StartQuest", "TikiQuest1", 2}, QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311), FarmPos = CFrame.new(-16670, 43, -270)}
-    else
-        return {Name = "Isle Outlaw", QuestArgs = {"StartQuest", "TikiQuest1", 1}, QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311), FarmPos = CFrame.new(-16350, 45, -180)}
-    end
-end
-
--- Contagem de Vasos (Olhos)
-local function GetEyesCount()
-    local model = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("TikiOutpost") and workspace.Map.TikiOutpost:FindFirstChild("IslandModel")
-    local count = 0
-    if model then
-        local eye1 = model:FindFirstChild("Eye1")
-        local eye2 = model:FindFirstChild("Eye2")
-        local chunks = model:FindFirstChild("IslandChunks")
-        local eye3 = chunks and chunks:FindFirstChild("E") and chunks.E:FindFirstChild("Eye3")
-        local eye4 = chunks and chunks:FindFirstChild("E") and chunks.E:FindFirstChild("Eye4")
-        if eye1 and eye1.Transparency == 0 then count = count + 1 end
-        if eye2 and eye2.Transparency == 0 then count = count + 1 end
-        if eye3 and eye3.Transparency == 0 then count = count + 1 end
-        if eye4 and eye4.Transparency == 0 then count = count + 1 end
-    end
-    return count
-end
-
--- Skills com Filtro Kitsune
-local function UseAllCategorySkills()
-    local VirtualInputManager = game:GetService("VirtualInputManager")
-    local VirtualUser = game:GetService("VirtualUser")
-    local categories = {"Melee", "Blox Fruit", "Sword", "Gun"}
-    local skills = {"Z", "X", "C"}
-
-    for _, toolType in ipairs(categories) do
-        local tool = nil
-        for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-            -- Filtro rigoroso para não pegar itens Kitsune
-            if v:IsA("Tool") and v.ToolTip == toolType and not string.find(v.Name, "Kitsune") then 
-                tool = v 
-                break 
-            end
-        end
-        if tool then
-            game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
-            for i = 1, 3 do
-                VirtualUser:CaptureController()
-                VirtualUser:ClickButton1(Vector2.new(851, 158))
-                VirtualInputManager:SendKeyEvent(true, skills[i], false, game)
-                task.wait(0.05)
-                VirtualInputManager:SendKeyEvent(false, skills[i], false, game)
-                task.wait(0.1)
-            end
-        end
-    end
-end
-
--- LOOP PRINCIPAL
-spawn(function()
-    local VaseIndex = 1
-    
-    while task.wait() do
-        if _G.AutoTyrant then
-            pcall(function()
-                local plr = game.Players.LocalPlayer
-                local char = plr.Character
-                local boss = workspace.Enemies:FindFirstChild("Tyrant of the Skies")
-                local eyes = GetEyesCount()
-
-                -- [1] PRIORIDADE MÁXIMA: BOSS
-                if boss and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
-                    _tp(boss.HumanoidRootPart.CFrame * CFrame.new(0, _G.MobHeight, 0))
-                    EquipWeapon(_G.SelectWeapon)
-                    _G.Kill(boss, true)
-
-                -- [2] PRIORIDADE MÉDIA: FARM DE QUEST / MOBS (Se não tiver boss)
-                -- Só sai daqui se não houver inimigos vivos e os olhos estiverem prontos
-                else
-                    local TargetData = GetTargetByLevel()
-                    local hasQuest = plr.PlayerGui.Main.Quest.Visible
-                    
-                    -- Busca inimigos próximos primeiro
-                    local closestEnemy = nil
-                    local shortestDistance = math.huge
-                    local AllMobs = {"Skull Slayer", "Serpent Hunter", "Isle Champion", "Sun-kissed Warrior", "Island Boy", "Isle Outlaw"}
-                    
-                    for _, v in pairs(workspace.Enemies:GetChildren()) do
-                        if table.find(AllMobs, v.Name) and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
-                            local dist = (char.HumanoidRootPart.Position - v.HumanoidRootPart.Position).Magnitude
-                            if dist < shortestDistance then
-                                shortestDistance = dist
-                                closestEnemy = v
-                            end
-                        end
-                    end
-
-                    -- Se houver inimigos ou precisar pegar quest, foca neles antes dos vasos
-                    if (closestEnemy) or (not hasQuest and _G.AcceptQuestTyrant) then
-                        if _G.AcceptQuestTyrant and not hasQuest then
-                            if (char.HumanoidRootPart.Position - TargetData.QuestPos.Position).Magnitude <= 5 then
-                                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(TargetData.QuestArgs))
-                            else
-                                _tp(TargetData.QuestPos)
-                            end
-                        elseif closestEnemy then
-                            _tp(closestEnemy.HumanoidRootPart.CFrame * CFrame.new(0, _G.MobHeight, 0))
-                            EquipWeapon(_G.SelectWeapon)
-                            _G.Kill(closestEnemy, true)
-                        end
-
-                    -- [3] PRIORIDADE BAIXA: QUEBRAR VASOS (SÓ SE TIVER 4 OLHOS ACESOS)
-                    elseif eyes >= 4 then
-                        local targetsty = {
-                            CFrame.new(-16335.1, 158.1, 1465.6), CFrame.new(-16288.6, 158.1, 1470.3),
-                            CFrame.new(-16258.0, 156.7, 1461.4), CFrame.new(-16212.4, 158.1, 1466.3),
-                            CFrame.new(-16335.0, 159.3, 1324.8), CFrame.new(-16286.0, 155.9, 1323.8),
-                            CFrame.new(-16250.3, 159.3, 1316.3)
-                        }
-                        
-                        local pos = targetsty[VaseIndex]
-                        if pos then
-                            local distToVase = (char.HumanoidRootPart.Position - pos.Position).Magnitude
-                            
-                            -- Se o ataque lançar pra longe, volta pelo _tp
-                            if distToVase > 15 then
-                                _tp(pos)
-                            else
-                                if _G.UseSkullSummon then
-                                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("LoadItem", "Skull Guitar")
-                                    EquipWeapon("Skull Guitar")
-                                    local guitar = char:FindFirstChild("Skull Guitar")
-                                    if guitar and guitar:FindFirstChild("RemoteEvent") then
-                                        guitar.RemoteEvent:FireServer("TAP", pos.Position)
-                                        game:GetService("ReplicatedStorage").Remotes.Validator2:FireServer(8359618, 0)
-                                    end
-                                else
-                                    UseAllCategorySkills()
-                                end
-                                task.wait(0.2)
-                                VaseIndex = (VaseIndex % #targetsty) + 1
-                            end
-                        end
-                    else
-                        -- Caso não tenha mob e nem 4 olhos, fica no FarmPos aguardando spawn
-                        _tp(TargetData.FarmPos)
-                    end
-                end
-            end)
-        end
-    end
-end)
 
 
 
@@ -5455,23 +5389,7 @@ outros:AddToggle({
     end
 })
 
-outros:AddToggle({
-    Title = "Use Soul Guitar on Vases",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.UseSkullSummon = Value
-    end
-})
 
-outros:AddToggle({
-    Title = "Accept Quest Tyrant",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.AcceptQuestTyrant = Value
-    end
-})
 
 local plr = game.Players.LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
