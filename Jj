@@ -6606,7 +6606,7 @@ if World1 or World3 then
 h:AddSeperator("only in Sea 2 upgrade to Race v4");
 end
 if World3 then
-nn:AddSeperator("Trials Quests / Misc V4");
+nn:AddSeperator("Trials Quests");
 
 nn:AddToggle({
 	Title = "Auto Look At Moon",
@@ -6630,6 +6630,27 @@ task.spawn(function()
 		end;
 	end;
 end);
+
+nn:AddButton({
+    Title = "Teleport Location",
+    Description = "Teleporta o personagem para a posição definida",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+
+        if not character.PrimaryPart then
+            character:GetPropertyChangedSignal("PrimaryPart"):Wait()
+        end
+
+        local vu725 = CFrame.new(Vector3.new(28286, 14897, 103))
+
+        for _ = 1, 10 do
+            task.wait()
+            character:SetPrimaryPartCFrame(vu725)
+        end
+    end
+})
+
 
 nn:AddToggle({
 	Title = "Auto Train V4",
