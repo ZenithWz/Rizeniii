@@ -6632,11 +6632,9 @@ task.spawn(function()
 end);
 
 -- =========================
--- CONFIG / FLAGS
+-- TEMPLE OF TIME
 -- =========================
-getgenv().RequestTeleportTemple = false
-
-local TemplePosition = Vector3.new(28286, 14897, 103)
+local TEMPLE_CF = CFrame.new(28286, 14897, 103)
 
 -- =========================
 -- BUTTON
@@ -6645,46 +6643,19 @@ nn:AddButton({
     Title = "Teleport Temple of Time",
     Description = "Teleporta para o Temple of Time",
     Callback = function()
-        getgenv().RequestTeleportTemple = true
+        -- garante que o mapa exista (se seu script usar MapStash)
+        local mapStash = game:GetService("ReplicatedStorage"):FindFirstChild("MapStash")
+        if mapStash then
+            local temple = mapStash:FindFirstChild("Temple of Time")
+            if temple and not workspace:FindFirstChild("Temple of Time") then
+                temple.Parent = workspace:WaitForChild("Map")
+            end
+        end
+
+        -- chama o sistema de tween que JÁ EXISTE
+        _tp(TEMPLE_CF)
     end
 })
-
--- =========================
--- LOAD MAP (Temple of Time)
--- =========================
-local function LoadTempleIfNeeded()
-    local mapStash = game:GetService("ReplicatedStorage"):WaitForChild("MapStash")
-    local temple = mapStash:FindFirstChild("Temple of Time")
-
-    if temple and not workspace:FindFirstChild("Temple of Time") then
-        temple.Parent = workspace:WaitForChild("Map")
-    end
-
-    while not workspace:FindFirstChild("Temple of Time") do
-        task.wait(0.1)
-    end
-end
-
--- =========================
--- TELEPORT LOOP (USA _tp)
--- =========================
-spawn(function()
-    while task.wait() do
-        pcall(function()
-            if getgenv().RequestTeleportTemple then
-                LoadTempleIfNeeded()
-                _tp(CFrame.new(TemplePosition))
-            end
-        end)
-    end
-end)
-
--- =========================
--- OPTIONAL: POSITIONS TABLE
--- =========================
-local TeleportLocations = {
-    ["Temple of Time"] = TemplePosition
-}
 
 nn:AddToggle({
 	Title = "Auto Train V4",
