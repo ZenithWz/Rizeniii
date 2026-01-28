@@ -107,7 +107,7 @@ function I:NewWindow(config)
     -- Cria a janela principal com as novas credenciais
     local Window = Library:MakeWindow({
         Title = "Diamond Hub ・ By Victor7zk",
-        SubTitle = "Blox Fruits",
+        SubTitle = "https://discord.gg/uYUB962jw",
         ScriptFolder = "DiamondHubConfig"
     })
 
@@ -116,7 +116,7 @@ local Minimizer = Window:NewMinimizer({
 })  
 
 local MobileButton = Minimizer:CreateMobileMinimizer({  
-    Image = "rbxassetid://135264546140981",  
+    Image = "rbxassetid://71831493707184",  
     BackgroundColor3 = Color3.fromRGB(30, 30, 30)  
 })  
 
