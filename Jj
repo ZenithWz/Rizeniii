@@ -4513,6 +4513,122 @@ T:AddToggle({
     end,
 })
 
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local plr = Players.LocalPlayer
+local char = plr.Character or plr.CharacterAdded:Wait()
+
+local DISTANCE = 60
+local FastAttackConnection
+
+pcall(function()
+	require(game.ReplicatedStorage.Util.CameraShaker):Stop()
+end)
+
+local function getEnemies(radius)
+	local targets = {}
+
+	for _, e in pairs(workspace.Enemies:GetChildren()) do
+		local part = e:FindFirstChild("UpperTorso") or e:FindFirstChild("Head") or e.PrimaryPart
+		if part and e:FindFirstChild("Humanoid") and e.Humanoid.Health > 0 then
+			if (part.Position - char.HumanoidRootPart.Position).Magnitude <= radius then
+				table.insert(targets, e)
+			end
+		end
+	end
+
+	for _, e in pairs(workspace.SeaBeasts:GetChildren()) do
+		if e:FindFirstChild("HumanoidRootPart") and e:FindFirstChild("Health") and e.Health.Value > 0 then
+			table.insert(targets, e)
+		end
+	end
+
+	return targets
+end
+
+local function AttackNoCoolDown()
+	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+	local tool = char:FindFirstChildOfClass("Tool")
+	if not tool then return end
+
+	local enemies = getEnemies(DISTANCE)
+	if #enemies == 0 then return end
+
+	local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
+	local RegisterAttack = Net:WaitForChild("RE/RegisterAttack")
+	local RegisterHit = Net:WaitForChild("RE/RegisterHit")
+
+	local hits = {}
+	local basePart
+
+	for _, enemy in ipairs(enemies) do
+		if not enemy:GetAttribute("IsBoat") then
+			local parts = {
+				"RightLowerArm","RightUpperArm","LeftLowerArm",
+				"LeftUpperArm","RightHand","LeftHand","Head","UpperTorso"
+			}
+			local part = enemy:FindFirstChild(parts[math.random(#parts)]) or enemy.PrimaryPart
+			if part then
+				table.insert(hits, {enemy, part})
+				basePart = part
+			end
+		end
+	end
+
+	if not basePart then return end
+
+	pcall(function()
+		RegisterAttack:FireServer(0)
+	end)
+
+	local success, flags = pcall(function()
+		return require(ReplicatedStorage.Modules.Flags).COMBAT_REMOTE_THREAD
+	end)
+
+	if success and flags then
+		local ps = plr:WaitForChild("PlayerScripts")
+		local ls = ps:FindFirstChildOfClass("LocalScript")
+		if ls and getsenv then
+			local ok, env = pcall(getsenv, ls)
+			if ok and env and env._G and env._G.SendHitsToServer then
+				env._G.SendHitsToServer(basePart, hits)
+			end
+		end
+	else
+		pcall(function()
+			RegisterHit:FireServer(basePart, hits)
+		end)
+	end
+
+	if tool.ToolTip == "Blox Fruit" and tool:FindFirstChild("LeftClickRemote") then
+		pcall(function()
+			tool.LeftClickRemote:FireServer(Vector3.new(0.01, -500, 0.01), 1, true)
+			tool.LeftClickRemote:FireServer(false)
+		end)
+	end
+end
+
+T:AddToggle({
+	Title = "Use M1 Fruit",
+	Description = "",
+	Default = GetSetting("FastAttack_Save", false),
+	Callback = function(I)
+		_G.SaveData["FastAttack_Save"] = I
+		SaveSettings()
+
+		if I and not FastAttackConnection then
+			FastAttackConnection = RunService.Heartbeat:Connect(function()
+				pcall(AttackNoCoolDown)
+			end)
+		elseif not I and FastAttackConnection then
+			FastAttackConnection:Disconnect()
+			FastAttackConnection = nil
+		end
+	end,
+})
 
 
 T:AddToggle({
