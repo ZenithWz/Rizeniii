@@ -1,7 +1,7 @@
  repeat task.wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
-local FolderName = "Red Night Settings"
+local FolderName = "Darkness Hub"
 local FileName = "Settings.json"
 local FullPath = FolderName .. "/" .. FileName
 
@@ -106,9 +106,9 @@ local I = {}
 function I:NewWindow(config)
     -- Cria a janela principal com as novas credenciais
     local Window = Library:MakeWindow({
-        Title = "Red Night ・ By Victor7zk",
+        Title = "Darkness Hub ・ By Victor7zk",
         SubTitle = "Blox Fruits",
-        ScriptFolder = "Red Night Library"
+        ScriptFolder = "Darkness Library"
     })
 
 local Minimizer = Window:NewMinimizer({  
@@ -2525,13 +2525,13 @@ ConfigSection:AddButton({
             
             -- Notificação Universal
             game.StarterGui:SetCore("SendNotification", {
-                Title = "Diamond Hub",
+                Title = "Darkness Hub",
                 Text = "Done",
                 Duration = 5
             })
         else
             game.StarterGui:SetCore("SendNotification", {
-                Title = "Diamond Hub",
+                Title = "Darkness Hub",
                 Text = "Done",
                 Duration = 3
             })
@@ -4370,7 +4370,7 @@ b:AddDropdown({
     Default = GetSavedSkillsList(),
     Callback = function(Selected)
         -- AQUI FAZEMOS A LIGAÇÃO: Nome Longo (UI) -> Nome Curto (Script)
-        -- O script interno do Diamond Hub só entende .Z, .X, etc.
+        -- O script interno do Darkness Hub só entende .Z, .X, etc.
         
         _G.FruitSkills.Z = Selected["Fruit Skill Z"] or false
         _G.FruitSkills.X = Selected["Fruit Skill X"] or false
@@ -4464,10 +4464,10 @@ end);
 T:AddSeperator("Settings");
 
 
-b:AddDropdown({
+T:AddDropdown({
     Title = "Select Weapon",
     Description = "",
-    Values = {"Melee","Sword","Fruit"}, 
+    Values = {"Melee","Sword","Blox Fruit"}, 
     Default = "Melee",
     Multi = false,
     Callback = function(I)
