@@ -107,7 +107,7 @@ function I:NewWindow(config)
     -- Cria a janela principal com as novas credenciais
     local Window = Library:MakeWindow({
         Title = "Diamond Hub ・ By Victor7zk",
-        SubTitle = "https://discord.gg/uYUB962jw",
+        SubTitle = "Blox Fruits",
         ScriptFolder = "DiamondHubConfig"
     })
 
@@ -116,7 +116,7 @@ local Minimizer = Window:NewMinimizer({
 })  
 
 local MobileButton = Minimizer:CreateMobileMinimizer({  
-    Image = "rbxassetid://71831493707184",  
+    Image = "rbxassetid://135264546140981",  
     BackgroundColor3 = Color3.fromRGB(30, 30, 30)  
 })  
 
@@ -2260,7 +2260,7 @@ elseif I == 1650 or I <= 1699 then
 			PosQ = CFrame.new(10778.875, -2087.72437, 9265.18359, 0.934615612, -9.33109447e-08, -0.355659455, 9.17655143e-08, 1, -2.12154276e-08, 0.355659455, -1.28090019e-08, 0.934615612)
 			if (getgenv().AutoFarm or _G.Level) and (PosQ.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude > 10000 then
 				_tp(CFrame.new(-16269.7041, 25.2288494, 1373.65955, 0.997390985, 1.47309942e-09, -0.0721890926, -4.00651912e-09, 0.99999994, -2.51183763e-09, 0.0721890852, 5.75363091e-10, 0.997390926))
-				task.wait(5)
+				task.wait(2)
 				local args = {"TravelToSubmergedIsland"}
 				game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/SubmarineWorkerSpeak"):InvokeServer(unpack(args))
 				return
@@ -2275,7 +2275,7 @@ elseif I == 1650 or I <= 1699 then
 			PosQ = CFrame.new(10778.875, -2087.72437, 9265.18359, 0.934615612, -9.33109447e-08, -0.355659455, 9.17655143e-08, 1, -2.12154276e-08, 0.355659455, -1.28090019e-08, 0.934615612)
 			if (getgenv().AutoFarm or _G.Level) and (PosQ.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude > 10000 then
 				_tp(CFrame.new(-16269.7041, 25.2288494, 1373.65955, 0.997390985, 1.47309942e-09, -0.0721890926, -4.00651912e-09, 0.99999994, -2.51183763e-09, 0.0721890852, 5.75363091e-10, 0.997390926))
-				task.wait(5)
+				task.wait(2)
 				local args = {"TravelToSubmergedIsland"}
 				game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/SubmarineWorkerSpeak"):InvokeServer(unpack(args))
 				return
@@ -2290,7 +2290,7 @@ elseif I == 1650 or I <= 1699 then
 			PosQ = CFrame.new(10880.6855, -2086.20044, 10032.624, -0.321384728, 9.87648434e-08, -0.946948707, 7.13271007e-08, 1, 8.00902953e-08, 0.946948707, -4.18033075e-08, -0.321384728)
 			if (getgenv().AutoFarm or _G.Level) and (PosQ.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude > 10000 then
 				_tp(CFrame.new(-16269.7041, 25.2288494, 1373.65955, 0.997390985, 1.47309942e-09, -0.0721890926, -4.00651912e-09, 0.99999994, -2.51183763e-09, 0.0721890852, 5.75363091e-10, 0.997390926))
-				task.wait(5)
+				task.wait(2)
 				local args = {"TravelToSubmergedIsland"}
 				game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/SubmarineWorkerSpeak"):InvokeServer(unpack(args))
 				return
@@ -2305,7 +2305,7 @@ elseif I == 1650 or I <= 1699 then
 			PosQ = CFrame.new(10880.6855, -2086.20044, 10032.624, -0.321384728, 9.87648434e-08, -0.946948707, 7.13271007e-08, 1, 8.00902953e-08, 0.946948707, -4.18033075e-08, -0.321384728)
 			if (getgenv().AutoFarm or _G.Level) and (PosQ.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude > 10000 then
 				_tp(CFrame.new(-16269.7041, 25.2288494, 1373.65955, 0.997390985, 1.47309942e-09, -0.0721890926, -4.00651912e-09, 0.99999994, -2.51183763e-09, 0.0721890852, 5.75363091e-10, 0.997390926))
-				task.wait(5)
+				task.wait(2)
 				local args = {"TravelToSubmergedIsland"}
 				game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/SubmarineWorkerSpeak"):InvokeServer(unpack(args))
 				return
@@ -2320,7 +2320,7 @@ elseif I == 1650 or I <= 1699 then
 			PosQ = CFrame.new(9640.08789, -1992.44507, 9613.65234, -0.957327187, 4.11991223e-08, 0.289006323, 1.5775445e-08, 1, -9.02985846e-08, -0.289006323, -8.18860855e-08, -0.957327187)
 			if (getgenv().AutoFarm or _G.Level) and (PosQ.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude > 10000 then
 				_tp(CFrame.new(-16269.7041, 25.2288494, 1373.65955, 0.997390985, 1.47309942e-09, -0.0721890926, -4.00651912e-09, 0.99999994, -2.51183763e-09, 0.0721890852, 5.75363091e-10, 0.997390926))
-				task.wait(5)
+				task.wait(2)
 				local args = {"TravelToSubmergedIsland"}
 				game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/SubmarineWorkerSpeak"):InvokeServer(unpack(args))
 				return
@@ -2335,7 +2335,7 @@ elseif I == 1650 or I <= 1699 then
 			PosQ = CFrame.new(9640.08789, -1992.44507, 9613.65234, -0.957327187, 4.11991223e-08, 0.289006323, 1.5775445e-08, 1, -9.02985846e-08, -0.289006323, -8.18860855e-08, -0.957327187)
 			if (getgenv().AutoFarm or _G.Level) and (PosQ.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude > 10000 then
 				_tp(CFrame.new(-16269.7041, 25.2288494, 1373.65955, 0.997390985, 1.47309942e-09, -0.0721890926, -4.00651912e-09, 0.99999994, -2.51183763e-09, 0.0721890852, 5.75363091e-10, 0.997390926))
-				task.wait(5)
+				task.wait(2)
 				local args = {"TravelToSubmergedIsland"}
 				game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/SubmarineWorkerSpeak"):InvokeServer(unpack(args))
 				return
@@ -6606,7 +6606,7 @@ if World1 or World3 then
 h:AddSeperator("only in Sea 2 upgrade to Race v4");
 end
 if World3 then
-nn:AddSeperator("Trials Quests");
+nn:AddSeperator("Trials Quests / Misc V4");
 
 nn:AddToggle({
 	Title = "Auto Look At Moon",
@@ -6630,8 +6630,6 @@ task.spawn(function()
 		end;
 	end;
 end);
-
-
 
 nn:AddToggle({
 	Title = "Auto Train V4",
