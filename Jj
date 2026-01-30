@@ -7697,6 +7697,61 @@ E:AddToggle({
     end
 })
 
+local RunService = game:GetService("RunService")
+
+getgenv().RemoveCooldown = false
+local RemoveCooldownConnection
+
+if not getgenv().attackMelee then
+	for _, v in next, getgc(true) do
+		if typeof(v) == "function" and debug.getinfo(v).name == "attackMelee" then
+			getgenv().attackMelee = v
+			break
+		end
+	end
+end
+
+local function StartRemoveCooldown()
+	if RemoveCooldownConnection then return end
+	RemoveCooldownConnection = RunService.Heartbeat:Connect(function()
+		if getgenv().RemoveCooldown and getgenv().attackMelee then
+			pcall(function()
+				for i, v in pairs(getupvalues(getgenv().attackMelee)) do
+					if typeof(v) == "number" then
+						setupvalue(getgenv().attackMelee, i, 0)
+					elseif typeof(v) == "boolean" then
+						setupvalue(getgenv().attackMelee, i, false)
+					end
+				end
+			end)
+		end
+	end)
+end
+
+local function StopRemoveCooldown()
+	if RemoveCooldownConnection then
+		RemoveCooldownConnection:Disconnect()
+		RemoveCooldownConnection = nil
+	end
+end
+
+E:AddToggle({
+	Title = "Remove Cooldown Attack Sword And Melee",
+	Description = "",
+	Default = GetSetting("RemoveCooldown_Save", false),
+	Callback = function(I)
+		getgenv().RemoveCooldown = I
+		_G.SaveData["RemoveCooldown_Save"] = I
+		SaveSettings()
+
+		if I then
+			StartRemoveCooldown()
+		else
+			StopRemoveCooldown()
+		end
+	end,
+})
+
 E:AddSeperator("Travel Worlds");
 E:AddButton({ Title = "Teleport Sea 1", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("TravelMain");
