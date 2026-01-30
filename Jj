@@ -1,7 +1,7 @@
  repeat task.wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
-local FolderName = "Diamond Hub"
+local FolderName = "Red Night Settings"
 local FileName = "Settings.json"
 local FullPath = FolderName .. "/" .. FileName
 
@@ -106,9 +106,9 @@ local I = {}
 function I:NewWindow(config)
     -- Cria a janela principal com as novas credenciais
     local Window = Library:MakeWindow({
-        Title = "Diamond Hub ・ By Victor7zk",
+        Title = "Red Night ・ By Victor7zk",
         SubTitle = "Blox Fruits",
-        ScriptFolder = "DiamondHubConfig"
+        ScriptFolder = "Red Night Library"
     })
 
 local Minimizer = Window:NewMinimizer({  
@@ -2485,7 +2485,7 @@ local g  = V:T("Shop","rbxassetid://134556077676632")
 local F  = V:T("Bugs And Feedback","rbxassetid://10734896881")
 local c  = V:T("Misc","rbxassetid://10734950309")
 
-local b      = y:AddSection("Main")
+local b      = y:AddSection("General Farming")
 
 local D      = g:AddSection("Shop, Styles & Accessories")
 
@@ -4464,10 +4464,10 @@ end);
 T:AddSeperator("Settings");
 
 
-T:AddDropdown({
+b:AddDropdown({
     Title = "Select Weapon",
     Description = "",
-    Values = {"Melee","Sword"}, -- Apenas essas duas agora
+    Values = {"Melee","Sword","Fruit"}, 
     Default = "Melee",
     Multi = false,
     Callback = function(I)
