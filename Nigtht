@@ -1219,140 +1219,189 @@ Hop = function()
 			end;
 		end);
 	end;
-local C = Instance.new("Part", workspace);
-C.Size = Vector3.new(1, 1, 1);
-C.Name = "Rip_Indra";
-C.Anchored = true;
-C.CanCollide = false;
-C.CanTouch = false;
-C.Transparency = 1;
+-- ========================================================
+-- CONFIGURAÇÕES INICIAIS E PARTE DE CONTROLE
+-- ========================================================
+local plr = game.Players.LocalPlayer
+local C = Instance.new("Part", workspace)
+C.Size = Vector3.new(1, 1, 1)
+C.Name = "Rip_Indra"
+C.Anchored = true
+C.CanCollide = false
+C.CanTouch = false
+C.Transparency = 1
 
-local M = workspace:FindFirstChild(C.Name);
+local M = workspace:FindFirstChild(C.Name)
 if M and M ~= C then
-	M:Destroy();
-end;
+    M:Destroy()
+end
+
+-- Identificação do Mundo (Sea)
+local World1, World2, World3 = false, false, false
+if game.PlaceId == 2753915549 or game.PlaceId == 85211729168715 then
+    World1 = true
+elseif game.PlaceId == 4442272183 or game.PlaceId == 79091703265657 then
+    World2 = true
+elseif game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
+    World3 = true
+end
+
+-- ========================================================
+-- SISTEMA DE PORTAIS / TELEPORTES RÁPIDOS
+-- ========================================================
+
+function GetPortalsTable()
+    if World3 then
+        return {
+            ["Floating Turtle"] = Vector3.new(-12462, 375, -7552),
+            ["Hydra Island"] = Vector3.new(5657, 1013, -335),
+            ["Mansion"] = Vector3.new(-12462, 375, -7552),
+            ["Castle"] = Vector3.new(-5036, 315, -3179),
+            ["Beautiful Pirate"] = Vector3.new(5319, 23, -93),
+            ["Temple of Time"] = Vector3.new(28286, 14897, 103)
+        }
+    elseif World2 then
+        return {
+            ["Swan Mansion"] = Vector3.new(-390, 332, 673),
+            ["Cursed Ship"] = Vector3.new(923, 126, 32852),
+            ["Zombie Island"] = Vector3.new(-6509, 83, -133)
+        }
+    elseif World1 then
+        return {
+            ["Sky3"] = Vector3.new(-7894, 5547, -380),
+            ["Underwater City"] = Vector3.new(61165, 0, 1897)
+        }
+    end
+    return {}
+end
+
+function CheckNearestTeleporter(targetPos)
+    local portals = GetPortalsTable()
+    local closestPortalName = nil
+    local minDistance = math.huge
+    local playerPos = plr.Character.HumanoidRootPart.Position
+
+    for name, pos in pairs(portals) do
+        local distToTarget = (pos - targetPos).Magnitude
+        if distToTarget < minDistance then
+            minDistance = distToTarget
+            closestPortalName = name
+        end
+    end
+
+    -- Só usa o portal se a distância do portal até o alvo for menor que a sua distância atual até o alvo
+    local currentDistToTarget = (playerPos - targetPos).Magnitude
+    if closestPortalName and minDistance < currentDistToTarget then
+        return closestPortalName
+    end
+    return nil
+end
+
+function requestEntrance(portalName)
+    game.ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance", portalName)
+    task.wait(0.3)
+    if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+        plr.Character.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame + Vector3.new(0, 50, 0)
+    end
+    task.wait(0.2)
+end
+
+-- ========================================================
+-- TWEEN E MOVIMENTAÇÃO
+-- ========================================================
+
+getgenv().TweenSpeedFar = 300
+getgenv().TweenSpeedNear = 600
+
+_tp = function(targetCFrame)
+    local character = plr.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    local HRP = character.HumanoidRootPart
+
+    -- [ NOVO ] VERIFICAÇÃO DE PORTAL ANTES DO TWEEN
+    local portalUtil = CheckNearestTeleporter(targetCFrame.Position)
+    if portalUtil then
+        requestEntrance(portalUtil)
+        -- Atualiza a posição da peça guia C para onde você foi teleportado
+        C.CFrame = HRP.CFrame
+    end
+
+    shouldTween = true
+    getgenv().OnFarm = false
+
+    if HRP.Anchored then HRP.Anchored = false end
+
+    local dist = (targetCFrame.Position - C.Position).Magnitude
+    local speed = dist <= 15 and (getgenv().TweenSpeedNear) or (getgenv().TweenSpeedFar)
+    local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)
+    
+    local tween = game:GetService("TweenService"):Create(C, info, { CFrame = targetCFrame })
+
+    if character.Humanoid.Sit then
+        C.CFrame = CFrame.new(C.Position.X, targetCFrame.Y, C.Position.Z)
+    end
+
+    tween:Play()
+
+    task.spawn(function()
+        while tween.PlaybackState == Enum.PlaybackState.Playing do
+            if not shouldTween then
+                tween:Cancel()
+                break
+            end
+            task.wait(0.1)
+        end
+        getgenv().OnFarm = true
+    end)
+end
+
+-- ========================================================
+-- LOOPS DE FARM E COLISÃO (SEU CÓDIGO ORIGINAL)
+-- ========================================================
 
 task.spawn(function()
-	while task.wait() do
-		if C and C.Parent == workspace then
-			if shouldTween then
-				(getgenv()).OnFarm = true;
-			else
-				(getgenv()).OnFarm = false;
-			end;
-		else
-			(getgenv()).OnFarm = false;
-		end;
-	end;
-end);
-
-task.spawn(function()
-	local I = game.Players.LocalPlayer;
-	repeat task.wait() until I.Character and I.Character.PrimaryPart;
-
-	C.CFrame = I.Character.PrimaryPart.CFrame;
-
-	while task.wait() do
-		pcall(function()
-			if (getgenv()).OnFarm then
-				if C and C.Parent == workspace then
-					local e = I.Character and I.Character.PrimaryPart;
-					if e and (e.Position - C.Position).Magnitude <= 200 then
-						e.CFrame = C.CFrame;
-					else
-						C.CFrame = e.CFrame;
-					end;
-				end;
-
-				local e = I.Character;
-				if e then
-					for _, v in pairs(e:GetChildren()) do
-						if v:IsA("BasePart") then
-							v.CanCollide = false;
-						end;
-					end;
-				end;
-
-			else
-				local e = I.Character;
-				if e then
-					for _, v in pairs(e:GetChildren()) do
-						if v:IsA("BasePart") then
-							v.CanCollide = true;
-						end;
-					end;
-				end;
-			end;
-		end);
-	end;
-end);
-
--- =======================
--- TWEEN AJUSTADO POR DISTÂNCIA
--- =======================
-
--- [[ VARIÁVEIS PARA O SEU INPUT ]] --
-getgenv().TweenSpeedFar = 300   -- Velocidade Padrão (Longe)
-getgenv().TweenSpeedNear = 600  -- Velocidade Boost (Perto <= 15 studs)
-
-_tp = function(I)
-local e = plr.Character;
-if not e or not e:FindFirstChild("HumanoidRootPart") then
-return;
-end;
-
-local HRP = e.HumanoidRootPart;  
-
--- Desativar farm enquanto tweena  
-shouldTween = true  
-getgenv().OnFarm = false  
-
--- Garantir que não está ancorado  
-if HRP.Anchored then  
-	HRP.Anchored = false  
-	task.wait()  
-end  
-
-local dist = (I.Position - HRP.Position).Magnitude  
-
--- ===============================  
---  SE ESTIVER ATÉ 15 STUDS → USA A VELOCIDADE DE PERTO
---  CASO CONTRÁRIO → USA A VELOCIDADE PADRÃO
--- ===============================  
-local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
-
-local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)  
-local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })  
-
--- Caso esteja sentado  
-if e.Humanoid.Sit == true then  
-	C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)  
-end  
-
-tween:Play()  
-
--- Anti travamento / controle  
-task.spawn(function()  
-	while tween.PlaybackState == Enum.PlaybackState.Playing do  
-		if not shouldTween then  
-			tween:Cancel()  
-			break  
-		end  
-		task.wait(.1)  
-	end  
-
-	getgenv().OnFarm = true  
+    while task.wait() do
+        if C and C.Parent == workspace then
+            getgenv().OnFarm = shouldTween and true or false
+        else
+            getgenv().OnFarm = false
+        end
+    end
 end)
 
-end
+task.spawn(function()
+    repeat task.wait() until plr.Character and plr.Character:FindFirstChild("PrimaryPart")
+    C.CFrame = plr.Character.PrimaryPart.CFrame
 
-TeleportToTarget = function(I)
-_tp(I)
-end
+    while task.wait() do
+        pcall(function()
+            if getgenv().OnFarm then
+                local e = plr.Character and plr.Character.PrimaryPart
+                if e then
+                    if (e.Position - C.Position).Magnitude <= 200 then
+                        e.CFrame = C.CFrame
+                    else
+                        C.CFrame = e.CFrame
+                    end
+                end
 
-notween = function(I)
-plr.Character.HumanoidRootPart.CFrame = I
-end
+                for _, v in pairs(plr.Character:GetChildren()) do
+                    if v:IsA("BasePart") then v.CanCollide = false end
+                end
+            else
+                if plr.Character then
+                    for _, v in pairs(plr.Character:GetChildren()) do
+                        if v:IsA("BasePart") then v.CanCollide = true end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+TeleportToTarget = function(I) _tp(I) end
+notween = function(I) plr.Character.HumanoidRootPart.CFrame = I end
+
 
 
 function BTP(I)
@@ -2497,14 +2546,14 @@ local y        = V:T("Main Farm","rbxassetid://127561653320876")
 local CS_Tab   = V:T("Farm Mastery","rbxassetid://10709782497")
 local x        = V:T("Farm Others","rbxassetid://72448332143088")
 local t        = V:T("Sea Events","rbxassetid://96788654458681")
-local m        = V:T("Race Upgrade","rbxassetid://10734897102")
+local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
 local v        = V:T("Dojo Quest & Drago Race","rbxassetid://91920478152016")
 local VI       = V:T("Visuals & ESP","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
 local l        = V:T("Teleport","rbxassetid://10734886004")
 local R        = V:T("Get Items & Upgrade","rbxassetid://10709782582")
 local B        = V:T("Raid & Fruit","rbxassetid://10709790875")
-local c        = V:T("Settings & Misc","rbxassetid://10734950309")
+local c        = V:T("Settings & Misc","rbxassetid://127147149367603")
 
 -- SECTIONS (somente nomes alterados)
 local b    = y:AddSection("Auto Farm main");
@@ -4572,7 +4621,7 @@ _G.StartFarm = false
 _G.Level = false
 _G.AutoFarm_Bone = false
 _G.AutoFarm_Cake = false
-_G.AutoTyrant = false 
+_G.AutoTyrant = false -- Adicionado
 _G.AcceptQuest = false
 
 -- Variável para guardar o mob de Level Farm
@@ -4592,8 +4641,10 @@ local function TeleportConditional(hrp, targetCFrame, threshold)
     end
 end
 
+---
+
 ----------------------------------------------------------------------------
--- UI: DROPDOWN + TOGGLES
+-- 1. UI: DROPDOWN + TOGGLES (Coloque isso na seção da sua UI)
 ----------------------------------------------------------------------------
 
 b:AddDropdown({
@@ -4627,7 +4678,7 @@ b:AddToggle({
             elseif _G.SelectedFarmMode == "Cake Prince" then  
                 _G.AutoFarm_Cake = true  
             elseif _G.SelectedFarmMode == "Tyrant Of The Skies" then  
-                _G.AutoTyrant = true 
+                _G.AutoTyrant = true -- Ativa a lógica do Tyrant
             end  
         end
 
@@ -4647,12 +4698,13 @@ b:AddToggle({
 })
 
 ----------------------------------------------------------------------------
--- 1. NOVO SISTEMA TYRANT OF THE SKIES
+-- 2. LÓGICA DO TYRANT (FARM, QUESTS E BOSS)
 ----------------------------------------------------------------------------
 
-local FarmHeight = 45 -- Altura segura para não bugar no mob
+-- Configurações
+-- (FarmHeight removido para usar apenas a lógica do G.Kill ou fixa abaixo)
 
--- Função de colisão e estado (Melhorada)
+-- NoClip Reforçado
 spawn(function()
     game:GetService("RunService").Stepped:Connect(function()
         if _G.AutoTyrant and _G.StartFarm then
@@ -4663,63 +4715,76 @@ spawn(function()
                         part.CanCollide = false
                     end
                 end
+                -- Mantém o boneco em estado de "Physics" para evitar que o jogo tente derrubá-lo
                 if char:FindFirstChild("Humanoid") then
-                    -- ChangeState(11) remove a gravidade, às vezes parece "travado"
-                    -- Se quiser que ele caia normalmente, remova a linha abaixo
                     char.Humanoid:ChangeState(11) 
+                end
+                
+                -- FORÇA VELOCIDADE ZERO PARA NÃO ESCORREGAR
+                if char:FindFirstChild("HumanoidRootPart") then
+                    char.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
+                    char.HumanoidRootPart.RotVelocity = Vector3.new(0,0,0)
                 end
             end
         end
     end)
 end)
 
+-- Função Mágica: Seleciona o Mob/Quest exato pelo Nível
 local function GetTargetByLevel()
     local myLevel = game.Players.LocalPlayer.Data.Level.Value
+    -- [LEVEL 2575+] SKULL SLAYER
     if myLevel >= 2575 then
         return {
             Name = "Skull Slayer",
             QuestArgs = {"StartQuest", "TikiQuest3", 2},
-            QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743),
+            QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743, -0.999621451, 3.5280582e-08, 0.0275127869, 3.5990368e-08, 1, 2.53032191e-08, -0.0275127869, 2.62838356e-08, -0.999621451),
             FarmPos = CFrame.new(-16709.49, 419.68, 1751.09)
         }
+    -- [LEVEL 2551 - 2574] SERPENT HUNTER
     elseif myLevel > 2550 then
         return {
             Name = "Serpent Hunter",
             QuestArgs = {"StartQuest", "TikiQuest3", 1},
-            QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743),
+            QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743, -0.999621451, 3.5280582e-08, 0.0275127869, 3.5990368e-08, 1, 2.53032191e-08, -0.0275127869, 2.62838356e-08, -0.999621451),
             FarmPos = CFrame.new(-16645.64, 163.09, 1352.87)
         }
+    -- [LEVEL 2525 - 2550] ISLE CHAMPION
     elseif myLevel >= 2525 then
         return {
             Name = "Isle Champion",
             QuestArgs = {"StartQuest", "TikiQuest2", 2},
-            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311),
+            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311, -0.0595058464, 2.45485676e-08, 0.998227954, -5.3272025e-08, 1, -2.77677703e-08, -0.998227954, -5.48299717e-08, -0.0595058464),
             FarmPos = CFrame.new(-16602.1015625, 130.38734436035, 1087.2456054688)
         }
+    -- [LEVEL 2500 - 2524] SUN-KISSED WARRIOR
     elseif myLevel >= 2500 then
         return {
             Name = "Sun-kissed Warrior",
             QuestArgs = {"StartQuest", "TikiQuest2", 1},
-            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311),
+            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311, -0.0595058464, 2.45485676e-08, 0.998227954, -5.3272025e-08, 1, -2.77677703e-08, -0.998227954, -5.48299717e-08, -0.0595058464),
             FarmPos = CFrame.new(-16347, 64, 984)
         }
+    -- [LEVEL 2475 - 2499] ISLAND BOY
     elseif myLevel >= 2475 then
         return {
             Name = "Island Boy",
             QuestArgs = {"StartQuest", "TikiQuest1", 2},
-            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311),
+            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311, -0.0595058464, 2.45485676e-08, 0.998227954, -5.3272025e-08, 1, -2.77677703e-08, -0.998227954, -5.48299717e-08, -0.0595058464),
             FarmPos = CFrame.new(-16670, 43, -270)
         }
+    -- [LEVEL < 2475] ISLE OUTLAW
     else
         return {
             Name = "Isle Outlaw",
             QuestArgs = {"StartQuest", "TikiQuest1", 1},
-            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311),
+            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311, -0.0595058464, 2.45485676e-08, 0.998227954, -5.3272025e-08, 1, -2.77677703e-08, -0.998227954, -5.48299717e-08, -0.0595058464),
             FarmPos = CFrame.new(-16350, 45, -180)
         }
     end
 end
 
+-- Verifica quantos "Olhos" (Vasos) foram quebrados
 local function GetEyesCount()
     local model = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("TikiOutpost") and workspace.Map.TikiOutpost:FindFirstChild("IslandModel")
     local count = 0
@@ -4737,229 +4802,168 @@ local function GetEyesCount()
     return count
 end
 
+-- Usa skills para quebrar os vasos
 local function UseAllCategorySkills()
     local VirtualInputManager = game:GetService("VirtualInputManager")
     local VirtualUser = game:GetService("VirtualUser")
     local categories = {"Melee", "Blox Fruit", "Sword", "Gun"}
     local skills = {"Z", "X", "C"}
-    
-    pcall(function()
-        workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, workspace.CurrentCamera.CFrame.Position + Vector3.new(0,-1,0))
-    end)
 
-    for _, toolType in ipairs(categories) do
-        local tool = nil
-        for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-            if v:IsA("Tool") and v.ToolTip == toolType then tool = v break end
-        end
-        if not tool then
-            local charTool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
-            if charTool and charTool.ToolTip == toolType then tool = charTool end
-        end
-        if tool then
-            game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
-            task.wait(0.05)
-            for i = 1, #skills do
-                VirtualUser:CaptureController()
-                VirtualUser:ClickButton1(Vector2.new(851, 158))
-                local skillKey = skills[i]
-                VirtualInputManager:SendKeyEvent(true, skillKey, false, game)
-                task.wait(0.05)
-                VirtualInputManager:SendKeyEvent(false, skillKey, false, game)
-                task.wait(0.1) 
-            end
-        end
+    pcall(function()  
+        game:GetService("VirtualInputManager"):SendKeyEvent(true, "RightControl", false, game)  
+        workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, workspace.CurrentCamera.CFrame.Position + Vector3.new(0,-1,0))  
+    end)  
+
+    for _, toolType in ipairs(categories) do  
+        local tool = nil  
+        for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do  
+            if v:IsA("Tool") and v.ToolTip == toolType then tool = v break end  
+        end  
+        if not tool then  
+            local charTool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")  
+            if charTool and charTool.ToolTip == toolType then tool = charTool end  
+        end  
+        if tool then  
+            game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)  
+            task.wait(0.1)  
+            for i = 1, 3 do  
+                VirtualUser:CaptureController()  
+                VirtualUser:ClickButton1(Vector2.new(851, 158))  
+                local skillKey = skills[i]  
+                if skillKey then  
+                    VirtualInputManager:SendKeyEvent(true, skillKey, false, game)  
+                    task.wait(0.05)  
+                    VirtualInputManager:SendKeyEvent(false, skillKey, false, game)  
+                end  
+                task.wait(0.1)   
+            end  
+        end  
     end
 end
 
+-- LOOP PRINCIPAL DO FARM
 spawn(function()
     local VaseIndex = 1 
-    while task.wait() do
-        if _G.AutoTyrant and _G.StartFarm then
-            local plr = game.Players.LocalPlayer
-            local char = plr.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            
-            if not hrp then continue end
 
-            pcall(function()
-                local boss = workspace.Enemies:FindFirstChild("Tyrant of the Skies")
-                local eyes = GetEyesCount()
+    while task.wait() do  
+        if _G.AutoTyrant and _G.StartFarm then  
+            pcall(function()  
+                local plr = game.Players.LocalPlayer  
+                local boss = workspace.Enemies:FindFirstChild("Tyrant of the Skies")  
+                local eyes = GetEyesCount()  
 
-                -- 1. LÓGICA DO BOSS
-                if boss and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
-                    hrp.Anchored = false -- Garante que não está preso
-                    _tp(boss.HumanoidRootPart.CFrame * CFrame.new(0, FarmHeight, 0))
-                    EquipWeapon(_G.SelectWeapon)
-                    _G.Kill(boss, true) -- Note: Verifique se é _G.Kill ou G.Kill no seu script original
-
-                -- 2. LÓGICA DOS VASOS (ONDE DEVE ANCORAR)
-                elseif eyes == 4 then
-                    local targetsty = {
-                        CFrame.new(-16335.1, 158.1, 1465.6), CFrame.new(-16288.6, 158.1, 1470.3),
-                        CFrame.new(-16258.0, 156.7, 1461.4), CFrame.new(-16212.4, 158.1, 1466.3),
-                        CFrame.new(-16335.0, 159.3, 1324.8), CFrame.new(-16286.0, 155.9, 1323.8),
-                        CFrame.new(-16250.3, 159.3, 1316.3)
-                    }
-                    local pos = targetsty[VaseIndex]
-                    if pos then
-                        _tp(pos)
-                        if (hrp.Position - pos.Position).Magnitude < 15 then
-                            hrp.Anchored = true -- ANCORA APENAS AQUI
-                            UseAllCategorySkills()
-                            task.wait(0.1) 
-                            hrp.Anchored = false
-                            VaseIndex = VaseIndex + 1
-                            if VaseIndex > #targetsty then VaseIndex = 1 end
-                        end
-                    end
-
-                -- 3. LÓGICA DOS MOBS (FARM NORMAL)
-                else
-                    hrp.Anchored = false -- GARANTE DESANCORADO PARA FARM
-                    local TargetData = GetTargetByLevel() 
-                    local hasQuest = plr.PlayerGui.Main.Quest.Visible
-                    
-                    if _G.AcceptQuest and not hasQuest then
-                        local distToNPC = (hrp.Position - TargetData.QuestPos.Position).Magnitude
-                        if distToNPC <= 5 then
-                            hrp.CFrame = TargetData.QuestPos
-                            task.wait(0.1)
-                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(TargetData.QuestArgs))
-                        else
-                            _tp(TargetData.QuestPos)
-                        end
-                    else
-                        -- Procura mob próximo
-                        local closestEnemy = nil
-                        local shortestDistance = math.huge 
-                        local AllMobs = {"Skull Slayer", "Serpent Hunter", "Isle Champion", "Sun-kissed Warrior", "Island Boy", "Isle Outlaw"}
-                        
-                        for _, v in pairs(workspace.Enemies:GetChildren()) do
-                            if table.find(AllMobs, v.Name) and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v:FindFirstChild("HumanoidRootPart") then
-                                local distance = (hrp.Position - v.HumanoidRootPart.Position).Magnitude
-                                if distance < shortestDistance then
-                                    shortestDistance = distance
-                                    closestEnemy = v
-                                end
+                -- [PRIORIDADE 1] MATAR BOSS  
+                if boss and boss.Humanoid.Health > 0 then  
+                    repeat task.wait()  
+                        if boss and boss:FindFirstChild("HumanoidRootPart") then  
+                            -- Trava a Câmera e o HRP, mas deixa o G.Kill atacar
+                            -- Se o G.Kill já faz TP, isso aqui ajuda a estabilizar:
+                            local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+                            if hrp then
+                                hrp.Velocity = Vector3.new(0,0,0) -- Zera movimento
                             end
-                        end
-
-                        if closestEnemy then
-                            _tp(closestEnemy.HumanoidRootPart.CFrame * CFrame.new(0, FarmHeight, 0)) 
+                            
                             EquipWeapon(_G.SelectWeapon)
-                            _G.Kill(closestEnemy, true)
-                        else
-                            _tp(TargetData.FarmPos)
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end)
+                            G.Kill(boss, true)  
+                        else  
+                            break  
+                        end  
+                    until not boss.Parent or boss.Humanoid.Health <= 0 or not _G.StartFarm or not _G.AutoTyrant  
 
-
-----------------------------------------------------------------------------
--- 2. NOVO SISTEMA CAKE PRINCE (ANTI-FALL + DELAY QUEST)
-----------------------------------------------------------------------------
-
-spawn(function()
-    while task.wait() do
-        if _G.AutoFarm_Cake and _G.StartFarm then
-            pcall(function()
-                local plr = game.Players.LocalPlayer
-                local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-                if not hrp then return end
-                
-                -- SISTEMA ANTI-QUEDA
-                if not hrp:FindFirstChild("VelocityLock") then
-                    local bv = Instance.new("BodyVelocity")
-                    bv.Name = "VelocityLock"
-                    bv.Velocity = Vector3.new(0, 0, 0)
-                    bv.MaxForce = Vector3.new(0, math.huge, 0)
-                    bv.Parent = hrp
-                end
-
-                local enemies = workspace:FindFirstChild("Enemies")  
-                if not enemies then return end  
-                
-                local CakePos = CFrame.new(-2091.91, 70.00, -12142.83)  
-                local PortalEntrance = CFrame.new(-2151.82, 149.32, -12404.91)  
-                local mirror = workspace.Map:FindFirstChild("CakeLoaf")  
-                mirror = mirror and mirror:FindFirstChild("BigMirror")  
-                local other = mirror and mirror:FindFirstChild("Other")  
-                local portalOpen = other and other.Transparency == 0  
-                local boss = enemies:FindFirstChild("Cake Prince") or enemies:FindFirstChild("Dough King")  
-
-                if boss or portalOpen then  
-                    if boss and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss.PrimaryPart then  
-                        local bossPos = boss.PrimaryPart.CFrame * CFrame.new(0, 25, 0) * CFrame.Angles(math.rad(-90), 0, 0)  
-                        _tp(bossPos)  
-                        G.Kill(boss, true)  
-                        return  
-                    end  
-                    if (hrp.Position - PortalEntrance.Position).Magnitude < 500 then  
-                        _tp(PortalEntrance)
-                    end  
-                    return  
-                end  
-
-                if _G.AcceptQuest and not plr.PlayerGui.Main.Quest.Visible then  
-                    local questPos = CFrame.new(-1927.92, 45, -12842.54)
-                    _tp(questPos) 
+                -- [PRIORIDADE 2] QUEBRAR 4 VASOS PARA INVOCAR  
+                elseif eyes == 4 then  
+                    local targetsty = {  
+                        CFrame.new(-16335.1, 158.1, 1465.6), CFrame.new(-16288.6, 158.1, 1470.3),  
+                        CFrame.new(-16258.0, 156.7, 1461.4), CFrame.new(-16212.4, 158.1, 1466.3),  
+                        CFrame.new(-16335.0, 159.3, 1324.8), CFrame.new(-16286.0, 155.9, 1323.8),  
+                        CFrame.new(-16250.3, 159.3, 1316.3)  
+                    }  
                     
-                    if (hrp.Position - questPos.Position).Magnitude <= 40 then  
-                        task.wait(1.5) -- ESPERA DE 1.5 SEGUNDOS
-                        if _G.AutoFarm_Cake and _G.AcceptQuest and not plr.PlayerGui.Main.Quest.Visible then
-                            local q = {{"StartQuest", "CakeQuest2", 2}, {"StartQuest", "CakeQuest2", 1}, {"StartQuest", "CakeQuest1", 1}, {"StartQuest", "CakeQuest1", 2}}  
-                            game.ReplicatedStorage.Remotes.CommF_:InvokeServer(unpack(q[math.random(1, 4)]))  
-                        end
+                    local pos = targetsty[VaseIndex]  
+                    if pos then  
+                        _tp(pos)  
+                        local char = plr.Character  
+                        if char and char:FindFirstChild("HumanoidRootPart") then  
+                            if (char.HumanoidRootPart.Position - pos.Position).Magnitude < 15 then  
+                                
+                                -- AQUI ESTÁ A MÁGICA DE ANCORAR NOS VASOS
+                                char.HumanoidRootPart.CFrame = pos -- Força a posição exata
+                                char.HumanoidRootPart.Anchored = true -- TRAVA
+                                
+                                UseAllCategorySkills()  
+                                task.wait(0.1)   
+                                
+                                char.HumanoidRootPart.Anchored = false -- DESTRAVA
+                                
+                                VaseIndex = VaseIndex + 1  
+                                if VaseIndex > #targetsty then VaseIndex = 1 end  
+                            end  
+                        end  
                     end  
-                    return  
-                end  
 
-                local CAKE_MOBS = {"Cookie Crafter", "Cake Guard", "Baking Staff", "Head Baker"}  
-                local bestMob = nil  
-                local bestDist = math.huge  
-                
-                for _, mob in ipairs(enemies:GetChildren()) do  
-                    if table.find(CAKE_MOBS, mob.Name) and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then  
-                        local dist = (mob.HumanoidRootPart.Position - hrp.Position).Magnitude  
-                        if dist < bestDist then 
-                            bestDist = dist 
-                            bestMob = mob 
+                -- [PRIORIDADE 3] FARM NORMAL (TODOS OS MOBS + QUEST)  
+                else  
+                    local TargetData = GetTargetByLevel()   
+                    local QuestUI = plr.PlayerGui.Main.Quest  
+                    local hasQuest = QuestUI.Visible  
+
+                    -- A. PEGAR QUEST   
+                    if _G.AcceptQuest and not hasQuest then  
+                        local char = plr.Character  
+                        if char and char:FindFirstChild("HumanoidRootPart") then  
+                            local distToNPC = (char.HumanoidRootPart.Position - TargetData.QuestPos.Position).Magnitude  
+                            if distToNPC <= 3 then  
+                                char.HumanoidRootPart.CFrame = TargetData.QuestPos  
+                                task.wait(0.1)  
+                                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(TargetData.QuestArgs))  
+                                task.wait(0.5)  
+                            else  
+                                _tp(TargetData.QuestPos)  
+                            end  
+                        end  
+                    
+                    -- B. MATAR MOBS  
+                    else  
+                        local char = plr.Character or plr.CharacterAdded:Wait()  
+                        local hrp = char:WaitForChild("HumanoidRootPart", 1)  
+
+                        if hrp then   
+                            local closestEnemy = nil  
+                            local shortestDistance = math.huge   
+
+                            local AllMobs = {"Skull Slayer", "Serpent Hunter", "Isle Champion", "Sun-kissed Warrior", "Island Boy", "Isle Outlaw"}  
+                            
+                            for _, v in pairs(workspace.Enemies:GetChildren()) do  
+                                if table.find(AllMobs, v.Name) and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v:FindFirstChild("HumanoidRootPart") then  
+                                    local distance = (hrp.Position - v.HumanoidRootPart.Position).Magnitude  
+                                    if distance < shortestDistance then  
+                                        shortestDistance = distance  
+                                        closestEnemy = v  
+                                    end  
+                                end  
+                            end  
+
+                            if closestEnemy then  
+                                -- TRAVA DE VELOCIDADE NO FARM NORMAL TAMBÉM
+                                hrp.Velocity = Vector3.new(0,0,0)
+                                EquipWeapon(_G.SelectWeapon)  
+                                G.Kill(closestEnemy, true)  
+                            else  
+                                _tp(TargetData.FarmPos)  
+                            end  
                         end  
                     end  
                 end  
-
-                if bestMob then  
-                    repeat task.wait()
-                        if not _G.AutoFarm_Cake or not bestMob.Parent or bestMob.Humanoid.Health <= 0 then break end
-                        if (workspace.Map.CakeLoaf.BigMirror.Other.Transparency == 0) or enemies:FindFirstChild("Cake Prince") then break end
-                        
-                        local combatPos = bestMob.HumanoidRootPart.CFrame * CFrame.new(0, 25, 0) * CFrame.Angles(math.rad(-90), 0, 0)
-                        _tp(combatPos)
-                        G.Kill(bestMob, true)
-                    until false
-                else  
-                    _tp(CFrame.new(-1927.92, 100, -12842.54))
-                end  
-            end)
-        else
-            -- Limpeza ao desligar
-            pcall(function()
-                local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if hrp and hrp:FindFirstChild("VelocityLock") then hrp.VelocityLock:Destroy() end
-            end)
-        end
+            end)  
+        end  
     end
 end)
 
-----------------------------------------------------------------------------
--- 3. SISTEMA BONE FARM
-----------------------------------------------------------------------------
 
+
+
+
+-- 3. SISTEMA BONE FARM (CORRIGIDO)
 spawn(function()
     while task.wait() do
         if _G.AutoFarm_Bone and _G.StartFarm then
@@ -4970,17 +4974,29 @@ spawn(function()
                 
                 local QuestUI = plr.PlayerGui.Main.Quest      
                 local MOBS = {"Reborn Skeleton", "Living Zombie", "Demonic Soul", "Posessed Mummy"}
-                local npcPos = CFrame.new(-9516.99, 172.01, 6078.46)
+                local npcPos = CFrame.new(-9516.99, 172.01, 6078.46) -- Posição do NPC de Bones
 
+                -- [PASSO 1] SE PRECISAR DE QUEST, VAI AO NPC PRIMEIRO
                 if _G.AcceptQuest and not QuestUI.Visible then      
-                    if (npcPos.Position - hrp.Position).Magnitude > 5 then
-                        _tp(npcPos)
+                    local distToNPC = (npcPos.Position - hrp.Position).Magnitude
+                    
+                    if distToNPC > 5 then
+                        _tp(npcPos) -- Teleporta direto para o NPC
                     else
+                        -- Se estiver perto, tenta pegar a quest
                         task.wait(0.5)
-                        local quests = {{"StartQuest","HauntedQuest1",1}, {"StartQuest","HauntedQuest1",2}, {"StartQuest","HauntedQuest2",1}, {"StartQuest","HauntedQuest2",2}}
+                        local quests = {
+                            {"StartQuest","HauntedQuest1",1}, 
+                            {"StartQuest","HauntedQuest1",2},
+                            {"StartQuest","HauntedQuest2",1}, 
+                            {"StartQuest","HauntedQuest2",2}
+                        }
+                        -- Tenta pegar a quest baseada no seu level (opcional: deixei aleatório como no seu original)
                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(quests[math.random(1,#quests)]))
-                        task.wait(1)
+                        task.wait(1) -- Espera a quest carregar na UI
                     end
+
+                -- [PASSO 2] SE JÁ TEM QUEST OU NÃO QUER ACEITAR, VAI FARMAL
                 else
                     local function GetClosestMob()      
                         local closest, shortest = nil, math.huge      
@@ -4988,18 +5004,24 @@ spawn(function()
                             for _, mob in pairs(workspace.Enemies:GetChildren()) do      
                                 if mob.Name == mobName and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then      
                                     local dist = (mob.PrimaryPart.Position - hrp.Position).Magnitude      
-                                    if dist < shortest then shortest = dist closest = mob end      
+                                    if dist < shortest then 
+                                        shortest = dist 
+                                        closest = mob 
+                                    end      
                                 end      
                             end      
                         end      
                         return closest      
                     end      
+
                     local mob = GetClosestMob()      
                     if mob then      
+                        -- Teleporta para o mob e mata
                         _tp(mob.PrimaryPart.CFrame)      
                         EquipWeapon(_G.SelectWeapon)
                         G.Kill(mob, true)
                     else      
+                        -- Se não achar mobs, vai para o spot de spawn deles
                         _tp(CFrame.new(-9495.68, 453.58, 5977.34))      
                     end      
                 end
@@ -5008,9 +5030,11 @@ spawn(function()
     end
 end)
 
-----------------------------------------------------------------------------
+---
+
 -- 4. SISTEMA LEVEL FARM
-----------------------------------------------------------------------------
+
+local CurrentMob = nil
 
 local function GetNearestMob(TargetName)
     local plr = game.Players.LocalPlayer
@@ -5059,6 +5083,154 @@ spawn(function()
     end
 end)
 
+---
+
+----------------------------------------------------------------------------
+-- 5. SISTEMA CAKE PRINCE FARM
+----------------------------------------------------------------------------
+
+local lastAirCFrame = nil
+
+spawn(function()
+    while task.wait() do
+        if _G.AutoFarm_Cake and _G.StartFarm then
+            pcall(function()
+                local plr = game.Players.LocalPlayer
+                local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                local enemies = workspace:FindFirstChild("Enemies")
+                if not enemies then return end
+
+                local CakePos = CFrame.new(-2091.91, 70.00, -12142.83)
+                local PortalEntrance = CFrame.new(-2151.82, 149.32, -12404.91)
+
+                local mirror = workspace.Map:FindFirstChild("CakeLoaf")
+                mirror = mirror and mirror:FindFirstChild("BigMirror")
+                local other = mirror and mirror:FindFirstChild("Other")
+                local portalOpen = other and other.Transparency == 0
+
+                local boss = enemies:FindFirstChild("Cake Prince") or enemies:FindFirstChild("Dough King")
+
+                if not boss and not portalOpen and (hrp.Position - CakePos.Position).Magnitude > 3000 then
+                    _tp(CakePos)
+                    return
+                end
+
+                if boss or portalOpen then
+                    lastAirCFrame = nil
+
+                    if boss and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss.PrimaryPart then
+                        local bossPos =
+                            boss.PrimaryPart.CFrame
+                            * CFrame.new(0, 25, 0)
+                            * CFrame.Angles(math.rad(-90), 0, 0)
+
+                        _tp(bossPos)
+                        G.Kill(boss, true)
+                        return
+                    end
+
+                    if (hrp.Position - PortalEntrance.Position).Magnitude < 500 then
+                        TeleportConditional(hrp, PortalEntrance, TELEPORT_DISTANCE_THRESHOLD)
+                    end
+                    return
+                end
+
+                local CAKE_MOBS = {"Cookie Crafter", "Cake Guard", "Baking Staff", "Head Baker"}
+
+                if _G.AcceptQuest and not plr.PlayerGui.Main.Quest.Visible then
+                    lastAirCFrame = nil
+
+                    local questPos = CFrame.new(-1927.92, 37.80, -12842.54)
+                    TeleportConditional(hrp, questPos, TELEPORT_DISTANCE_THRESHOLD)
+
+                    if (hrp.Position - questPos.Position).Magnitude <= 40 then
+                        local q = {
+                            {"StartQuest", "CakeQuest2", 2},
+                            {"StartQuest", "CakeQuest2", 1},
+                            {"StartQuest", "CakeQuest1", 1},
+                            {"StartQuest", "CakeQuest1", 2}
+                        }
+                        game.ReplicatedStorage.Remotes.CommF_:InvokeServer(unpack(q[math.random(1, 4)]))
+                    end
+                    return
+                end
+
+                local bestMob, bestDist = nil, math.huge
+                for _, mob in ipairs(enemies:GetChildren()) do
+                    if table.find(CAKE_MOBS, mob.Name)
+                    and mob:FindFirstChild("Humanoid")
+                    and mob.Humanoid.Health > 0
+                    and mob:FindFirstChild("HumanoidRootPart") then
+
+                        local dist = (mob.HumanoidRootPart.Position - hrp.Position).Magnitude
+                        if dist < bestDist then
+                            bestDist = dist
+                            bestMob = mob
+                        end
+                    end
+                end
+
+                if bestMob then
+                    repeat
+                        task.wait()
+
+                        if (workspace.Map.CakeLoaf.BigMirror.Other.Transparency == 0)
+                        or enemies:FindFirstChild("Cake Prince") then
+                            break
+                        end
+
+                        if bestMob.Parent and bestMob.Humanoid.Health > 0 then
+                            local mobHRP = bestMob.HumanoidRootPart
+
+                            local targetCFrame =
+                                mobHRP.CFrame
+                                * CFrame.new(0, 20, 0)
+                                * CFrame.Angles(math.rad(-90), 0, 0)
+
+                            -- mantém a altura SEMPRE estável
+                            if lastAirCFrame then
+                                targetCFrame = CFrame.new(
+                                    targetCFrame.Position.X,
+                                    lastAirCFrame.Position.Y,
+                                    targetCFrame.Position.Z
+                                ) * CFrame.Angles(math.rad(-90), 0, 0)
+                            end
+
+                            _tp(targetCFrame)
+
+                            -- anula gravidade / queda entre frames
+                            hrp.Velocity = Vector3.zero
+                            hrp.AssemblyLinearVelocity = Vector3.zero
+
+                            -- só atualiza se subir (nunca se cair)
+                            if not lastAirCFrame
+                            or targetCFrame.Position.Y > lastAirCFrame.Position.Y then
+                                lastAirCFrame = targetCFrame
+                            end
+
+                            G.Kill(bestMob, true)
+                        else
+                            break
+                        end
+                    until not _G.StartFarm
+                       or not _G.AutoFarm_Cake
+                       or not bestMob.Parent
+                       or bestMob.Humanoid.Health <= 0
+                else
+                    lastAirCFrame = nil
+
+                    TeleportConditional(
+                        hrp,
+                        CFrame.new(-1927.92, 37.80, -12842.54),
+                        TELEPORT_DISTANCE_THRESHOLD
+                    )
+                end
+            end)
+        end
+    end
+end)
 
 
 b:AddSeperator("statistics point")
@@ -6015,50 +6187,180 @@ T:AddInput({
     end,
 });
 
-outros:AddSeperator("Sea")
 
-outros:AddToggle({
-	Title = "Auto Sea 2",
-	Description = "",
-	Default = false,
-	Callback = function(I)
-		_G.TravelDres = I;
-	end,
-});
+j:AddSeperator("Christmas")
+
+-- [[ TOGGLE PARA O FARM ]]
+j:AddToggle({
+    Title = "Auto Farm Candy",
+    Default = _G.FarmElfLevelCustom or false,
+    Callback = function(I)
+        _G.FarmElfLevelCustom = I
+        _G.FarmPriorityElf = I  
+        _G.SaveData["FarmElfLevelCustom"] = I  
+        SaveSettings()  
+    end
+})
+
+-- [[ FUNÇÃO DE NOCLIP ]]
+-- Adicionado para evitar que o personagem prenda em objetos durante o TP
 spawn(function()
-	while wait(Sec) do
-		pcall(function()
-			if _G.TravelDres then
-				if plr.Data.Level.Value >= 700 then
-					if workspace.Map.Ice.Door.CanCollide == true and workspace.Map.Ice.Door.Transparency == 0 then
-						replicated.Remotes.CommF_:InvokeServer("DressrosaQuestProgress", "Detective");
-						EquipWeapon("Key");
-						repeat
-							wait();
-							_tp(CFrame.new(1347.7124, 37.3751602, -1325.6488));
-						until not _G.TravelDres or Root.Position == (CFrame.new(1347.7124, 37.3751602, -1325.6488)).Position;
-					elseif workspace.Map.Ice.Door.CanCollide == false and workspace.Map.Ice.Door.Transparency == 1 then
-						if Enemies:FindFirstChild("Ice Admiral") then
-							for I, e in pairs(Enemies:GetChildren()) do
-								if e.Name == "Ice Admiral" and G.Alive(e) then
-									repeat
-										task.wait();
-										G.Kill(e, _G.TravelDres);
-									until _G.TravelDres == false or e.Humanoid.Health <= 0;
-									replicated.Remotes.CommF_:InvokeServer("TravelDressrosa");
-								end;
-							end;
-						else
-							_tp(CFrame.new(1347.7124, 37.3751602, -1325.6488));
-						end;
-					else
-						replicated.Remotes.CommF_:InvokeServer("TravelDressrosa");
-					end;
-				end;
-			end;
-		end);
-	end;
-end);
+    while task.wait() do
+        if _G.FarmElfLevelCustom then
+            local char = game.Players.LocalPlayer.Character
+            if char then
+                for _, v in pairs(char:GetDescendants()) do
+                    if v:IsA("BasePart") and v.CanCollide then
+                        v.CanCollide = false
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- [[ FUNÇÃO DE BUSCA NA ILHA (BUSCA TODOS OS MOBS DA ÁREA) ]]
+local function GetAllIslandTargets(IslandPosition, MaxRadius)
+    local plr = game.Players.LocalPlayer
+    local char = plr.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") or not IslandPosition then return nil end
+
+    local BestElf, BestAnyMob = nil, nil  
+    local DistElf, DistAny = math.huge, math.huge  
+
+    for _, Mob in pairs(workspace.Enemies:GetChildren()) do  
+        if G.Alive(Mob) and Mob:FindFirstChild("HumanoidRootPart") then  
+            local distanceToIsland = (Mob.HumanoidRootPart.Position - IslandPosition.Position).Magnitude  
+
+            if distanceToIsland < (MaxRadius or 800) then  
+                local InternalName = string.lower(Mob.Name)  
+                local DisplayName = Mob:FindFirstChild("Humanoid") and string.lower(Mob.Humanoid.DisplayName) or ""  
+
+                -- PRIORIDADE 1: Elfos  
+                if string.find(InternalName, "elf") or string.find(DisplayName, "elf") then  
+                    if distanceToIsland < DistElf then  
+                        DistElf = distanceToIsland  
+                        BestElf = Mob  
+                    end  
+                else  
+                    -- PRIORIDADE 2: Qualquer mob da ilha  
+                    if distanceToIsland < DistAny then  
+                        DistAny = distanceToIsland  
+                        BestAnyMob = Mob  
+                    end  
+                end  
+            end  
+        end  
+    end  
+
+    return BestElf or BestAnyMob
+end
+
+-- [[ LOOP PRINCIPAL ]]
+spawn(function()
+    while task.wait() do
+        if _G.FarmElfLevelCustom then
+            pcall(function()
+                local plr = game.Players.LocalPlayer
+                local char = plr.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                local Q = QuestNeta()  
+                local IslandPos = Q[4]  
+
+                -- === LÓGICA DE VIAGEM (SUBMARINE) ===  
+                if (IslandPos.Position - hrp.Position).Magnitude > 10000 then  
+                    local SubmarineNPC = CFrame.new(-16269.7041, 25.2288494, 1373.65955)  
+                    if (hrp.Position - SubmarineNPC.Position).Magnitude < 15 then  
+                        local args = {"TravelToSubmergedIsland"}  
+                        game:GetService("ReplicatedStorage").Modules.Net  
+                            :FindFirstChild("RF/SubmarineWorkerSpeak")  
+                            :InvokeServer(unpack(args))  
+                        task.wait(2)  
+                    else  
+                        _tp(SubmarineNPC)  
+                    end  
+                    return  
+                end  
+
+                -- === LÓGICA DE ATAQUE ===  
+                local Target = GetAllIslandTargets(IslandPos, 800)  
+
+                if Target then  
+                    repeat  
+                        task.wait()  
+
+                        -- INTERRUPÇÃO SE ELF SPAWNAR  
+                        local QuickCheck = GetAllIslandTargets(IslandPos, 800)  
+                        if QuickCheck and QuickCheck ~= Target then  
+                            local isNewElf =  
+                                string.find(string.lower(QuickCheck.Name), "elf") or  
+                                (QuickCheck:FindFirstChild("Humanoid") and  
+                                 string.find(string.lower(QuickCheck.Humanoid.DisplayName), "elf"))  
+
+                            local isCurrentElf =  
+                                string.find(string.lower(Target.Name), "elf") or  
+                                (Target:FindFirstChild("Humanoid") and  
+                                 string.find(string.lower(Target.Humanoid.DisplayName), "elf"))  
+
+                            if isNewElf and not isCurrentElf then  
+                                break  
+                            end  
+                        end  
+
+                        if Target and Target:FindFirstChild("HumanoidRootPart") then  
+                            _tp(Target.HumanoidRootPart.CFrame * CFrame.new(0, 45, 0))  
+                            EquipWeapon(_G.SelectWeapon)  
+                            G.Kill(Target, true)  
+                        end  
+                    until not _G.FarmElfLevelCustom  
+                        or not Target.Parent  
+                        or Target.Humanoid.Health <= 0  
+                else  
+                    _tp(IslandPos)  
+                end  
+            end)  
+        end  
+    end
+end)
+
+
+local replicated = game:GetService("ReplicatedStorage")
+
+-- ===============================
+-- TOGGLE + SISTEMA NO MESMO CÓDIGO
+-- ===============================
+j:AddToggle({
+    Title = "Random Winter Gacha",
+    Default = GetSetting("Auto_Xmas_Gacha", false),
+    Callback = function(I)
+        _G.Auto_Xmas_Gacha = I
+        _G.SaveData["Auto_Xmas_Gacha"] = I
+        SaveSettings()
+    end
+})
+
+-- loop do sistema
+spawn(function()
+    while task.wait(1.5) do
+        if _G.Auto_Xmas_Gacha then
+            pcall(function()
+                -- 1. compra / valida
+                replicated.Remotes.CommF_:InvokeServer(
+                    "Cousin",
+                    "F2PXmasWeek2Gacha25"
+                )
+
+                -- 2. gira
+                replicated.Modules.Net["RE/SpinGacha"]:FireServer({
+                    BoxName = "F2PXmasWeek2Gacha25"
+                })
+            end)
+        end
+    end
+end)
+
 
 
 
