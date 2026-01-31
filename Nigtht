@@ -4652,6 +4652,7 @@ b:AddToggle({
 
 local FarmHeight = 45 -- Altura segura para não bugar no mob
 
+-- Função de colisão e estado (Melhorada)
 spawn(function()
     game:GetService("RunService").Stepped:Connect(function()
         if _G.AutoTyrant and _G.StartFarm then
@@ -4663,7 +4664,8 @@ spawn(function()
                     end
                 end
                 if char:FindFirstChild("Humanoid") then
-                    char.Humanoid.AutoRotate = true 
+                    -- ChangeState(11) remove a gravidade, às vezes parece "travado"
+                    -- Se quiser que ele caia normalmente, remova a linha abaixo
                     char.Humanoid:ChangeState(11) 
                 end
             end
@@ -4677,42 +4679,42 @@ local function GetTargetByLevel()
         return {
             Name = "Skull Slayer",
             QuestArgs = {"StartQuest", "TikiQuest3", 2},
-            QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743, -0.999621451, 3.5280582e-08, 0.0275127869, 3.5990368e-08, 1, 2.53032191e-08, -0.0275127869, 2.62838356e-08, -0.999621451),
+            QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743),
             FarmPos = CFrame.new(-16709.49, 419.68, 1751.09)
         }
     elseif myLevel > 2550 then
         return {
             Name = "Serpent Hunter",
             QuestArgs = {"StartQuest", "TikiQuest3", 1},
-            QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743, -0.999621451, 3.5280582e-08, 0.0275127869, 3.5990368e-08, 1, 2.53032191e-08, -0.0275127869, 2.62838356e-08, -0.999621451),
+            QuestPos = CFrame.new(-16665.0879, 105.27478, 1577.61743),
             FarmPos = CFrame.new(-16645.64, 163.09, 1352.87)
         }
     elseif myLevel >= 2525 then
         return {
             Name = "Isle Champion",
             QuestArgs = {"StartQuest", "TikiQuest2", 2},
-            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311, -0.0595058464, 2.45485676e-08, 0.998227954, -5.3272025e-08, 1, -2.77677703e-08, -0.998227954, -5.48299717e-08, -0.0595058464),
+            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311),
             FarmPos = CFrame.new(-16602.1015625, 130.38734436035, 1087.2456054688)
         }
     elseif myLevel >= 2500 then
         return {
             Name = "Sun-kissed Warrior",
             QuestArgs = {"StartQuest", "TikiQuest2", 1},
-            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311, -0.0595058464, 2.45485676e-08, 0.998227954, -5.3272025e-08, 1, -2.77677703e-08, -0.998227954, -5.48299717e-08, -0.0595058464),
+            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311),
             FarmPos = CFrame.new(-16347, 64, 984)
         }
     elseif myLevel >= 2475 then
         return {
             Name = "Island Boy",
             QuestArgs = {"StartQuest", "TikiQuest1", 2},
-            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311, -0.0595058464, 2.45485676e-08, 0.998227954, -5.3272025e-08, 1, -2.77677703e-08, -0.998227954, -5.48299717e-08, -0.0595058464),
+            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311),
             FarmPos = CFrame.new(-16670, 43, -270)
         }
     else
         return {
             Name = "Isle Outlaw",
             QuestArgs = {"StartQuest", "TikiQuest1", 1},
-            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311, -0.0595058464, 2.45485676e-08, 0.998227954, -5.3272025e-08, 1, -2.77677703e-08, -0.998227954, -5.48299717e-08, -0.0595058464),
+            QuestPos = CFrame.new(-16546.748, 55.7216759, -172.865311),
             FarmPos = CFrame.new(-16350, 45, -180)
         }
     end
@@ -4740,10 +4742,11 @@ local function UseAllCategorySkills()
     local VirtualUser = game:GetService("VirtualUser")
     local categories = {"Melee", "Blox Fruit", "Sword", "Gun"}
     local skills = {"Z", "X", "C"}
+    
     pcall(function()
-        game:GetService("VirtualInputManager"):SendKeyEvent(true, "RightControl", false, game)
         workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, workspace.CurrentCamera.CFrame.Position + Vector3.new(0,-1,0))
     end)
+
     for _, toolType in ipairs(categories) do
         local tool = nil
         for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
@@ -4755,16 +4758,14 @@ local function UseAllCategorySkills()
         end
         if tool then
             game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
-            task.wait(0.1)
-            for i = 1, 3 do
+            task.wait(0.05)
+            for i = 1, #skills do
                 VirtualUser:CaptureController()
                 VirtualUser:ClickButton1(Vector2.new(851, 158))
                 local skillKey = skills[i]
-                if skillKey then
-                    VirtualInputManager:SendKeyEvent(true, skillKey, false, game)
-                    task.wait(0.05)
-                    VirtualInputManager:SendKeyEvent(false, skillKey, false, game)
-                end
+                VirtualInputManager:SendKeyEvent(true, skillKey, false, game)
+                task.wait(0.05)
+                VirtualInputManager:SendKeyEvent(false, skillKey, false, game)
                 task.wait(0.1) 
             end
         end
@@ -4775,23 +4776,24 @@ spawn(function()
     local VaseIndex = 1 
     while task.wait() do
         if _G.AutoTyrant and _G.StartFarm then
+            local plr = game.Players.LocalPlayer
+            local char = plr.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            
+            if not hrp then continue end
+
             pcall(function()
-                local plr = game.Players.LocalPlayer
                 local boss = workspace.Enemies:FindFirstChild("Tyrant of the Skies")
                 local eyes = GetEyesCount()
 
-                if boss and boss.Humanoid.Health > 0 then
+                -- 1. LÓGICA DO BOSS
+                if boss and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
+                    hrp.Anchored = false -- Garante que não está preso
                     _tp(boss.HumanoidRootPart.CFrame * CFrame.new(0, FarmHeight, 0))
-                    repeat task.wait()
-                        if boss and boss:FindFirstChild("HumanoidRootPart") then
-                            _tp(boss.HumanoidRootPart.CFrame * CFrame.new(0, FarmHeight, 0))
-                            EquipWeapon(_G.SelectWeapon)
-                            G.Kill(boss, true)
-                        else
-                            break
-                        end
-                    until not boss.Parent or boss.Humanoid.Health <= 0 or not _G.StartFarm or not _G.AutoTyrant
+                    EquipWeapon(_G.SelectWeapon)
+                    _G.Kill(boss, true) -- Note: Verifique se é _G.Kill ou G.Kill no seu script original
 
+                -- 2. LÓGICA DOS VASOS (ONDE DEVE ANCORAR)
                 elseif eyes == 4 then
                     local targetsty = {
                         CFrame.new(-16335.1, 158.1, 1465.6), CFrame.new(-16288.6, 158.1, 1470.3),
@@ -4802,57 +4804,53 @@ spawn(function()
                     local pos = targetsty[VaseIndex]
                     if pos then
                         _tp(pos)
-                        local char = plr.Character
-                        if char and char:FindFirstChild("HumanoidRootPart") then
-                            if (char.HumanoidRootPart.Position - pos.Position).Magnitude < 15 then
-                                char.HumanoidRootPart.Anchored = true
-                                UseAllCategorySkills()
-                                task.wait(0.1) 
-                                char.HumanoidRootPart.Anchored = false
-                                VaseIndex = VaseIndex + 1
-                                if VaseIndex > #targetsty then VaseIndex = 1 end
-                            end
+                        if (hrp.Position - pos.Position).Magnitude < 15 then
+                            hrp.Anchored = true -- ANCORA APENAS AQUI
+                            UseAllCategorySkills()
+                            task.wait(0.1) 
+                            hrp.Anchored = false
+                            VaseIndex = VaseIndex + 1
+                            if VaseIndex > #targetsty then VaseIndex = 1 end
                         end
                     end
+
+                -- 3. LÓGICA DOS MOBS (FARM NORMAL)
                 else
+                    hrp.Anchored = false -- GARANTE DESANCORADO PARA FARM
                     local TargetData = GetTargetByLevel() 
                     local hasQuest = plr.PlayerGui.Main.Quest.Visible
+                    
                     if _G.AcceptQuest and not hasQuest then
-                        local char = plr.Character
-                        if char and char:FindFirstChild("HumanoidRootPart") then
-                            local distToNPC = (char.HumanoidRootPart.Position - TargetData.QuestPos.Position).Magnitude
-                            if distToNPC <= 3 then
-                                char.HumanoidRootPart.CFrame = TargetData.QuestPos
-                                task.wait(0.1)
-                                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(TargetData.QuestArgs))
-                                task.wait(0.5)
-                            else
-                                _tp(TargetData.QuestPos)
-                            end
+                        local distToNPC = (hrp.Position - TargetData.QuestPos.Position).Magnitude
+                        if distToNPC <= 5 then
+                            hrp.CFrame = TargetData.QuestPos
+                            task.wait(0.1)
+                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(TargetData.QuestArgs))
+                        else
+                            _tp(TargetData.QuestPos)
                         end
                     else
-                        local char = plr.Character or plr.CharacterAdded:Wait()
-                        local hrp = char:WaitForChild("HumanoidRootPart", 1)
-                        if hrp then 
-                            local closestEnemy = nil
-                            local shortestDistance = math.huge 
-                            local AllMobs = {"Skull Slayer", "Serpent Hunter", "Isle Champion", "Sun-kissed Warrior", "Island Boy", "Isle Outlaw"}
-                            for _, v in pairs(workspace.Enemies:GetChildren()) do
-                                if table.find(AllMobs, v.Name) and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v:FindFirstChild("HumanoidRootPart") then
-                                    local distance = (hrp.Position - v.HumanoidRootPart.Position).Magnitude
-                                    if distance < shortestDistance then
-                                        shortestDistance = distance
-                                        closestEnemy = v
-                                    end
+                        -- Procura mob próximo
+                        local closestEnemy = nil
+                        local shortestDistance = math.huge 
+                        local AllMobs = {"Skull Slayer", "Serpent Hunter", "Isle Champion", "Sun-kissed Warrior", "Island Boy", "Isle Outlaw"}
+                        
+                        for _, v in pairs(workspace.Enemies:GetChildren()) do
+                            if table.find(AllMobs, v.Name) and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v:FindFirstChild("HumanoidRootPart") then
+                                local distance = (hrp.Position - v.HumanoidRootPart.Position).Magnitude
+                                if distance < shortestDistance then
+                                    shortestDistance = distance
+                                    closestEnemy = v
                                 end
                             end
-                            if closestEnemy then
-                                _tp(closestEnemy.HumanoidRootPart.CFrame * CFrame.new(0, FarmHeight, 0)) 
-                                EquipWeapon(_G.SelectWeapon)
-                                G.Kill(closestEnemy, true)
-                            else
-                                _tp(TargetData.FarmPos)
-                            end
+                        end
+
+                        if closestEnemy then
+                            _tp(closestEnemy.HumanoidRootPart.CFrame * CFrame.new(0, FarmHeight, 0)) 
+                            EquipWeapon(_G.SelectWeapon)
+                            _G.Kill(closestEnemy, true)
+                        else
+                            _tp(TargetData.FarmPos)
                         end
                     end
                 end
@@ -4860,6 +4858,7 @@ spawn(function()
         end
     end
 end)
+
 
 ----------------------------------------------------------------------------
 -- 2. NOVO SISTEMA CAKE PRINCE (ANTI-FALL + DELAY QUEST)
