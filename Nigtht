@@ -1335,7 +1335,7 @@ function CheckNearestTeleporter(v393)
     if l_huge_0 <= (l_Position_1 - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude then
         return v396, vName
     else
-        return 
+        return nil, nil
     end
 end
 
@@ -1362,62 +1362,66 @@ getgenv().TweenSpeedFar = 300
 getgenv().TweenSpeedNear = 600
 
 _tp = function(I)
-local e = game.Players.LocalPlayer.Character;
-if not e or not e:FindFirstChild("HumanoidRootPart") then
-return;
-end;
+    local e = game.Players.LocalPlayer.Character;
+    if not e or not e:FindFirstChild("HumanoidRootPart") then
+        return;
+    end;
 
-local HRP = e.HumanoidRootPart;  
+    local HRP = e.HumanoidRootPart;  
 
-shouldTween = true  
-getgenv().OnFarm = false  
+    shouldTween = true  
+    getgenv().OnFarm = false  
 
-if HRP.Anchored then  
-	HRP.Anchored = false  
-	task.wait()  
-end  
+    if HRP.Anchored then  
+        HRP.Anchored = false  
+        task.wait()  
+    end  
 
-local portalPos, portalName = CheckNearestTeleporter(I)
-if portalName then
-    requestEntrance(portalName)
-    if e and e:FindFirstChild("HumanoidRootPart") then
-        C.CFrame = e.HumanoidRootPart.CFrame
+    -- VERIFICAR E USAR PORTAL ANTES DE CALCULAR A ROTA
+    local PortalPos, PortalName = CheckNearestTeleporter(I)
+    if PortalName then
+        requestEntrance(PortalName)
+        -- Importante: Esperar o teleporte e atualizar a peça guia (Rip_Indra)
+        if e and e:FindFirstChild("HumanoidRootPart") then
+            -- Força a peça a ir para onde o player foi teleportado
+            C.CFrame = e.HumanoidRootPart.CFrame 
+        end
+        task.wait(0.2) 
     end
-end
 
-local dist = (I.Position - HRP.Position).Magnitude  
+    -- Recalcula distância a partir da nova posição (pós-portal ou original)
+    local dist = (I.Position - HRP.Position).Magnitude  
 
-local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
+    local speed = dist <= 15 and (getgenv().TweenSpeedNear or 600) or (getgenv().TweenSpeedFar or 300)
 
-local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)  
-local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })  
+    local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)  
+    local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })  
 
-if e.Humanoid.Sit == true then  
-	C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)  
-end  
+    if e.Humanoid.Sit == true then  
+        C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)  
+    end  
 
-tween:Play()  
+    tween:Play()  
 
-task.spawn(function()  
-	while tween.PlaybackState == Enum.PlaybackState.Playing do  
-		if not shouldTween then  
-			tween:Cancel()  
-			break  
-		end  
-		task.wait(.1)  
-	end  
+    task.spawn(function()  
+        while tween.PlaybackState == Enum.PlaybackState.Playing do  
+            if not shouldTween then  
+                tween:Cancel()  
+                break  
+            end  
+            task.wait(.1)  
+        end  
 
-	getgenv().OnFarm = true  
-end)
-
+        getgenv().OnFarm = true  
+    end)
 end
 
 TeleportToTarget = function(I)
-_tp(I)
+    _tp(I)
 end
 
 notween = function(I)
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = I
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = I
 end
 
 
