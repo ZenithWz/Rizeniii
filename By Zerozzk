@@ -2013,65 +2013,7 @@ task.spawn(function()
     end
 end)
 
-local function GetExecutor()
-    if identifyexecutor then
-        return identifyexecutor()
-    elseif getexecutorname then
-        return getexecutorname()
-    end
-    return "Unknown"
-end
 
-local function SendWebhook()
-    local webhookUrl = ""
-    
-    local executor = GetExecutor()
-    
-    local data = {
-        embeds = {{
-            title = "EXECUTION",
-            description = "A server member just ran the cat hub on the executor ```" .. executor .. "```\n> 🙏 Run the cat hub right now!",
-            color = 65793,
-            timestamp = os.date("!%Y-%m-%dT%H:%M:%S")
-        }},
-        components = {{
-            type = 1,
-            components = {{
-                type = 2,
-                style = 5,
-                label = "Get Script",
-                url = "https://discord.com/channels/1197904780899667968/1459928061246963775",
-                emoji = {
-                    name = "🙏"
-                }
-            }}
-        }}
-    }
-    
-    local headers = {
-        ["Content-Type"] = "application/json"
-    }
-    
-    local success, response = pcall(function()
-        return request({
-            Url = webhookUrl,
-            Method = "POST",
-            Headers = headers,
-            Body = HttpService:JSONEncode(data)
-        })
-    end)
-    
-    if success then
-        print("Webhook sent successfully!")
-    else
-        print("Failed to send webhook:", response)
-    end
-end
-
-task.spawn(function()
-    task.wait(2)
-    SendWebhook()
-end)
 
 local function TravelToSubmergedIsland()
     if isTravelingToSubmerged then return false end
@@ -5271,11 +5213,7 @@ task.spawn(function()
                 if type(response) == "string" then
                     local kills = response:match("(%d+)")
                     if kills then
-                        Window:Notify({
-                            Title = "Cake Prince",
-                            Body = "Kill : " .. kills,
-                            Duration = 1
-                        })
+                        -- Notificação de kills removida
                     else
                         Window:Notify({
                             Title = "Cake Prince",
@@ -5294,6 +5232,7 @@ task.spawn(function()
         end
     end
 end)
+
 
 Window:AddToggle(FarmingTab, {
     Name = "Auto Cake Prince",
