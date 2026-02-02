@@ -4616,8 +4616,10 @@ b:AddDropdown({
     Default = "Melee",
     Multi = false,
     Callback = function(I)
+        -- Só muda se M1 Fruit NÃO estiver ativo
         if not _G.UseM1Fruit then
             _G.ChooseWP = I
+            _G.LastChooseWP = I
         end
     end,
 })
@@ -10316,9 +10318,34 @@ A:AddToggle({
     Title = "Use M1 Fruit",
     Default = false,
     Callback = function(v)
+
+        -- Bloqueia se SailBoats estiver OFF
+        if v and not _G.SailBoats then
+            _G.UseM1Fruit = false
+            return
+        end
+
         _G.UseM1Fruit = v
+
         if v then
+            -- Salva o weapon atual
+            _G.LastChooseWP = _G.ChooseWP
+
+            -- Força Blox Fruit
             _G.ChooseWP = "Blox Fruit"
+
+            if SelectWeapon then
+                SelectWeapon:Set("Blox Fruit")
+            end
+        else
+            -- Volta pro weapon anterior
+            if _G.LastChooseWP then
+                _G.ChooseWP = _G.LastChooseWP
+
+                if SelectWeapon then
+                    SelectWeapon:Set(_G.LastChooseWP)
+                end
+            end
         end
     end
 })
