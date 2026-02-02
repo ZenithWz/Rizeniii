@@ -4612,14 +4612,16 @@ Discord_Info:AddParagraph({
 b:AddSeperator("Farming")
 b:AddDropdown({
     Title = "Select Weapon",
-    Description = "",
     Values = {"Melee","Sword","Blox Fruit","Gun"},
     Default = "Melee",
     Multi = false,
     Callback = function(I)
-        _G.ChooseWP = I
+        if not _G.UseM1Fruit then
+            _G.ChooseWP = I
+        end
     end,
 })
+
 
 spawn(function()
     while wait(Sec) do
@@ -10130,7 +10132,7 @@ if World1 or World2 then
 zu:AddSeperator("only in Sea 3")
 end
 if World2 or World3 then
-    A:AddSeperator("Sea Event / Setting Sail")
+    A:AddSeperator("Sea Event")
 
     local z5 = {
         "Guardian",
@@ -10170,7 +10172,7 @@ if World2 or World3 then
     end
 
     A:AddToggle({
-        Title = "Auto Start farm",
+        Title = "Start farm",
         Description = "Auto Buy Boat, Move to Zone & Farm Selected Events",
         Default = false,
         Callback = function(I)
@@ -10287,6 +10289,18 @@ if World2 or World3 then
         end)
     end)
 
+A:AddToggle({
+    Title = "Use M1 Fruit",
+    Default = false,
+    Callback = function(v)
+        _G.UseM1Fruit = v
+        if v then
+            _G.ChooseWP = "Blox Fruit"
+        end
+    end
+})
+
+
     A:AddSeperator("Sea Events Selection")
 
     local SeaEventsConfig = {
@@ -10344,7 +10358,7 @@ if World2 or World3 then
         end
     end)
 end
--- [[ CONFIGURAÇÃO INICIAL (Coloque no topo do script ou mantenha onde está) ]]
+-- [[ CONFIGURAÇÃO INICIAL ]]
 _G.SelectedSkills = _G.SelectedSkills or {
     ["Melee"] = {},
     ["Sword"] = {},
@@ -10352,48 +10366,40 @@ _G.SelectedSkills = _G.SelectedSkills or {
     ["Blox Fruit"] = {}
 }
 
--- Função auxiliar para converter o save (tabela) em lista para a UI (visual)
+-- Função auxiliar para converter o save em lista para a UI
 local function GetActiveSkillsList(category, allSkills, saveKey)
     local savedData = GetSetting(saveKey, nil)
-    
-    -- Se tiver dados salvos, converte {["Z"]=true} para {"Z"}
     if savedData then
         local list = {}
         for skill, active in pairs(savedData) do
             if active then table.insert(list, skill) end
         end
-        -- Atualiza a variável global de lógica imediatamente
         _G.SelectedSkills[category] = savedData
         return list
     end
     
-    -- Se não tiver save, retorna todas as skills como padrão e ativa na lógica
-    local defaultList = allSkills
     local defaultLogic = {}
     for _, s in pairs(allSkills) do defaultLogic[s] = true end
     _G.SelectedSkills[category] = defaultLogic
-    return defaultList
+    return allSkills
 end
 
+-- [[ INTERFACE DE SKILLS ]]
 if World2 or World3 then
     o:AddSeperator("Configure Skills for Sea Events")
 
-    -- [[ MELEE MULTI DROPDOWN ]]
     o:AddDropdown({
         Title = "Melee Skills",
         Multi = true,
         Values = {"Z", "X", "C"},
         Default = GetActiveSkillsList("Melee", {"Z", "X", "C"}, "Sea_Skill_Melee"),
         Callback = function(Selected)
-            -- Atualiza a tabela global que o Farm usa
             _G.SelectedSkills["Melee"] = Selected
-            -- Salva no arquivo
             _G.SaveData["Sea_Skill_Melee"] = Selected
             SaveSettings()
         end
     })
 
-    -- [[ SWORD MULTI DROPDOWN ]]
     o:AddDropdown({
         Title = "Sword Skills",
         Multi = true,
@@ -10406,7 +10412,6 @@ if World2 or World3 then
         end
     })
 
-    -- [[ GUN MULTI DROPDOWN ]]
     o:AddDropdown({
         Title = "Gun Skills",
         Multi = true,
@@ -10419,7 +10424,6 @@ if World2 or World3 then
         end
     })
 
-    -- [[ BLOX FRUIT MULTI DROPDOWN ]]
     o:AddDropdown({
         Title = "Blox Fruit Skills",
         Multi = true,
@@ -10433,36 +10437,33 @@ if World2 or World3 then
     })
 end
 
--- [[ CONFIGURAÇÕES DE SKILLS ]]
-_G.SelectedSkills = {
-    ["Melee"] = {["Z"] = true, ["X"] = true, ["C"] = true},
-    ["Sword"] = {["Z"] = true, ["X"] = true},
-    ["Blox Fruit"] = {["Z"] = true, ["X"] = true, ["C"] = true, ["V"] = true, ["F"] = true},
-    ["Gun"] = {["Z"] = true, ["X"] = true}
-}
-
--- Função OTIMIZADA para usar todas as skills de uma categoria antes de sair
+-- [[ LÓGICA DE EXECUÇÃO OTIMIZADA ]]
 local function ExecuteSkills(category)
+    -- Se "Use M1 Fruit" estiver ligado e a categoria for Fruit, APENAS EQUIPA (não usa skill)
+    if _G.UseM1Fruit and category == "Blox Fruit" then
+        weaponSc(category)
+        return 
+    end
+
     if _G.SelectedSkills[category] then
-        weaponSc(category) -- Garante que equipou a arma
-        task.wait(0.2) -- Espera equipar
+        weaponSc(category)
+        task.wait(0.2)
         
         local keys = {"Z", "X", "C", "V", "F"}
         for _, skill in ipairs(keys) do
             if _G.SelectedSkills[category][skill] then
                 Useskills(category, skill)
-                task.wait(0.35) -- Espera um pouco entre cada skill para não bugar
+                task.wait(0.35)
             end
         end
     end
 end
 
--- [[ LOOP PRINCIPAL ]]
+-- [[ LOOP DE EVENTOS MARÍTIMOS ]]
 task.spawn(function()
     while task.wait() do
         pcall(function()
-            
-            -- 1. INIMIGOS NORMAIS
+            -- 1. INIMIGOS NORMAIS (Sharks, Piranhas, etc)
             local seaEnemies = {
                 {Flag = _G.Shark, Name = "Shark", Check = CheckShark, KillType = "Normal"},
                 {Flag = _G.TerrorShark, Name = "Terrorshark", Check = CheckTerrorShark, KillType = "Sea"},
@@ -10500,11 +10501,9 @@ task.spawn(function()
                             
                             if plr:DistanceFromCharacter(e.HumanoidRootPart.CFrame.Position) <= 500 then
                                 MousePos = e.HumanoidRootPart.Position
-                                if CheckF() then
-                                    -- Se estiver transformado, foca só em Blox Fruit
+                                if CheckF() or _G.UseM1Fruit then
                                     ExecuteSkills("Blox Fruit")
                                 else
-                                    -- Sequência completa: Melee -> Sword -> Fruit -> Gun
                                     ExecuteSkills("Melee")
                                     ExecuteSkills("Sword")
                                     ExecuteSkills("Blox Fruit")
@@ -10529,7 +10528,7 @@ task.spawn(function()
                             
                             if plr:DistanceFromCharacter(e.HumanoidRootPart.CFrame.Position) <= 500 then
                                 MousePos = segment.Position
-                                if CheckF() then
+                                if CheckF() or _G.UseM1Fruit then
                                     ExecuteSkills("Blox Fruit")
                                 else
                                     ExecuteSkills("Melee")
@@ -10562,7 +10561,7 @@ task.spawn(function()
                                 
                                 if plr:DistanceFromCharacter(e.Engine.CFrame.Position) <= boat.Dist then
                                     MousePos = e.Engine.Position
-                                    if CheckF() then
+                                    if CheckF() or _G.UseM1Fruit then
                                         ExecuteSkills("Blox Fruit")
                                     else
                                         ExecuteSkills("Melee")
@@ -10576,7 +10575,6 @@ task.spawn(function()
                     end
                 end
             end
-
         end)
     end
 end)
