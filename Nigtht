@@ -1,3 +1,4 @@
+
 repeat task.wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
@@ -5559,24 +5560,134 @@ spawn(function()
     end
 end)
 end
-b:AddSeperator("Collect")
+b:AddSeperator("Chest")
 
--- Botão Auto Collect Chest
+_G.CollectMethod = "TP"
+_G.AutoCollectChests = false
+
+b:AddDropdown({
+    Title = "Collect Method",
+    Description = "",
+    Values = {"TP", "Tween"},
+    Default = "TP",
+    Callback = function(I)
+        _G.CollectMethod = I
+    end
+})
+
 b:AddToggle({
     Title = "Auto Collect Chest",
     Description = "",
-    -- 1. Carrega o estado salvo (ou false por padrão)
-    Default = GetSetting("AutoFarmChest_Save", false),
+    Default = false,
     Callback = function(I)
-        _G.AutoFarmChest = I
-        
-        -- 2. Guarda na tabela de salvamento
-        _G.SaveData["AutoFarmChest_Save"] = I
-        
-        -- 3. Salva no arquivo Settings.json
-        SaveSettings()
-    end,
+        _G.AutoCollectChests = I
+    end
 })
+
+local Players = game:GetService("Players")
+local CollectionService = game:GetService("CollectionService")
+local LocalPlayer = Players.LocalPlayer
+
+local function toggleNoclip(Toggle)
+    if LocalPlayer.Character then
+        for _, v in pairs(LocalPlayer.Character:GetChildren()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = not Toggle
+            end
+        end
+    end
+end
+
+local function Teleport(Goal)
+    local Character = LocalPlayer.Character
+    if Character and Character:FindFirstChild("HumanoidRootPart") then
+        toggleNoclip(true)
+        Character.HumanoidRootPart.CFrame = CFrame.new(Goal + Vector3.new(0,3,0))
+        task.wait(0.1)
+        toggleNoclip(false)
+    end
+end
+
+local UncheckedChests, FirstRun = {}, true
+
+local function getChestsSorted()
+    if FirstRun then
+        FirstRun = false
+        for _, Object in pairs(game:GetDescendants()) do
+            if Object.Name:find("Chest") and Object:IsA("Part") then
+                table.insert(UncheckedChests, Object)
+            end
+        end
+    end
+
+    local Chests = {}
+    for _, Chest in pairs(UncheckedChests) do
+        if Chest:FindFirstChild("TouchInterest") then
+            table.insert(Chests, Chest)
+        end
+    end
+
+    table.sort(Chests, function(a, b)
+        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if root then
+            return (root.Position - a.Position).Magnitude < (root.Position - b.Position).Magnitude
+        end
+        return false
+    end)
+
+    return Chests
+end
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if _G.AutoCollectChests and _G.CollectMethod == "TP" then
+            local Chests = getChestsSorted()
+            if #Chests > 0 then
+                Teleport(Chests[1].Position)
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(13) do
+        if _G.AutoCollectChests and _G.CollectMethod == "TP" then
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                LocalPlayer.Character.Humanoid.Health = 0
+            end
+        end
+    end
+end)
+
+local Sec = 0.1
+
+spawn(function()
+    while wait(Sec) do
+        if _G.AutoCollectChests and _G.CollectMethod == "Tween" then
+            pcall(function()
+                local plrChar = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+                local d = plrChar:GetPivot().Position
+                local Chests = CollectionService:GetTagged("_ChestTagged")
+                local minDist, nearestChest = math.huge, nil
+
+                for _, chest in pairs(Chests) do
+                    local dist = (chest:GetPivot().Position - d).Magnitude
+                    if not chest:GetAttribute("IsDisabled") and dist < minDist then
+                        minDist = dist
+                        nearestChest = chest
+                    end
+                end
+
+                if nearestChest then
+                    _tp(nearestChest:GetPivot())
+                end
+            end)
+        end
+    end
+end)
+
+b:AddSeperator("Berry")
+
 
 -- Botão Auto Collect Berry
 b:AddToggle({
