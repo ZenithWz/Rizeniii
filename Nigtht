@@ -1349,21 +1349,15 @@ function CheckNearestTeleporter(cf)
 		end
 	end
 
-	if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-		if bestDist <= (pos - plr.Character.HumanoidRootPart.Position).Magnitude then
-			return bestPos, bestName
-		end
-	end
-	return nil, nil
+	return bestPos, bestName, bestDist
 end
 
 -- =======================
--- FUNÇÃO DE UNLOCK (CORRETA)
+-- SISTEMA DE UNLOCK
 -- =======================
 vu105 = vu105 or {}
 
 function vu105.hasUnlocked(_, portal)
-	-- WORLD 3
 	if World3 then
 		if portal == "Hydra Island"
 		or portal == "Sea Castle"
@@ -1372,14 +1366,10 @@ function vu105.hasUnlocked(_, portal)
 		end
 	end
 
-	-- WORLD 2
 	if World2 then
 		if portal == "Flamingo Mansion"
 		or portal == "Flamingo Room" then
-			if vu106 and vu106["Swan Glasses"] then
-				return true
-			end
-			return vu19 and vu19.Value >= 1750
+			return vu106 and vu106["Swan Glasses"] or (vu19 and vu19.Value >= 1750)
 		end
 
 		if portal == "Zombie Island"
@@ -1388,33 +1378,28 @@ function vu105.hasUnlocked(_, portal)
 		end
 	end
 
-	-- outros portais sempre liberados
 	return true
 end
 
 -- =======================
--- TWEEN
+-- TWEEN / TELEPORT
 -- =======================
 getgenv().TweenSpeedFar = 300
 getgenv().TweenSpeedNear = 600
 
-_tp = function(cf)
+local function _tp(cf)
 	local char = plr.Character
 	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 	local HRP = char.HumanoidRootPart
 
 	local PortalPos, PortalName = CheckNearestTeleporter(cf)
 
-	-- 🔒 SÓ USA PORTAL SE TIVER UNLOCK
-	if PortalPos and PortalName and vu105.hasUnlocked(nil, PortalName) == true then
+	-- ✅ USA PORTAL SÓ SE TIVER UNLOCK
+	if PortalPos and PortalName and vu105.hasUnlocked(nil, PortalName) then
 		requestEntrance(PortalName)
 
-		HRP.CFrame = CFrame.new(PortalPos)
-		C.CFrame = CFrame.new(PortalPos)
-
-		-- sobe 10 studs
-		HRP.CFrame += Vector3.new(0,10,0)
-		C.CFrame += Vector3.new(0,10,0)
+		HRP.CFrame = CFrame.new(PortalPos) + Vector3.new(0,10,0)
+		C.CFrame = HRP.CFrame
 
 		task.wait(0.2)
 	end
