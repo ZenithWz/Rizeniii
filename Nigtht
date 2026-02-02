@@ -1219,7 +1219,6 @@ Hop = function()
 			end;
 		end);
 	end;
-
 -- =======================
 -- CONFIGURAÇÃO INICIAL E PART C
 -- =======================
@@ -1242,7 +1241,7 @@ end
 task.spawn(function()
 	while task.wait() do
 		if C and C.Parent == workspace then
-			getgenv().OnFarm = shouldTween and true or false
+			getgenv().OnFarm = shouldTween == true
 		else
 			getgenv().OnFarm = false
 		end
@@ -1359,22 +1358,37 @@ function CheckNearestTeleporter(cf)
 end
 
 -- =======================
--- FUNÇÃO UNLOCK (SAFE)
+-- FUNÇÃO DE UNLOCK (CORRETA)
 -- =======================
 vu105 = vu105 or {}
 
-function vu105.hasUnlocked(_, p114)
-	if vu107 == 3 and (p114 == "Hydra Island" or p114 == "Sea Castle" or p114 == "Mansion") then
-		return vu106 and vu106["Valkyrie Helm"]
-	end
-	if vu107 == 2 then
-		if p114 == "Flamingo Mansion" or p114 == "Flamingo Room" then
-			return (vu106 and vu106["Swan Glasses"]) or (vu19 and vu19.Value >= 1750)
+function vu105.hasUnlocked(_, portal)
+	-- WORLD 3
+	if World3 then
+		if portal == "Hydra Island"
+		or portal == "Sea Castle"
+		or portal == "Mansion" then
+			return vu106 and vu106["Valkyrie Helm"] == true
 		end
-		if p114 == "Zombie Island" or p114 == "Cursed Ship" then
+	end
+
+	-- WORLD 2
+	if World2 then
+		if portal == "Flamingo Mansion"
+		or portal == "Flamingo Room" then
+			if vu106 and vu106["Swan Glasses"] then
+				return true
+			end
+			return vu19 and vu19.Value >= 1750
+		end
+
+		if portal == "Zombie Island"
+		or portal == "Cursed Ship" then
 			return vu19 and vu19.Value >= 1000
 		end
 	end
+
+	-- outros portais sempre liberados
 	return true
 end
 
@@ -1391,10 +1405,8 @@ _tp = function(cf)
 
 	local PortalPos, PortalName = CheckNearestTeleporter(cf)
 
-	if PortalPos and PortalName
-		and vu105 and vu105.hasUnlocked
-		and vu105.hasUnlocked(nil, PortalName) then
-
+	-- 🔒 SÓ USA PORTAL SE TIVER UNLOCK
+	if PortalPos and PortalName and vu105.hasUnlocked(nil, PortalName) == true then
 		requestEntrance(PortalName)
 
 		HRP.CFrame = CFrame.new(PortalPos)
@@ -1443,6 +1455,7 @@ notween = function(cf)
 		plr.Character.HumanoidRootPart.CFrame = cf
 	end
 end
+
 function BTP(I)
 	local e = game.Players.LocalPlayer;
 	local K = e.Character.HumanoidRootPart;
