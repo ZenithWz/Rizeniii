@@ -10312,32 +10312,18 @@ if World2 or World3 then
         end)
     end)
 
-A:AddToggle({
+
+
+b:AddToggle({
     Title = "Use M1 Fruit",
     Default = false,
     Callback = function(v)
         _G.UseM1Fruit = v
+        if v and _G.SailBoats then
+            _G.ChooseWP = "Blox Fruit"
+        end
     end
 })
-
-spawn(function()
-    while task.wait(0.5) do
-        pcall(function()
-            -- Força o ChooseWP para Blox Fruit apenas se ambos os toggles estiverem ligados
-            if _G.UseM1Fruit and _G.SailBoats then
-                _G.ChooseWP = "Blox Fruit"
-            end
-
-            if _G.ChooseWP then
-                for _, e in pairs(plr.Backpack:GetChildren()) do
-                    if e.ToolTip == _G.ChooseWP then
-                        _G.SelectWeapon = e.Name
-                    end
-                end
-            end
-        end)
-    end
-end)
 
 
 _G.SelectedSkills = _G.SelectedSkills or {
@@ -10365,8 +10351,6 @@ local function GetActiveSkillsList(category, allSkills, saveKey)
 end
 
 if World2 or World3 then
-    o:AddSeperator("Configure Skills for Sea Events")
-
     o:AddDropdown({
         Title = "Melee Skills",
         Multi = true,
@@ -10417,8 +10401,7 @@ if World2 or World3 then
 end
 
 local function ExecuteSkills(category)
-    -- Se M1 Fruit e SailBoats estiverem ativos, apenas equipa a fruta (sem usar skills)
-    if _G.UseM1Fruit and _G.SailBoats and category == "Blox Fruit" then
+    if _G.UseM1Fruit and category == "Blox Fruit" then
         weaponSc(category)
         return 
     end
@@ -10476,7 +10459,7 @@ task.spawn(function()
                             
                             if plr:DistanceFromCharacter(e.HumanoidRootPart.CFrame.Position) <= 500 then
                                 MousePos = e.HumanoidRootPart.Position
-                                if CheckF() or (_G.UseM1Fruit and _G.SailBoats) then
+                                if CheckF() or _G.UseM1Fruit then
                                     ExecuteSkills("Blox Fruit")
                                 else
                                     ExecuteSkills("Melee")
@@ -10502,7 +10485,7 @@ task.spawn(function()
                             
                             if plr:DistanceFromCharacter(e.HumanoidRootPart.CFrame.Position) <= 500 then
                                 MousePos = segment.Position
-                                if CheckF() or (_G.UseM1Fruit and _G.SailBoats) then
+                                if CheckF() or _G.UseM1Fruit then
                                     ExecuteSkills("Blox Fruit")
                                 else
                                     ExecuteSkills("Melee")
@@ -10534,7 +10517,7 @@ task.spawn(function()
                                 
                                 if plr:DistanceFromCharacter(e.Engine.CFrame.Position) <= boat.Dist then
                                     MousePos = e.Engine.Position
-                                    if CheckF() or (_G.UseM1Fruit and _G.SailBoats) then
+                                    if CheckF() or _G.UseM1Fruit then
                                         ExecuteSkills("Blox Fruit")
                                     else
                                         ExecuteSkills("Melee")
@@ -10551,8 +10534,6 @@ task.spawn(function()
         end)
     end
 end)
-
-
 
 if game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
 zu:AddSeperator("Frozen Dimension");
