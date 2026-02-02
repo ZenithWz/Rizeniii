@@ -1222,26 +1222,37 @@ Hop = function()
 -- =======================
 -- CONFIGURAÇÃO INICIAL E PART C
 -- =======================
-local C = Instance.new("Part", workspace)
-C.Size = Vector3.new(1, 1, 1)
-C.Name = "Rip_Indra"
-C.Anchored = true
-C.CanCollide = false
-C.CanTouch = false
-C.Transparency = 1
 
-local M = workspace:FindFirstChild(C.Name)
+local C = Instance.new("Part", workspace);
+C.Size = Vector3.new(1, 1, 1);
+C.Name = "Rip_Indra";
+C.Anchored = true;
+C.CanCollide = false;
+C.CanTouch = false;
+C.Transparency = 1;
+
+local M = workspace:FindFirstChild(C.Name);
 if M and M ~= C then
-	M:Destroy()
-end
+	M:Destroy();
+end;
+
+-- FLAGS GLOBAIS
+getgenv().OnFarm = false
+getgenv().UsePortalTeleport = true -- CONTROLADO PELO TOGGLE
+local shouldTween = false
 
 -- =======================
--- LOOP OnFarm
+-- LOOP DE STATUS (OnFarm)
 -- =======================
+
 task.spawn(function()
 	while task.wait() do
 		if C and C.Parent == workspace then
-			getgenv().OnFarm = shouldTween == true
+			if shouldTween then
+				getgenv().OnFarm = true
+			else
+				getgenv().OnFarm = false
+			end
 		else
 			getgenv().OnFarm = false
 		end
@@ -1249,34 +1260,37 @@ task.spawn(function()
 end)
 
 -- =======================
--- MOVIMENTAÇÃO / COLISÃO
+-- LOOP DE MOVIMENTO / COLISÃO
 -- =======================
-task.spawn(function()
-	local plr = game.Players.LocalPlayer
-	repeat task.wait() until plr.Character and plr.Character.PrimaryPart
 
-	C.CFrame = plr.Character.PrimaryPart.CFrame
+task.spawn(function()
+	local I = game.Players.LocalPlayer
+	repeat task.wait() until I.Character and I.Character.PrimaryPart
+
+	C.CFrame = I.Character.PrimaryPart.CFrame
 
 	while task.wait() do
 		pcall(function()
-			local char = plr.Character
+			local char = I.Character
 			if not char then return end
 
 			if getgenv().OnFarm then
-				if char.PrimaryPart then
-					if (char.PrimaryPart.Position - C.Position).Magnitude <= 200 then
-						char:SetPrimaryPartCFrame(C.CFrame)
+				if C and C.Parent == workspace then
+					local hrp = char.PrimaryPart
+					if hrp and (hrp.Position - C.Position).Magnitude <= 200 then
+						hrp.CFrame = C.CFrame
 					else
-						C.CFrame = char.PrimaryPart.CFrame
+						C.CFrame = hrp.CFrame
 					end
 				end
-				for _,v in pairs(char:GetChildren()) do
+
+				for _, v in pairs(char:GetChildren()) do
 					if v:IsA("BasePart") then
 						v.CanCollide = false
 					end
 				end
 			else
-				for _,v in pairs(char:GetChildren()) do
+				for _, v in pairs(char:GetChildren()) do
 					if v:IsA("BasePart") then
 						v.CanCollide = true
 					end
@@ -1289,9 +1303,10 @@ end)
 -- =======================
 -- SISTEMA DE PORTAIS
 -- =======================
-local plr = game.Players.LocalPlayer
 
+local plr = game.Players.LocalPlayer
 local World1, World2, World3 = false, false, false
+
 if game.PlaceId == 2753915549 or game.PlaceId == 85211729168715 then
 	World1 = true
 elseif game.PlaceId == 4442272183 or game.PlaceId == 79091703265657 then
@@ -1300,120 +1315,102 @@ elseif game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
 	World3 = true
 end
 
-function requestEntrance(name)
-	game.ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance", name)
+function requestEntrance(v)
+	game.ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance", v)
 	if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-		plr.Character.HumanoidRootPart.CFrame += Vector3.new(0,50,0)
+		plr.Character.HumanoidRootPart.CFrame += Vector3.new(0, 50, 0)
 	end
 	task.wait(0.5)
 end
 
-function CheckNearestTeleporter(cf)
-	local pos = cf.Position
-	local bestDist = math.huge
-	local bestPos, bestName
+function CheckNearestTeleporter(target)
+	local pos = target.Position
+	local distMin = math.huge
+	local portalPos, portalName
+	local pid = game.PlaceId
 	local list = {}
 
-	if World3 then
+	if pid == 85211729168715 then
 		list = {
-			["Floating Turtle"] = Vector3.new(-12462,375,-7552),
-			["Hydra Island"] = Vector3.new(5657,1013,-335),
-			["Mansion"] = Vector3.new(-12462,375,-7552),
-			["Sea Castle"] = Vector3.new(-5036,315,-3179),
-			["Beautiful Pirate"] = Vector3.new(5319,23,-93),
-			["Beautiful Room"] = Vector3.new(5314,22,-125)
+			Sky3 = Vector3.new(-7894, 5547, -380),
+			Sky3Exit = Vector3.new(-4607, 874, -1667),
+			UnderWater = Vector3.new(61163, 11, 1819),
+			["Underwater City"] = Vector3.new(61165, 0, 1897),
+			UnderwaterExit = Vector3.new(4050, -1, -1814)
 		}
-	elseif World2 then
+	elseif pid == 79091703265657 then
 		list = {
-			["Flamingo Mansion"] = Vector3.new(-390,332,673),
-			["Flamingo Room"] = Vector3.new(2285,15,905),
-			["Cursed Ship"] = Vector3.new(923,126,32852),
-			["Zombie Island"] = Vector3.new(-6509,83,-133)
+			["Swan Mansion"] = Vector3.new(-390, 332, 673),
+			["Swan Room"] = Vector3.new(2285, 15, 905),
+			["Cursed Ship"] = Vector3.new(923, 126, 32852),
+			["Zombie Island"] = Vector3.new(-6509, 83, -133)
 		}
-	else
+	elseif World3 then
 		list = {
-			Sky3 = Vector3.new(-7894,5547,-380),
-			Sky3Exit = Vector3.new(-4607,874,-1667),
-			UnderWater = Vector3.new(61163,11,1819),
-			["Underwater City"] = Vector3.new(61165,0,1897),
-			UnderwaterExit = Vector3.new(4050,-1,-1814)
+			["Floating Turtle"] = Vector3.new(-12462, 375, -7552),
+			["Hydra Island"] = Vector3.new(5657, 1013, -335),
+			Mansion = Vector3.new(-12462, 375, -7552),
+			Castle = Vector3.new(-5036, 315, -3179),
+			["Beautiful Pirate"] = Vector3.new(5319, 23, -93),
+			["Beautiful Room"] = Vector3.new(5314, 22, -125)
 		}
 	end
 
-	for name, p in pairs(list) do
-		local d = (p - pos).Magnitude
-		if d < bestDist then
-			bestDist = d
-			bestPos = p
-			bestName = name
+	for k, v in pairs(list) do
+		local d = (v - pos).Magnitude
+		if d < distMin then
+			distMin = d
+			portalPos = v
+			portalName = k
 		end
 	end
 
-	return bestPos, bestName, bestDist
+	return portalPos, portalName
 end
 
 -- =======================
--- SISTEMA DE UNLOCK
+-- TWEEN
 -- =======================
-vu105 = vu105 or {}
 
-function vu105.hasUnlocked(_, portal)
-	if World3 then
-		if portal == "Hydra Island"
-		or portal == "Sea Castle"
-		or portal == "Mansion" then
-			return vu106 and vu106["Valkyrie Helm"] == true
-		end
-	end
-
-	if World2 then
-		if portal == "Flamingo Mansion"
-		or portal == "Flamingo Room" then
-			return vu106 and vu106["Swan Glasses"] or (vu19 and vu19.Value >= 1750)
-		end
-
-		if portal == "Zombie Island"
-		or portal == "Cursed Ship" then
-			return vu19 and vu19.Value >= 1000
-		end
-	end
-
-	return true
-end
-
--- =======================
--- TWEEN / TELEPORT
--- =======================
 getgenv().TweenSpeedFar = 300
 getgenv().TweenSpeedNear = 600
 
-local function _tp(cf)
+_tp = function(targetCF)
 	local char = plr.Character
 	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 	local HRP = char.HumanoidRootPart
 
-	local PortalPos, PortalName = CheckNearestTeleporter(cf)
+	-- PORTAL (SÓ SE TOGGLE ATIVO)
+	if getgenv().UsePortalTeleport then
+		local PortalPos, PortalName = CheckNearestTeleporter(targetCF)
+		if PortalPos and PortalName then
+			requestEntrance(PortalName)
 
-	-- ✅ USA PORTAL SÓ SE TIVER UNLOCK
-	if PortalPos and PortalName and vu105.hasUnlocked(nil, PortalName) then
-		requestEntrance(PortalName)
+			HRP.CFrame = CFrame.new(PortalPos)
+			C.CFrame = CFrame.new(PortalPos)
 
-		HRP.CFrame = CFrame.new(PortalPos) + Vector3.new(0,10,0)
-		C.CFrame = HRP.CFrame
+			HRP.CFrame += Vector3.new(0, 10, 0)
+			C.CFrame += Vector3.new(0, 10, 0)
 
-		task.wait(0.2)
+			task.wait(0.2)
+		end
 	end
 
 	shouldTween = true
 	getgenv().OnFarm = false
 
-	local dist = (cf.Position - HRP.Position).Magnitude
+	if HRP.Anchored then
+		HRP.Anchored = false
+		task.wait()
+	end
+
+	local dist = (targetCF.Position - HRP.Position).Magnitude
 	local speed = dist <= 15 and getgenv().TweenSpeedNear or getgenv().TweenSpeedFar
 
 	local tween = game:GetService("TweenService"):Create(
 		C,
 		TweenInfo.new(dist / speed, Enum.EasingStyle.Linear),
-		{CFrame = cf}
+		{ CFrame = targetCF }
 	)
 
 	tween:Play()
@@ -1427,7 +1424,8 @@ local function _tp(cf)
 			end
 			task.wait()
 		end
-		getgenv().OnFarm = shouldTween
+
+		getgenv().OnFarm = tween.PlaybackState == Enum.PlaybackState.Completed
 	end)
 end
 
@@ -1440,6 +1438,7 @@ notween = function(cf)
 		plr.Character.HumanoidRootPart.CFrame = cf
 	end
 end
+
 
 function BTP(I)
 	local e = game.Players.LocalPlayer;
@@ -6045,6 +6044,17 @@ T:AddToggle({
         _G.SaveData["BringMobs_Save"] = I
         SaveSettings()
     end,
+})
+
+T:AddToggle({
+	Title = "Use Portais Teleport",
+	Description = "Usa portais durante o Tween",
+	Default = GetSetting("UsePortalTeleport_Save", false),
+	Callback = function(I)
+		getgenv().UsePortalTeleport = I
+		_G.SaveData["UsePortalTeleport_Save"] = I
+		SaveSettings()
+	end,
 })
 
 T:AddToggle({
