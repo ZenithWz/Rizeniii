@@ -4720,6 +4720,17 @@ b:AddToggle({
     end
 })
 
+b:AddToggle({
+    Title = "Use Skull Guitar Summon Tyrant",
+    Default = GetSetting("UseSkullSummon_Save", false),
+    Callback = function(v)
+        _G.UseSkullSummon = v
+        _G.SaveData["UseSkullSummon_Save"] = v
+        SaveSettings()
+    end
+})
+
+
 ----------------------------------------------------------------------------
 -- 2. LÓGICA DO TYRANT (FARM, QUESTS E BOSS)
 ----------------------------------------------------------------------------
@@ -4880,7 +4891,6 @@ spawn(function()
                     repeat task.wait()  
                         if boss and boss:FindFirstChild("HumanoidRootPart") then  
                             -- Trava a Câmera e o HRP, mas deixa o G.Kill atacar
-                            -- Se o G.Kill já faz TP, isso aqui ajuda a estabilizar:
                             local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
                             if hrp then
                                 hrp.Velocity = Vector3.new(0,0,0) -- Zera movimento
@@ -4913,7 +4923,20 @@ spawn(function()
                                 char.HumanoidRootPart.CFrame = pos -- Força a posição exata
                                 char.HumanoidRootPart.Anchored = true -- TRAVA
                                 
-                                UseAllCategorySkills()  
+                                -- LÓGICA DA SKULL GUITAR (INSERIDA AQUI)
+                                if _G.UseSkullSummon then
+                                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("LoadItem", "Skull Guitar")  
+                                    EquipWeapon("Skull Guitar")  
+
+                                    local guitar = char:FindFirstChild("Skull Guitar")  
+                                    if guitar and guitar:FindFirstChild("RemoteEvent") then  
+                                        guitar.RemoteEvent:FireServer("TAP", pos.Position)  
+                                        game:GetService("ReplicatedStorage").Remotes.Validator2:FireServer(8359618, 0)  
+                                    end
+                                else
+                                    UseAllCategorySkills()  
+                                end
+                                
                                 task.wait(0.1)   
                                 
                                 char.HumanoidRootPart.Anchored = false -- DESTRAVA
