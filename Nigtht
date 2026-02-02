@@ -1251,7 +1251,7 @@ task.spawn(function()
 	end;
 end);
 
--- Loop de movimentação e colisão (Visual e Física)
+-- Loop de movimentação e colisão
 task.spawn(function()
 	local I = game.Players.LocalPlayer;
 	repeat task.wait() until I.Character and I.Character.PrimaryPart;
@@ -1293,7 +1293,7 @@ task.spawn(function()
 end);
 
 -- =======================
--- SISTEMA DE PORTAIS E TELEPORTES
+-- SISTEMA DE PORTAIS
 -- =======================
 
 local plr = game.Players.LocalPlayer
@@ -1310,8 +1310,7 @@ end
 function requestEntrance(v402)
     game.ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance", v402)
     if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = plr.Character.HumanoidRootPart
-        hrp.CFrame = hrp.CFrame + Vector3.new(0, 50, 0)
+        plr.Character.HumanoidRootPart.CFrame += Vector3.new(0, 50, 0)
     end
     task.wait(0.5)
 end
@@ -1319,30 +1318,25 @@ end
 function CheckNearestTeleporter(v393)
     local pos = v393.Position
     local distMin = math.huge
-    local portalPos, portalName = nil, nil
-    local pid = game.PlaceId
+    local portalPos, portalName
     local list = {}
 
-    if pid ~= 85211729168715 then
-        if pid ~= 79091703265657 then
-            if pid == 100117331123089 or World3 then
-                list = {
-                    ["Floating Turtle"] = Vector3.new(-12462, 375, -7552),
-                    ["Hydra Island"] = Vector3.new(5657, 1013, -335),
-                    Mansion = Vector3.new(-12462, 375, -7552),
-                    Castle = Vector3.new(-5036, 315, -3179),
-                    ["Beautiful Pirate"] = Vector3.new(5319, 23, -93),
-                    ["Beautiful Room"] = Vector3.new(5314, 22, -125)
-                }
-            end
-        else
-            list = {
-                ["Swan Mansion"] = Vector3.new(-390, 332, 673),
-                ["Swan Room"] = Vector3.new(2285, 15, 905),
-                ["Cursed Ship"] = Vector3.new(923, 126, 32852),
-                ["Zombie Island"] = Vector3.new(-6509, 83, -133)
-            }
-        end
+    if World3 then
+        list = {
+            ["Floating Turtle"] = Vector3.new(-12462, 375, -7552),
+            ["Hydra Island"] = Vector3.new(5657, 1013, -335),
+            Mansion = Vector3.new(-12462, 375, -7552),
+            ["Sea Castle"] = Vector3.new(-5036, 315, -3179),
+            ["Beautiful Pirate"] = Vector3.new(5319, 23, -93),
+            ["Beautiful Room"] = Vector3.new(5314, 22, -125)
+        }
+    elseif World2 then
+        list = {
+            ["Flamingo Mansion"] = Vector3.new(-390, 332, 673),
+            ["Flamingo Room"] = Vector3.new(2285, 15, 905),
+            ["Cursed Ship"] = Vector3.new(923, 126, 32852),
+            ["Zombie Island"] = Vector3.new(-6509, 83, -133)
+        }
     else
         list = {
             Sky3 = Vector3.new(-7894, 5547, -380),
@@ -1371,7 +1365,26 @@ function CheckNearestTeleporter(v393)
 end
 
 -- =======================
--- TWEEN AJUSTADO
+-- FUNÇÃO DE UNLOCK (USADA)
+-- =======================
+
+function vu105.hasUnlocked(_, p114)
+    if vu107 == 3 and (p114 == "Hydra Island" or p114 == "Sea Castle" or p114 == "Mansion") then
+        return vu106["Valkyrie Helm"]
+    end
+    if vu107 == 2 then
+        if p114 == "Flamingo Mansion" or p114 == "Flamingo Room" then
+            return vu106["Swan Glasses"] or vu19.Value >= 1750
+        end
+        if p114 == "Zombie Island" or p114 == "Cursed Ship" then
+            return vu19.Value >= 1000
+        end
+    end
+    return true
+end
+
+-- =======================
+-- TWEEN
 -- =======================
 
 getgenv().TweenSpeedFar = 300
@@ -1383,17 +1396,18 @@ _tp = function(I)
 
     local HRP = e.HumanoidRootPart
 
-    -- PORTAL + SUBIDA DE 10 STUDS
     local PortalPos, PortalName = CheckNearestTeleporter(I)
-    if PortalPos and PortalName then
+
+    -- 🔒 CHECAGEM DE UNLOCK
+    if PortalPos and PortalName and vu105.hasUnlocked(nil, PortalName) then
         requestEntrance(PortalName)
 
         HRP.CFrame = CFrame.new(PortalPos)
         C.CFrame = CFrame.new(PortalPos)
 
-        -- sobe 10 studs instantâneo
-        HRP.CFrame = HRP.CFrame + Vector3.new(0, 10, 0)
-        C.CFrame = C.CFrame + Vector3.new(0, 10, 0)
+        -- sobe 10 studs
+        HRP.CFrame += Vector3.new(0, 10, 0)
+        C.CFrame += Vector3.new(0, 10, 0)
 
         task.wait(0.2)
     end
@@ -1401,20 +1415,14 @@ _tp = function(I)
     shouldTween = true
     getgenv().OnFarm = false
 
-    if HRP.Anchored then
-        HRP.Anchored = false
-        task.wait()
-    end
-
     local dist = (I.Position - HRP.Position).Magnitude
     local speed = dist <= 15 and getgenv().TweenSpeedNear or getgenv().TweenSpeedFar
 
-    local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)
-    local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })
-
-    if e.Humanoid.Sit then
-        C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)
-    end
+    local tween = game:GetService("TweenService"):Create(
+        C,
+        TweenInfo.new(dist / speed, Enum.EasingStyle.Linear),
+        { CFrame = I }
+    )
 
     tween:Play()
 
@@ -1427,12 +1435,7 @@ _tp = function(I)
             end
             task.wait()
         end
-
-        if shouldTween and tween.PlaybackState == Enum.PlaybackState.Completed then
-            getgenv().OnFarm = true
-        else
-            getgenv().OnFarm = false
-        end
+        getgenv().OnFarm = shouldTween
     end)
 end
 
