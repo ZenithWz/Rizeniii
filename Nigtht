@@ -10312,20 +10312,76 @@ if World2 or World3 then
         end)
     end)
 
-
-
-b:AddToggle({
+A:AddToggle({
     Title = "Use M1 Fruit",
     Default = false,
     Callback = function(v)
         _G.UseM1Fruit = v
-        if v and _G.SailBoats then
+        if v then
             _G.ChooseWP = "Blox Fruit"
         end
     end
 })
 
 
+    A:AddSeperator("Sea Events Selection")
+
+    local SeaEventsConfig = {
+        {Name = "Sea Beast",        Var = "SeaBeast1",   Worlds = {2, 3}},
+        {Name = "Pirate Brigade",   Var = "PGB",         Worlds = {2, 3}},
+        {Name = "Shark",            Var = "Shark",       Worlds = {3}},
+        {Name = "Terror Shark",     Var = "TerrorShark", Worlds = {3}},
+        {Name = "Piranha",          Var = "Piranha",     Worlds = {3}},
+        {Name = "Fish Crew",        Var = "MobCrew",     Worlds = {3}},
+        {Name = "Haunted Crew",     Var = "HCM",         Worlds = {3}},
+        {Name = "Fish Boat",        Var = "FishBoat",    Worlds = {3}},
+    }
+
+    local CurrentSeaEventsList = {}
+    local CurrentWorldNum = 1
+    if World2 then CurrentWorldNum = 2 end
+    if World3 then CurrentWorldNum = 3 end
+
+    for _, event in ipairs(SeaEventsConfig) do
+        if table.find(event.Worlds, CurrentWorldNum) then
+            table.insert(CurrentSeaEventsList, event.Name)
+        end
+    end
+
+    _G.PendingSeaEvents = GetSetting("SeaEvents_Selection", {})
+
+    A:AddDropdown({
+        Title = "Select Sea Events",
+        Description = "Select items here, then turn on Auto Start farm",
+        Values = CurrentSeaEventsList,
+        Multi = true, 
+        Default = _G.PendingSeaEvents,
+        Callback = function(SelectedList)
+            _G.PendingSeaEvents = SelectedList
+            _G.SaveData["SeaEvents_Selection"] = SelectedList
+            SaveSettings()
+        end
+    })
+
+    task.spawn(function()
+        while task.wait(0.5) do
+            if _G.SailBoats then
+                for _, event in ipairs(SeaEventsConfig) do
+                    if _G.PendingSeaEvents[event.Name] == true then
+                        _G[event.Var] = true
+                    else
+                        _G[event.Var] = false
+                    end
+                end
+            else
+                for _, event in ipairs(SeaEventsConfig) do
+                    _G[event.Var] = false
+                end
+            end
+        end
+    end)
+end
+-- [[ CONFIGURAÇÃO INICIAL ]]
 _G.SelectedSkills = _G.SelectedSkills or {
     ["Melee"] = {},
     ["Sword"] = {},
@@ -10333,6 +10389,7 @@ _G.SelectedSkills = _G.SelectedSkills or {
     ["Blox Fruit"] = {}
 }
 
+-- Função auxiliar para converter o save em lista para a UI
 local function GetActiveSkillsList(category, allSkills, saveKey)
     local savedData = GetSetting(saveKey, nil)
     if savedData then
@@ -10350,7 +10407,10 @@ local function GetActiveSkillsList(category, allSkills, saveKey)
     return allSkills
 end
 
+-- [[ INTERFACE DE SKILLS ]]
 if World2 or World3 then
+    o:AddSeperator("Configure Skills for Sea Events")
+
     o:AddDropdown({
         Title = "Melee Skills",
         Multi = true,
@@ -10400,7 +10460,9 @@ if World2 or World3 then
     })
 end
 
+-- [[ LÓGICA DE EXECUÇÃO OTIMIZADA ]]
 local function ExecuteSkills(category)
+    -- Se "Use M1 Fruit" estiver ligado e a categoria for Fruit, APENAS EQUIPA (não usa skill)
     if _G.UseM1Fruit and category == "Blox Fruit" then
         weaponSc(category)
         return 
@@ -10420,9 +10482,11 @@ local function ExecuteSkills(category)
     end
 end
 
+-- [[ LOOP DE EVENTOS MARÍTIMOS ]]
 task.spawn(function()
     while task.wait() do
         pcall(function()
+            -- 1. INIMIGOS NORMAIS (Sharks, Piranhas, etc)
             local seaEnemies = {
                 {Flag = _G.Shark, Name = "Shark", Check = CheckShark, KillType = "Normal"},
                 {Flag = _G.TerrorShark, Name = "Terrorshark", Check = CheckTerrorShark, KillType = "Sea"},
@@ -10448,6 +10512,7 @@ task.spawn(function()
                 end
             end
 
+            -- 2. SEA BEAST
             if _G.SeaBeast1 and workspace.SeaBeasts:FindFirstChild("SeaBeast1") then
                 for _, e in pairs(workspace.SeaBeasts:GetChildren()) do
                     if e:FindFirstChild("HumanoidRootPart") and (e:FindFirstChild("Health") and e.Health.Value > 0) then
@@ -10473,6 +10538,7 @@ task.spawn(function()
                 end
             end
 
+            -- 3. LEVIATHAN
             if _G.Leviathan1 and workspace.SeaBeasts:FindFirstChild("Leviathan") then
                 for _, e in pairs(workspace.SeaBeasts:GetChildren()) do
                     local segment = e:FindFirstChild("Leviathan Segment")
@@ -10499,6 +10565,7 @@ task.spawn(function()
                 end
             end
 
+            -- 4. BARCOS
             local boatConfigs = {
                 {Flag = _G.FishBoat, Check = CheckEnemiesBoat, Name = "FishBoat", Dist = 150, Offset = CFrame.new(0, -50, -25)},
                 {Flag = _G.PGB, Check = CheckPirateGrandBrigade, Name = "PirateBrigade", Dist = 150, Offset = CFrame.new(0, -30, -10)},
