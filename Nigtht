@@ -5563,7 +5563,7 @@ b:AddSeperator("Collect")
 
 -- Botão Auto Collect Chest
 b:AddToggle({
-    Title = "Auto Collect Chest",
+    Title = "Auto Collect Chest Tween",
     Description = "",
     -- 1. Carrega o estado salvo (ou false por padrão)
     Default = GetSetting("AutoFarmChest_Save", false),
@@ -5576,6 +5576,137 @@ b:AddToggle({
         -- 3. Salva no arquivo Settings.json
         SaveSettings()
     end,
+})
+
+-- =======================
+-- SERVICES / PLAYER
+-- =======================
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- =======================
+-- VARIÁVEIS
+-- =======================
+local AutoChest = false
+local UncheckedChests = {}
+local FirstRun = true
+local AutoReset = true
+
+-- =======================
+-- NOCLIP
+-- =======================
+local function toggleNoclip(state)
+    if LocalPlayer.Character then
+        for _, v in pairs(LocalPlayer.Character:GetChildren()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = not state
+            end
+        end
+    end
+end
+
+-- =======================
+-- TELEPORT
+-- =======================
+local function Teleport(goalCFrame)
+    if not AutoChest then return end
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local Root = LocalPlayer.Character.HumanoidRootPart
+        toggleNoclip(true)
+        Root.CFrame = goalCFrame + Vector3.new(0, 3, 0)
+        task.wait(0.1)
+        toggleNoclip(false)
+    end
+end
+
+-- =======================
+-- SORT POR DISTÂNCIA
+-- =======================
+local function DistanceFromPlrSort(list)
+    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("LowerTorso") then return end
+    local Root = LocalPlayer.Character.LowerTorso
+
+    table.sort(list, function(a, b)
+        return (Root.Position - a.Position).Magnitude < (Root.Position - b.Position).Magnitude
+    end)
+end
+
+-- =======================
+-- PEGAR CHESTS
+-- =======================
+local function getChestsSorted()
+    if FirstRun then
+        FirstRun = false
+        for _, obj in pairs(game:GetDescendants()) do
+            if obj:IsA("Part") and obj.Name:find("Chest") then
+                table.insert(UncheckedChests, obj)
+            end
+        end
+    end
+
+    local Chests = {}
+    for _, chest in pairs(UncheckedChests) do
+        if chest and chest:FindFirstChild("TouchInterest") then
+            table.insert(Chests, chest)
+        end
+    end
+
+    DistanceFromPlrSort(Chests)
+    return Chests
+end
+
+-- =======================
+-- FARM LOOP
+-- =======================
+local function startFarm()
+    task.spawn(function()
+        while AutoChest do
+            task.wait()
+            local Chests = getChestsSorted()
+            if #Chests > 0 then
+                Teleport(Chests[1].CFrame)
+            end
+        end
+    end)
+end
+
+-- =======================
+-- AUTO RESET
+-- =======================
+task.spawn(function()
+    while task.wait(13) do
+        if AutoChest and AutoReset and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.Health = 0
+        end
+    end
+end)
+
+-- =======================
+-- RESPAWN
+-- =======================
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(1)
+    if AutoChest then
+        startFarm()
+    end
+end)
+
+-- =======================
+-- TOGGLE UI
+-- =======================
+b:AddToggle({
+    Title = "Auto Collect Chest Bypass",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        AutoChest = Value
+
+        if AutoChest then
+            FirstRun = true
+            UncheckedChests = {}
+            startFarm()
+        end
+    end
 })
 
 -- Botão Auto Collect Berry
