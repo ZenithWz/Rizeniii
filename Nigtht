@@ -2468,16 +2468,16 @@ local server   = V:T("Status And Server","rbxassetid://122223674767625")
 local g        = V:T("Shop","rbxassetid://134556077676632")
 local y        = V:T("Main Farm","rbxassetid://127561653320876")
 local CS_Tab   = V:T("Farm Mastery","rbxassetid://10709782497")
-local x        = V:T("Farm Others","rbxassetid://72448332143088")
+local x        = V:T("Farm Others","rbxassetid://10734975692")
 local t        = V:T("Sea Events","rbxassetid://96788654458681")
-local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
+local m        = V:T("Race Upgrade","rbxassetid://10734897102")
 local v        = V:T("Dojo Quest & Drago Race","rbxassetid://91920478152016")
 local VI       = V:T("Visuals & ESP","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
 local l        = V:T("Teleport","rbxassetid://10734886004")
 local R        = V:T("Get Items & Upgrade","rbxassetid://10709782582")
 local B        = V:T("Raid & Fruit","rbxassetid://10709790875")
-local c        = V:T("Settings & Misc","rbxassetid://127147149367603")
+local c        = V:T("Settings & Misc","rbxassetid://10734950309")
 
 local b    = y:AddSection("Auto Farm main");
 local CS   = CS_Tab:AddSection("Farm Mastery");
@@ -11505,7 +11505,40 @@ D:AddButton({ Title = "Buy Soru", Description = "", Callback = function()
 D:AddButton({ Title = "Buy Ken", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("KenTalk", "Buy");
 	end });
-
+D:AddSeperator("Fighting - Style");
+D:AddButton({ Title = "Buy Black Leg", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("BuyBlackLeg");
+	end });
+D:AddButton({ Title = "Buy Electro", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("BuyElectro");
+	end });
+D:AddButton({ Title = "Buy Fishman Karate", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("BuyFishmanKarate");
+	end });
+D:AddButton({ Title = "Buy DragonClaw", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("BlackbeardReward", "DragonClaw", "2");
+	end });
+D:AddButton({ Title = "Buy Superhuman", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("BuySuperhuman");
+	end });
+D:AddButton({ Title = "Buy Death Step", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("BuyDeathStep");
+	end });
+D:AddButton({ Title = "Buy Sharkman Karate", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("BuySharkmanKarate");
+	end });
+D:AddButton({ Title = "Buy ElectricClaw", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("BuyElectricClaw");
+	end });
+D:AddButton({ Title = "Buy DragonTalon", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("BuyDragonTalon");
+	end });
+D:AddButton({ Title = "Buy Godhuman", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("BuyGodhuman");
+	end });
+D:AddButton({ Title = "Buy SanguineArt", Description = "", Callback = function()
+		replicated.Remotes.CommF_:InvokeServer("BuySanguineArt");
+	end });
 D:AddSeperator("Accessory");
 D:AddButton({ Title = "Buy Tomoe Ring", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("BuyItem", "Tomoe Ring");
