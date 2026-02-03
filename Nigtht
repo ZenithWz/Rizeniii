@@ -6192,7 +6192,7 @@ T:AddToggle({
 
 -- NOVO: Toggle Use Portals Teleport
 T:AddToggle({
-    Title = "Use Portals Teleport",
+    Title = "Use Portals Teleport Beta",
     Description = "Ativa o uso de portais durante o teleporte",
     Default = GetSetting("UsePortals_Save", false),
     Callback = function(I)
