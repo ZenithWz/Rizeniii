@@ -11508,7 +11508,7 @@ D:AddButton({ Title = "Buy Ken", Description = "", Callback = function()
 D:AddSeperator("Fighting  Style");
 D:AddParagraph({
     Title = "Coming Soon",
-    Content = [[This content is currently under development]]
+    Content = "This content is currently under development",
 })
 D:AddSeperator("Accessory");
 D:AddButton({ Title = "Buy Tomoe Ring", Description = "", Callback = function()
