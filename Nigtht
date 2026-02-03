@@ -11507,9 +11507,10 @@ D:AddButton({ Title = "Buy Ken", Description = "", Callback = function()
 	end });
 D:AddSeperator("Fighting  Style");
 D:AddParagraph({
-    Title = "Coming Soon",
-    Content = "This content is currently under development",
+    Title = "Coming Soon", 
+    Content = "This feature is under development and will be available soon." -- Adicionei um espaço só por segurança, mas vazio deve funcionar
 })
+
 D:AddSeperator("Accessory");
 D:AddButton({ Title = "Buy Tomoe Ring", Description = "", Callback = function()
 		replicated.Remotes.CommF_:InvokeServer("BuyItem", "Tomoe Ring");
