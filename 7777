@@ -1,17 +1,15 @@
--- ts file was generated at discord.gg/25ms
-
 local v1 = loadstring(game:HttpGet('https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua'))()
 
 loadstring(game:HttpGet('https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua'))()
 loadstring(game:HttpGet('https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua'))()
 
 local v2 = v1:CreateWindow({
-    Title = 'Dersi X Hub',
-    SubTitle = 'Blox Fruit',
+    Title = 'Darkness Hub,
+    SubTitle = 'Blox Fruit | By wz7xwz',
     TabWidth = 160,
     Size = UDim2.fromOffset(480, 360),
     Acrylic = false,
-    Theme = 'Darker',
+    Theme = 'Dark',
     MinimizeKey = Enum.KeyCode.End,
 })
 local v3 = {
