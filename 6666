@@ -2798,7 +2798,7 @@ Shop:AddButton({
     end
 })
 
-Farm:AddSection({"Auto Farm main"})
+Farm:AddSection({"Global Settings"})
 Farm:AddDropdown({
     Name = "Select Weapon",
     Description = "",
@@ -2823,6 +2823,24 @@ spawn(function()
         end)
     end
 end)
+
+local UISizes = {
+    Small = 0.85,
+    Normal = 1.0,
+    Large = 1.15
+}
+
+Farm:AddDropdown({
+    Name = "UI Size",
+    Options = {"Small", "Normal", "Large"},
+    Default = "Normal",
+    Callback = function(Value)
+        Library:SetUIScale(UISizes[Value])
+    end
+})
+
+Farm:AddSection({"Farming"})
+
 -- VARIAVEIS GLOBAIS
 _G.SelectedFarmMode = "Level"
 _G.StartFarm = false
