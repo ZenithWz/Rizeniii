@@ -11,7 +11,7 @@ local function NotificacaoNightMystic(titulo, mensagem)
     local success = pcall(function()
         local TweenService = Services.TweenService
         local CoreGui = Services.CoreGui
-        local LogoID = "rbxassetid://115377474207871"
+        local LogoID = "rbxassetid://"
 
         local ScreenGui = Instance.new("ScreenGui")
         ScreenGui.Name = "NM_Notify"
@@ -2478,12 +2478,12 @@ local Status = Library:MakeTab({
 })
 
 local Shop = Library:MakeTab({
-    Title = "Shop",
+    Title = "Tab Shop",
     Icon = "rbxassetid://6031265976"
 })
 
 local Farm = Library:MakeTab({
-    Title = "Tab Farming",
+    Title = "Tab Main",
     Icon = "rbxassetid://127561653320876"
 })
 
@@ -2493,7 +2493,7 @@ local Maestry = Library:MakeTab({
 })
 
 local Others = Library:MakeTab({
-    Title = "Tab Farm Others",
+    Title = "Tab Sub Farming",
     Icon = "rbxassetid://10723405360"
 })
 
@@ -2508,12 +2508,12 @@ local Race = Library:MakeTab({
 })
 
 local Dojo = Library:MakeTab({
-    Title = "Tab Dojo Quest & Drago Race",
+    Title = "Tab Draco",
     Icon = "rbxassetid://91920478152016"
 })
 
 local Esp = Library:MakeTab({
-    Title = "Tab Stats & ESP",
+    Title = "Tab Stats And Esp",
     Icon = "rbxassetid://11155851001"
 })
 
@@ -2523,22 +2523,22 @@ local Player = Library:MakeTab({
 })
 
 local Teleport = Library:MakeTab({
-    Title = "Tab Teleport",
+    Title = "Tab Travel",
     Icon = "rbxassetid://10734886004"
 })
 
 local Get = Library:MakeTab({
-    Title = "Tab Get Items & Upgrade",
+    Title = "Tab Get Items And Upgrade",
     Icon = "rbxassetid://13075622619"
 })
 
 local Fruit = Library:MakeTab({
-    Title = "Tab Raid & Fruit",
+    Title = "Tab Raid And Fruit",
     Icon = "rbxassetid://11155986081"
 })
 
 local Setting = Library:MakeTab({
-    Title = "Tab Settings & Misc",
+    Title = "Tab Settings And Misc",
     Icon = "rbxassetid://7734053495"
 })
 Discord:AddDiscordInvite({
@@ -2547,11 +2547,7 @@ Discord:AddDiscordInvite({
     Logo = "rbxassetid://115377474207871",
     Invite = "https://discord.gg/A2pMghhd"
 })
-local credits = Discord:AddParagraph({
-    Title = "Credits For Someone Peoples",
-    Desc = ""
-})
-credits:SetDesc("nigth mystic, astral, tboy kiddo etc")
+
 
 Shop:AddSection("Fighting Shop")
 Shop:AddButton({
@@ -12098,6 +12094,6 @@ end)
 _ENV.rz_FastAttack = FastAttack
 FastAttackModule.FastAttack = FastAttack
 
-NotificacaoNightMystic("Abacaxi Hub", "✅ Todos os sistemas carregados!")
+NotificacaoNightMystic("Darkness Hub", "Script Loaded Successfully")
 
 return FastAttackModulem
