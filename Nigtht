@@ -695,37 +695,28 @@ statsSetings = function(I, e)
 	end;
 
 
---==================================================
--- VARIÁVEIS DE CONTROLE NECESSÁRIAS
---==================================================
 _G = _G or {}
 
 _B = false
 PosMon = nil
 
 _G.BringRange = _G.BringRange or 235
-_G.MaxBringMobs = _G.MaxBringMobs or 3 -- LIMITE DE MOBS
+_G.MaxBringMobs = _G.MaxBringMobs or 3
 
---==================================================
--- FUNÇÃO: VERIFICA SE QUALQUER FARM ESTÁ ATIVO
---==================================================
 local function FarmAtivo()
-    -- 1. PRIORIDADES E MASTERIAS (NÃO DEPENDEM DE STARTFARM)
     if _G.FarmPriorityElf or _G.FarmElfLevelCustom or _G.FarmMastery_S or _G.FarmMastery_G or _G.FarmMastery_Dev then
         return true
     end
 
-    -- 2. FARMS ESPECÍFICOS QUE DEPENDEM DO STARTFARM
     if _G.StartFarm then
         if _G.Level or _G.AutoFarm_Bone or _G.Auto_Cake_Prince or _G.AutoTyrant then
             return true
         end
     end
 
-    -- 3. TODOS OS OUTROS FARMS (NÃO DEPENDEM DE STARTFARM SEGUNDO SOLICITAÇÃO)
     if _G.AutoFarm_Cake or 
        (getgenv()).AutoMaterial or _G.SailBoat_Hydra or _G.WardenBoss or _G.AutoFactory or 
-       _G.HighestMirage or _G.HCM or _G.PGB or _G.Leviathan1 or _G.UPGDrago or 
+       _G.HighestMirage or _G.HCM or _G.PGB or _G.UPGDrago or 
        _G.Complete_Trials or _G.TpDrago_Prehis or _G.BuyDrago or _G.AutoFireFlowers or 
        _G.DT_Uzoth or _G.AutoBerry or _G.Prehis_Find or _G.Prehis_Skills or 
        _G.Prehis_DB or _G.Prehis_DE or _G.FarmBlazeEM or _G.Dojoo or _G.CollectPresent or 
@@ -737,11 +728,7 @@ local function FarmAtivo()
        _G.Bartilo_Quest or _G.FarmEliteHunt or _G.AutoZou or _G.CraftVM or 
        _G.FrozenTP or _G.TPDoor or _G.AcientOne or _G.AutoFarmNear or 
        _G.AutoRaidCastle or _G.DarkBladev3 or _G.AutoFarmRaid or _G.Addealer or 
-       _G.TPNpc or _G.TwinHook or _G.FindMirage or _G.FarmChestM or _G.Shark or 
-       _G.TerrorShark or _G.Piranha or _G.MobCrew or _G.SeaBeast1 or _G.FishBoat or 
-       _G.Auto or _G.AutoPoleV2 or _G.Auto_SuperHuman or _G.AutoDeathStep or 
-       _G.Auto_SharkMan_Karate or _G.Auto_Electric_Claw or _G.AutoDragonTalon or 
-       _G.Auto_Def_DarkCoat or _G.Auto_God_Human or _G.Auto_Tushita or _G.AutoMatSoul or 
+       _G.TPNpc or _G.TwinHook or _G.FindMirage or _G.FarmChestM or _G.Auto or _G.AutoPoleV2 or _G.Auto_Def_DarkCoat or _G.Auto_Tushita or _G.AutoMatSoul or 
        _G.AutoKenVTWO or _G.AutoSerpentBow or _G.AutoFMon or _G.Auto_Soul_Guitar or 
        _G.TPGEAR or _G.AutoSaw or _G.AutoTridentW2 or _G.Auto_StartRaid or 
        _G.AutoEvoRace or _G.AutoGetQuestBounty or _G.MarinesCoat or _G.TravelDres or 
@@ -752,19 +739,14 @@ local function FarmAtivo()
        _G.AutoGetUsoap or _G.Praying or _G.TryLucky or _G.AutoColShad or 
        _G.AutoUnHaki or _G.Auto_DonAcces or _G.AutoRipIngay or _G.DragoV3 or 
        _G.DragoV1 or _G.SailBoats or NextIs or _G.FarmGodChalice or _G.IceBossRen or 
-       senth or senth2 or _G.Lvthan or _G.beasthunter or _G.DangerLV or 
-       _G.Relic123 or _G.tweenKitsune or _G.Collect_Ember or _G.AutofindKitIs or 
-       _G.snaguine or _G.TwFruits or _G.tweenKitShrine or _G.Tp_LgS or 
-       _G.Tp_MasterA or _G.tweenShrine then
+       senth or senth2 or _G.Relic123 or _G.TwFruits or _G.Tp_LgS or 
+       _G.Tp_MasterA then
         return true
     end
 
     return false
 end
 
---==================================================
--- FUNÇÃO: IGNORA MOBS INDESEJADOS
---==================================================
 local function IsRaidMob(mob)
     local n = mob.Name:lower()
     if n:find("raid") or n:find("microchip") or n:find("island") then return true end
@@ -774,9 +756,6 @@ local function IsRaidMob(mob)
     return false
 end
 
---==================================================
--- FUNÇÃO PRINCIPAL: BRING (TELEPORT INSTANTÂNEO)
---==================================================
 BringEnemy = function()
     if not FarmAtivo() or not _B then return end
 
@@ -785,7 +764,6 @@ BringEnemy = function()
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    -- Simulation Radius para manter controle dos mobs
     pcall(function()
         sethiddenproperty(plr, "SimulationRadius", math.huge)
     end)
@@ -805,28 +783,30 @@ BringEnemy = function()
 
             if dist <= _G.BringRange then
                 count = count + 1
-                -- TELEPORT INSTANTÂNEO
                 root.CFrame = CFrame.new(targetPos)
             end
         end
     end
 end
 
---==================================================
--- LOOP CONTROLADOR
---==================================================
 task.spawn(function()
-    while task.wait() do -- Removido delay alto para resposta mais rápida
+    while true do
         if FarmAtivo() and _G.BringMobsUser then
-            _B = true
-            BringEnemy()
-            task.wait(0.1) -- Delay curto para não trapar o processamento
+            local startTime = tick()
+            while tick() - startTime < 3 and FarmAtivo() and _G.BringMobsUser do
+                _B = true
+                BringEnemy()
+                task.wait(0.1)
+            end
+            _B = false
+            task.wait(5)
         else
             _B = false
             task.wait(1)
         end
     end
 end)
+
 
 
 
