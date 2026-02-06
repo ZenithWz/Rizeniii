@@ -2382,7 +2382,7 @@ QuestNeta = function()
 			[6] = PosQ,
 		};
 	end;
-	local Library = loadstring(game:HttpGet("https://pastefy.app/2NsMZRkm/raw"))():MakeWindow({
+	local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tlredz/Library/refs/heads/main/redz-V5-remake/main.luau"))():MakeWindow({
     Title = "Darkness Hub",
     SubTitle = "By Anonymous",
     SaveFolder = "dark.json"
@@ -2505,7 +2505,7 @@ local Esp = Library:MakeTab({
 
 local Player = Library:MakeTab({
     Title = "Tab Local Player",
-    Icon = "rbxassetid://13075651575"
+    Icon = "rbxassetid://10747373176"
 })
 
 local Teleport = Library:MakeTab({
