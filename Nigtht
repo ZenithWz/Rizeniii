@@ -1220,39 +1220,84 @@ Hop = function()
 		end);
 	end;
 -- =========================================================
--- SERVIÇOS E VARIÁVEIS GLOBAIS
+-- CONFIGURAÇÃO INICIAL E CONTROLE DE COLISÃO (PART C)
 -- =========================================================
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local plr = Players.LocalPlayer
+local C = Instance.new("Part", workspace);
+C.Size = Vector3.new(1, 1, 1);
+C.Name = "Rip_Indra";
+C.Anchored = true;
+C.CanCollide = false;
+C.CanTouch = false;
+C.Transparency = 1;
 
--- Configurações de Velocidade (Mantendo compatibilidade com variáveis antigas se existirem)
-getgenv().TweenSpeedFar = getgenv().TweenSpeedFar or 300
-getgenv().TweenSpeedNear = getgenv().TweenSpeedNear or 600
-getgenv().UsePortals = true -- Define se deve usar portais ou não
+local M = workspace:FindFirstChild(C.Name);
+if M and M ~= C then
+    M:Destroy();
+end;
 
-local Settings = {
-    FlySpeed = getgenv().TweenSpeedFar -- Usa a velocidade global
-}
+-- Loop de verificação de Status (OnFarm)
+task.spawn(function()
+    while task.wait() do
+        if C and C.Parent == workspace then
+            if shouldTween then
+                (getgenv()).OnFarm = true;
+            else
+                (getgenv()).OnFarm = false;
+            end;
+        else
+            (getgenv()).OnFarm = false;
+        end;
+    end;
+end);
 
--- Variáveis de controle do novo sistema
-local flyPlatform = nil
-local currentTween = nil
-local noclipConnection = nil
-local tweenActive = false
+-- Loop de movimentação e colisão
+task.spawn(function()
+    local I = game.Players.LocalPlayer;
+    repeat task.wait() until I.Character and I.Character.PrimaryPart;
+
+    C.CFrame = I.Character.PrimaryPart.CFrame;  
+
+    while task.wait() do  
+        pcall(function()  
+            if (getgenv()).OnFarm then  
+                if C and C.Parent == workspace then  
+                    local e = I.Character and I.Character.PrimaryPart;  
+                    if e and (e.Position - C.Position).Magnitude <= 200 then  
+                        e.CFrame = C.CFrame;  
+                    else  
+                        C.CFrame = e.CFrame;  
+                    end;  
+                end;  
+
+                local e = I.Character;  
+                if e then  
+                    for _, v in pairs(e:GetChildren()) do  
+                        if v:IsA("BasePart") then v.CanCollide = false; end;  
+                    end;  
+                end;  
+            else  
+                local e = I.Character;  
+                if e then  
+                    for _, v in pairs(e:GetChildren()) do  
+                        if v:IsA("BasePart") then v.CanCollide = true; end;  
+                    end;  
+                end;  
+            end;  
+        end);  
+    end;
+end);
 
 -- =========================================================
--- SISTEMA DE PORTAIS (MANTIDO DO ORIGINAL)
+-- SISTEMA DE PORTAIS
 -- =========================================================
+local plr = game.Players.LocalPlayer
 local World1, World2, World3 = false, false, false
 if game.PlaceId == 2753915549 or game.PlaceId == 85211729168715 then World1 = true
 elseif game.PlaceId == 4442272183 or game.PlaceId == 79091703265657 then World2 = true
 elseif game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then World3 = true end
 
 function requestEntrance(v402)
-    ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance", v402)
+    game.ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance", v402)
     if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
         local hrp = plr.Character.HumanoidRootPart
         hrp.CFrame = hrp.CFrame + Vector3.new(0, 50, 0)
@@ -1315,182 +1360,65 @@ function CheckNearestTeleporter(v393)
 end
 
 -- =========================================================
--- NOVO SISTEMA DE TWEEN (TOPOS + PLATAFORMA)
+-- TWEEN E MOVIMENTAÇÃO (AJUSTADO PARA O TOGGLE)
 -- =========================================================
+getgenv().TweenSpeedFar = 300
+getgenv().TweenSpeedNear = 600
 
-local function EnableNoClip()
-    if noclipConnection then return end
-    noclipConnection = RunService.Stepped:Connect(function()
-        pcall(function()
-            if plr.Character then
-                for _, v in pairs(plr.Character:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        v.CanCollide = false
-                    end
-                end
-            end
-        end)
-    end)
-end
+_tp = function(I)
+    local e = plr.Character
+    if not e or not e:FindFirstChild("HumanoidRootPart") then return end
 
-local function DisableNoClip()
-    if noclipConnection then
-        noclipConnection:Disconnect()
-        noclipConnection = nil
-    end
-    pcall(function()
-        if plr.Character then
-            for _, v in pairs(plr.Character:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CanCollide = true
-                end
-            end
-        end
-    end)
-end
+    local HRP = e.HumanoidRootPart  
 
-local function CreateFlyPlatform()
-    if flyPlatform and flyPlatform.Parent then
-        return flyPlatform
-    end
-    
-    local platform = Instance.new("Part")
-    platform.Name = "FlyPlatform"
-    platform.Size = Vector3.new(5, 1, 5) -- Tamanho ajustado para ser mais discreto
-    platform.Transparency = 1
-    platform.Anchored = true
-    platform.CanCollide = true
-    platform.Parent = workspace
-    
-    flyPlatform = platform
-    return platform
-end
-
-local function RemoveFlyPlatform()
-    if flyPlatform and flyPlatform.Parent then
-        flyPlatform:Destroy()
-        flyPlatform = nil
-    end
-end
-
--- Função Principal de Movimento (Engine Nova)
-local function topos(targetCFrame)
-    pcall(function()
-        local char = plr.Character
-        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-        local rootPart = char.HumanoidRootPart
-        
-        -- Garante que targetCFrame seja um CFrame
-        if typeof(targetCFrame) == "Vector3" then
-            targetCFrame = CFrame.new(targetCFrame)
-        end
-
-        local distance = (rootPart.Position - targetCFrame.Position).Magnitude
-        
-        -- Atualiza a velocidade baseada na distância (Lógica do script antigo)
-        local currentSpeed = distance <= 150 and getgenv().TweenSpeedNear or getgenv().TweenSpeedFar
-        Settings.FlySpeed = currentSpeed
-        
-        if currentTween then
-            currentTween:Cancel()
-        end
-        
-        -- Lógica de "notween" se estiver muito perto
-        if distance < 10 then
-            rootPart.CFrame = targetCFrame
-            RemoveFlyPlatform()
-            DisableNoClip()
-            return
-        end
-
-        -- Inicia o processo de voo
-        EnableNoClip()
-        tweenActive = true
-        (getgenv()).OnFarm = true -- Compatibilidade com checks de status
-
-        local tweenInfo = TweenInfo.new(distance / Settings.FlySpeed, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-        currentTween = TweenService:Create(rootPart, tweenInfo, {CFrame = targetCFrame})
-        
-        local platform = CreateFlyPlatform()
-        
-        currentTween:Play()
-        
-        -- Loop de manutenção do voo
-        task.spawn(function()
-            while currentTween and currentTween.PlaybackState == Enum.PlaybackState.Playing and char and char:FindFirstChild("HumanoidRootPart") do
-                pcall(function()
-                    -- Zera a velocidade para não cair
-                    char.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-                    
-                    -- Posiciona a plataforma embaixo do jogador
-                    if platform and platform.Parent then
-                        platform.CFrame = CFrame.new(
-                            char.HumanoidRootPart.Position.X,
-                            char.HumanoidRootPart.Position.Y - 3.5,
-                            char.HumanoidRootPart.Position.Z
-                        )
-                    end
-                end)
-                task.wait()
-            end
-            
-            -- Limpeza pós-tween
-            RemoveFlyPlatform()
-            DisableNoClip()
-            tweenActive = false
-            -- Não setamos OnFarm = false imediatamente aqui para evitar flickering em loops rápidos, 
-            -- mas o script principal deve gerenciar isso.
-        end)
-    end)
-end
-
--- =========================================================
--- INTERCEPTADORES (CONECTANDO O VELHO AO NOVO)
--- =========================================================
-
--- Interceptador Inteligente: Verifica portais antes de usar o topos
-local function SmartTeleport(Target)
-    local TargetCF = Target
-    if typeof(Target) == "Vector3" then TargetCF = CFrame.new(Target) end
-
-    -- Verifica Portais se habilitado
+    -- VERIFICAÇÃO SE O USO DE PORTAIS ESTÁ ATIVADO
     if getgenv().UsePortals then
-        local PortalPos, PortalName = CheckNearestTeleporter(TargetCF)
-        if PortalPos and PortalName then
-            requestEntrance(PortalName)
-            -- Pequeno delay e ajuste após teleportar pelo portal
-            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                plr.Character.HumanoidRootPart.CFrame = CFrame.new(PortalPos) + Vector3.new(0, 10, 0)
-                task.wait(0.2)
-            end
-        end
+        local PortalPos, PortalName = CheckNearestTeleporter(I)  
+        if PortalPos and PortalName then  
+            requestEntrance(PortalName)  
+            HRP.CFrame = CFrame.new(PortalPos)  
+            C.CFrame = CFrame.new(PortalPos)  
+            HRP.CFrame = HRP.CFrame + Vector3.new(0, 10, 0)  
+            C.CFrame = C.CFrame + Vector3.new(0, 10, 0)  
+            task.wait(0.2)  
+        end  
     end
 
-    -- Chama a nova função de tween
-    topos(TargetCF)
+    shouldTween = true  
+    getgenv().OnFarm = false  
+
+    if HRP.Anchored then HRP.Anchored = false task.wait() end  
+
+    local dist = (I.Position - HRP.Position).Magnitude  
+    local speed = dist <= 15 and getgenv().TweenSpeedNear or getgenv().TweenSpeedFar  
+
+    local info = TweenInfo.new(dist / speed, Enum.EasingStyle.Linear)  
+    local tween = game:GetService("TweenService"):Create(C, info, { CFrame = I })  
+
+    if e.Humanoid.Sit then  
+        C.CFrame = CFrame.new(C.Position.X, I.Y, C.Position.Z)  
+    end  
+
+    tween:Play()  
+
+    task.spawn(function()  
+        while tween.PlaybackState == Enum.PlaybackState.Playing do  
+            if not shouldTween then  
+                tween:Cancel()  
+                getgenv().OnFarm = false  
+                return  
+            end  
+            task.wait()  
+        end  
+        getgenv().OnFarm = (shouldTween and tween.PlaybackState == Enum.PlaybackState.Completed)
+    end)
 end
 
--- Substituindo as globais antigas
-getgenv()._tp = SmartTeleport
-getgenv().TeleportToTarget = SmartTeleport
-
-getgenv().notween = function(Target)
-    local char = plr.Character
-    if char and char:FindFirstChild("HumanoidRootPart") then
-        local dest = Target
-        if typeof(Target) == "Vector3" then dest = CFrame.new(Target) end
-        char.HumanoidRootPart.CFrame = dest
-    end
-end
-
--- Função para parar o tween manualmente
-getgenv().StopTween = function()
-    if currentTween then
-        currentTween:Cancel()
-    end
-    RemoveFlyPlatform()
-    DisableNoClip()
-    (getgenv()).OnFarm = false
+TeleportToTarget = function(I) _tp(I) end
+notween = function(I) 
+    if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then 
+        plr.Character.HumanoidRootPart.CFrame = I 
+    end 
 end
 
 
