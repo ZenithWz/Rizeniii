@@ -2467,11 +2467,6 @@ imageButton.MouseButton1Click:Connect(function()
         Library:Minimize(true)
     end
 end)
-local Discord = Library:MakeTab({
-    Title = "Discord",
-    Icon = "rbxassetid://73132811772878"
-})
-
 local Status = Library:MakeTab({
     Title = "Status And Server",
     Icon = "rbxassetid://7040410130"
@@ -2484,7 +2479,7 @@ local Shop = Library:MakeTab({
 
 local Farm = Library:MakeTab({
     Title = "Tab Main",
-    Icon = "rbxassetid://127561653320876"
+    Icon = "rbxassetid://10723407389"
 })
 
 local Maestry = Library:MakeTab({
@@ -2494,17 +2489,17 @@ local Maestry = Library:MakeTab({
 
 local Others = Library:MakeTab({
     Title = "Tab Sub Farming",
-    Icon = "rbxassetid://10723405360"
+    Icon = "rbxassetid://10734975692"
 })
 
 local Event = Library:MakeTab({
     Title = "Tab Sea Event",
-    Icon = "rbxassetid://10709783577"
+    Icon = "rbxassetid://10747376931"
 })
 
 local Race = Library:MakeTab({
     Title = "Tab Race Upgrade",
-    Icon = "rbxassetid://115164375298022"
+    Icon = "rbxassetid://10734897102"
 })
 
 local Dojo = Library:MakeTab({
@@ -2529,7 +2524,7 @@ local Teleport = Library:MakeTab({
 
 local Get = Library:MakeTab({
     Title = "Tab Get Items And Upgrade",
-    Icon = "rbxassetid://13075622619"
+    Icon = "rbxassetid://10734975486"
 })
 
 local Fruit = Library:MakeTab({
@@ -2539,14 +2534,9 @@ local Fruit = Library:MakeTab({
 
 local Setting = Library:MakeTab({
     Title = "Tab Settings And Misc",
-    Icon = "rbxassetid://7734053495"
+    Icon = "rbxassetid://10734950309"
 })
-Discord:AddDiscordInvite({
-    Name = "Abacaxi Hub",
-    Description = "Join for support and updates",
-    Logo = "rbxassetid://115377474207871",
-    Invite = "https://discord.gg/A2pMghhd"
-})
+
 
 
 Shop:AddSection("Fighting Shop")
