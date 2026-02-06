@@ -1,9 +1,4 @@
---[[
-    Abacaxi Hub - Optimized Version
-    Performance & Code Quality Improvements
-]]
 
--- Cache all services at start for better performance
 local Services = setmetatable({}, {
     __index = function(self, serviceName)
         local service = game:GetService(serviceName)
@@ -16,7 +11,7 @@ local function NotificacaoNightMystic(titulo, mensagem)
     local success = pcall(function()
         local TweenService = Services.TweenService
         local CoreGui = Services.CoreGui
-        local "
+        local LogoID = "rbxassetid://115377474207871"
 
         local ScreenGui = Instance.new("ScreenGui")
         ScreenGui.Name = "NM_Notify"
@@ -97,13 +92,11 @@ local function NotificacaoNightMystic(titulo, mensagem)
     end
 end
 
-NotificacaoNightMystic("Abacaxi Hub", "Script carregado com sucesso!")
+NotificacaoNightMystic("Darkness", "Load Script Successfully")
 
--- ========================================
--- SAVE SYSTEM (Optimized)
--- ========================================
+
 local HttpService = Services.HttpService
-local FolderName = "Abacaxi Hub"
+local FolderName = "Darkness"
 local FileName = "Settings.json"
 local FullPath = FolderName .. "/" .. FileName
 
@@ -142,6 +135,32 @@ end
 LoadSettings()
 
 
+local Players = Services.Players
+local CollectionService = Services.CollectionService
+local ReplicatedStorage = Services.ReplicatedStorage
+
+local player = Players.LocalPlayer
+local commE = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommE")
+
+_G.AutoKen = true
+
+local function HasKen()
+    local char = player.Character
+    return char and CollectionService:HasTag(char, "Ken")
+end
+
+task.spawn(function()
+    while _G.AutoKen do
+        task.wait(0.2)
+        if not HasKen() then
+            pcall(function()
+                commE:FireServer("Ken", true)
+            end)
+        end
+    end
+end)
+
+
 local desiredTeam = "Marines"
 
 if not player.Team or player.Team.Name ~= desiredTeam then
@@ -151,6 +170,7 @@ if not player.Team or player.Team.Name ~= desiredTeam then
 end
 
 local Lighting = Services.Lighting
+
 
 Lighting.Ambient = Color3.new(0.695, 0.695, 0.695)
 Lighting.ColorShift_Bottom = Color3.new(0.695, 0.695, 0.695)
@@ -412,6 +432,7 @@ gay = (function()
     local I = game:GetService("Lighting");
     local e = I:FindFirstChild("LightingLayers");
 
+    -- NÃO remover DarkFog
 
     local K = workspace._WorldOrigin["Foam;"];
     if K and workspace._WorldOrigin["Foam;"] then
@@ -437,6 +458,7 @@ G.Dist = function(I, e)
 G.DistH = function(I, e)
 		return (Root.Position - (I:FindFirstChild("HumanoidRootPart")).Position).Magnitude > e;
 	end;
+-- ALTURA ÚNICA AJUSTÁVEL DO MOB
 _G.MobHeight = _G.MobHeight or 20
 
 G.Kill = function(I, e)
@@ -445,21 +467,25 @@ G.Kill = function(I, e)
 	local hrp = I:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
 
+	-- trava posição do mob
 	if not I:GetAttribute("Locked") then
 		I:SetAttribute("Locked", hrp.CFrame)
 	end
 
-	l
+	-- posição alvo do bring
 	PosMon = (I:GetAttribute("Locked")).Position
 
+	-- >>> FORÇA O BRING <<<
 	_B = true
 	BringEnemy()
 
+	-- equipa arma
 	EquipWeapon(_G.SelectWeapon)
 
 	local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
 	if not tool then return end
 
+	-- TP acima do mob (altura única)
 	_tp(hrp.CFrame * CFrame.new(0, _G.MobHeight, 0))
 end
 G.Kill2 = function(I, e)
@@ -534,7 +560,7 @@ G.Sword = function(I, e)
 			end;
 		end;
 	end;
-
+-- CONTROLE DE SKILLS DA FRUTA (MAESTRIA)
 _G.FruitSkills = {
     Z = false,
     X = false,
@@ -2359,7 +2385,7 @@ QuestNeta = function()
 	local Library = loadstring(game:HttpGet("https://pastefy.app/2NsMZRkm/raw"))():MakeWindow({
     Title = "Darkness Hub",
     SubTitle = "By Anonymous",
-    SaveFolder = "Darkness.settings"
+    SaveFolder = "abacaxi.json"
 })
 -- Criar ScreenGui
 local screenGui = Instance.new("ScreenGui")
@@ -2467,7 +2493,7 @@ local Maestry = Library:MakeTab({
 })
 
 local Others = Library:MakeTab({
-    Title = "Tab Sub Farming",
+    Title = "Tab Farm Others",
     Icon = "rbxassetid://10723405360"
 })
 
@@ -2487,7 +2513,7 @@ local Dojo = Library:MakeTab({
 })
 
 local Esp = Library:MakeTab({
-    Title = "Tab Stats And Esp",
+    Title = "Tab Stats & ESP",
     Icon = "rbxassetid://11155851001"
 })
 
@@ -2497,22 +2523,22 @@ local Player = Library:MakeTab({
 })
 
 local Teleport = Library:MakeTab({
-    Title = "Tab Travel",
+    Title = "Tab Teleport",
     Icon = "rbxassetid://10734886004"
 })
 
 local Get = Library:MakeTab({
-    Title = "Tab Get Items And Upgrade",
+    Title = "Tab Get Items & Upgrade",
     Icon = "rbxassetid://13075622619"
 })
 
 local Fruit = Library:MakeTab({
-    Title = "Tab Raid And Fruit",
+    Title = "Tab Raid & Fruit",
     Icon = "rbxassetid://11155986081"
 })
 
 local Setting = Library:MakeTab({
-    Title = "Tab Settings And Misc",
+    Title = "Tab Settings & Misc",
     Icon = "rbxassetid://7734053495"
 })
 Discord:AddDiscordInvite({
@@ -2521,7 +2547,11 @@ Discord:AddDiscordInvite({
     Logo = "rbxassetid://115377474207871",
     Invite = "https://discord.gg/A2pMghhd"
 })
-
+local credits = Discord:AddParagraph({
+    Title = "Credits For Someone Peoples",
+    Desc = ""
+})
+credits:SetDesc("nigth mystic, astral, tboy kiddo etc")
 
 Shop:AddSection("Fighting Shop")
 Shop:AddButton({
@@ -12069,7 +12099,5 @@ _ENV.rz_FastAttack = FastAttack
 FastAttackModule.FastAttack = FastAttack
 
 NotificacaoNightMystic("Abacaxi Hub", "✅ Todos os sistemas carregados!")
-
-return FastAttackModulemregados!")
 
 return FastAttackModulem
