@@ -718,7 +718,7 @@ local function FarmAtivo()
     if _G.AutoFarm_Cake or 
        (getgenv()).AutoMaterial or _G.WardenBoss or _G.AutoFactory or 
        _G.HCM or _G.PGB or _G.UPGDrago or 
-       _G.TpDrago_Prehis or _G.BuyDrago or _G.AutoFireFlowers or 
+       _G.TpDrago_Prehis or _G.AutoFireFlowers or 
        _G.DT_Uzoth or _G.Prehis_Find or _G.Prehis_Skills or 
        _G.Prehis_DB or _G.Prehis_DE or _G.FarmBlazeEM or _G.Dojoo or _G.CollectPresent or 
        _G.AutoLawKak or _G.TpLab or _G.AutoPhoenixF or _G.AutoFarmChest or 
@@ -761,10 +761,6 @@ BringEnemy = function()
     if not FarmAtivo() or not _B or not PosMon or not _G.BringCycleActive then return end
 
     local plr = game.Players.LocalPlayer
-    local char = plr.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
     pcall(function()
         sethiddenproperty(plr, "SimulationRadius", math.huge)
     end)
@@ -772,34 +768,42 @@ BringEnemy = function()
     local targetPos = PosMon
     local enemies = workspace.Enemies:GetChildren()
     local count = 0
-
+    
+    local activeEnemies = {}
     for _, mob in ipairs(enemies) do
-        if count >= _G.MaxBringMobs then break end
+        local hum = mob:FindFirstChild("Humanoid")
+        local root = mob:FindFirstChild("HumanoidRootPart")
+        if hum and root and hum.Health > 0 and not IsRaidMob(mob) then
+            if (root.Position - targetPos).Magnitude <= _G.BringRange then
+                table.insert(activeEnemies, mob)
+            end
+        end
+    end
 
+    for i, mob in ipairs(activeEnemies) do
+        if i > _G.MaxBringMobs then break end
+        
         local hum = mob:FindFirstChild("Humanoid")
         local root = mob:FindFirstChild("HumanoidRootPart")
 
-        if hum and root and hum.Health > 0 and not IsRaidMob(mob) then
-            local dist = (root.Position - targetPos).Magnitude
+        if hum and root then
+            for _, part in pairs(mob:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                    part.Velocity = Vector3.new(0, 0, 0)
+                end
+            end
 
-            if dist <= _G.BringRange then
-                count = count + 1
-                
-                for _, part in pairs(mob:GetChildren()) do
-                    if part:IsA("BasePart") and part.CanCollide then
-                        part.CanCollide = false 
-                    end
-                end
+            local angle = (i / #activeEnemies) * math.pi * 2 + (tick() * 2)
+            local radius = 2.5
+            local x = math.cos(angle) * radius
+            local z = math.sin(angle) * radius
+            local circlePos = targetPos + Vector3.new(x, 0, z)
 
-                if hum.WalkSpeed ~= _G.MobWalkSpeed then
-                    hum.WalkSpeed = _G.MobWalkSpeed
-                end
-                
-                if dist <= 2 then
-                    root.CFrame = CFrame.new(targetPos)
-                else
-                    hum:MoveTo(targetPos)
-                end
+            root.CFrame = CFrame.new(circlePos, targetPos)
+            
+            if hum.WalkSpeed ~= 0 then
+                hum.WalkSpeed = 0
             end
         end
     end
@@ -810,7 +814,7 @@ task.spawn(function()
         if FarmAtivo() and _G.BringMobsUser and PosMon then
             _B = true
             BringEnemy()
-            task.wait(0.1) 
+            task.wait() 
         else
             _B = false
             task.wait(0.5)
@@ -823,14 +827,14 @@ task.spawn(function()
         if _G.BringMobsUser then
             _G.BringCycleActive = true
             task.wait(3)
-            
             _G.BringCycleActive = false
-            task.wait(5)
+            task.wait(0.1)
         else
             task.wait(1)
         end
     end
 end)
+
 
 
 
