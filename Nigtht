@@ -757,7 +757,7 @@ local function IsRaidMob(mob)
 end
 
 BringEnemy = function()
-    if not FarmAtivo() or not _B then return end
+    if not FarmAtivo() or not _B or not PosMon then return end
 
     local plr = game.Players.LocalPlayer
     local char = plr.Character
@@ -768,7 +768,7 @@ BringEnemy = function()
         sethiddenproperty(plr, "SimulationRadius", math.huge)
     end)
 
-    local targetPos = PosMon or hrp.Position
+    local targetPos = PosMon
     local enemies = workspace.Enemies:GetChildren()
     local count = 0
 
@@ -791,21 +791,17 @@ end
 
 task.spawn(function()
     while true do
-        if FarmAtivo() and _G.BringMobsUser then
-            local startTime = tick()
-            while tick() - startTime < 3 and FarmAtivo() and _G.BringMobsUser do
-                _B = true
-                BringEnemy()
-                task.wait(0.1)
-            end
-            _B = false
-            task.wait(5)
+        if FarmAtivo() and _G.BringMobsUser and PosMon then
+            _B = true
+            BringEnemy()
+            task.wait(0.1)
         else
             _B = false
-            task.wait(1)
+            task.wait(0.5)
         end
     end
 end)
+
 
 
 
