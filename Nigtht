@@ -129,8 +129,8 @@ local I = {}
 
 function I:NewWindow(config)
     local Window = Library:CreateWindow({
-        Title = "Night Mystic",
-        Subtitle = "by araujozwx & Maurozzx",
+        Title = config.Title or "Night Mystic",
+        Subtitle = config.SubTitle or "by araujozwx & Maurozzx",
         Image = "rbxassetid://72077522197705"
     })
 
@@ -138,14 +138,16 @@ function I:NewWindow(config)
 
     function WindowWrapper:T(name, iconId)
         local Tab = Window:AddTab(name)
+        
         local TabWrapper = {}
 
         function TabWrapper:AddSection(sectionName)
             local Section = Tab:AddLeftGroupbox(sectionName)
+            
             local SectionWrapper = {}
 
             function SectionWrapper:AddToggle(config)
-                return Section:AddToggle(config.Title, {
+                Section:AddToggle(config.Title, {
                     Title = config.Title,
                     Default = config.Default or false,
                     Callback = config.Callback
@@ -153,24 +155,14 @@ function I:NewWindow(config)
             end
 
             function SectionWrapper:AddButton(config)
-                return Section:AddButton({
+                Section:AddButton({
                     Title = config.Title,
-                    Callback = config.Callback
-                })
-            end
-
-            function SectionWrapper:AddSlider(config)
-                return Section:AddSlider({
-                    Title = config.Title,
-                    Min = config.Min or 0,
-                    Max = config.Max or 100,
-                    Default = config.Default or 0,
                     Callback = config.Callback
                 })
             end
 
             function SectionWrapper:AddDropdown(config)
-                return Section:AddDropdown(config.Title, {
+                Section:AddDropdown(config.Title, {
                     Title = config.Title,
                     Values = config.Values or {},
                     Default = config.Default or 1,
@@ -179,32 +171,55 @@ function I:NewWindow(config)
                 })
             end
 
-            function SectionWrapper:AddInput(config)
-                return Section:AddInput(config.Title, {
+            function SectionWrapper:AddSlider(config)
+                Section:AddSlider({
                     Title = config.Title,
-                    Placeholder = config.PlaceHolder or config.Default or "Enter text...",
+                    Min = config.Min or 0,
+                    Max = config.Max or 100,
+                    Default = config.Default or 0,
                     Callback = config.Callback
                 })
             end
 
-            function SectionWrapper:AddLabel(text)
-                return Section:AddLabel(text)
+            function SectionWrapper:AddInput(config)
+                Section:AddInput(config.Title, {
+                    Title = config.Title,
+                    Placeholder = config.PlaceHolder or "",
+                    Callback = config.Callback
+                })
             end
 
             function SectionWrapper:AddParagraph(config)
-                return Section:AddLabel(config.Title or config.Content or "Paragraph")
+                Section:AddLabel(config.Title .. ": " .. (config.Desc or config.Content or ""))
+            end
+
+            function SectionWrapper:AddLabel(text)
+                Section:AddLabel(text)
             end
 
             function SectionWrapper:AddSeperator(text)
-                return Section:AddLabel("--- " .. (text or "") .. " ---")
+                Section:AddLabel(text)
             end
 
             function SectionWrapper:AddDiscord(title, link)
-                return Section:AddButton({
-                    Title = "Join Discord: " .. title,
+                Section:AddButton({
+                    Title = "Join " .. title,
                     Callback = function() 
-                        if setclipboard then setclipboard("https://discord.gg/"..link) end
+                        setclipboard("https://discord.gg/"..link)
+                        Library:Notify({
+                            Title = "Discord",
+                            Description = "Link copiado para a área de transferência!",
+                            Duration = 3
+                        })
                     end
+                })
+            end
+
+            function SectionWrapper:Notify(notificationConfig)
+                Library:Notify({
+                    Title = notificationConfig.Title or "Notificação",
+                    Description = notificationConfig.Content or notificationConfig.Description,
+                    Duration = notificationConfig.Duration or 3
                 })
             end
 
@@ -212,17 +227,9 @@ function I:NewWindow(config)
         end
         return TabWrapper
     end
-
-    function WindowWrapper:Notify(notificationConfig)
-        Library:Notify({
-            Title = notificationConfig.Title or "Notification",
-            Description = notificationConfig.Content or notificationConfig.Description or "",
-            Duration = notificationConfig.Duration or 5
-        })
-    end
-
     return WindowWrapper
 end
+
 
 if World1 then
 	Boss = {
