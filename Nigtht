@@ -123,93 +123,181 @@ Marines = function()
 Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
+-- [[ 1. CARREGAMENTO DA NOVA UI (NazuX Hub / Banana) ]] --
 local Library = loadstring(game:HttpGet("https://luacrack.site/index.php/anhkhoarb500gmail.com/raw/Banana"))()
 
+-- [[ 2. ADAPTADOR (NIGHT MYSTIC -> BANANA LIBRARY) ]] --
 local I = {}
 
-function I:NewWindow()
+function I:NewWindow(config)
+    -- Cria a janela principal usando a Banana Lib
     local Window = Library:CreateWindow({
-        Title = "NazuX Hub",
-        Subtitle = "Kaitun Hop",
-        Image = "rbxassetid://72077522197705"
+        Title = "Night Mystic",
+        Subtitle = "by araujozwx & Maurozzx",
+        Image = "rbxassetid://105245380363493", -- Ícone do Night Mystic
     })
 
     local WindowWrapper = {}
 
-    function WindowWrapper:T(name)
+    -- Função para notificar (Adaptada para a nova lib)
+    function WindowWrapper:Notify(notificationConfig)
+        Library:Notify({
+            Title = notificationConfig.Title or "Night Mystic",
+            Description = notificationConfig.Body or notificationConfig.Content or "",
+            Duration = notificationConfig.Duration or 5
+        })
+    end
+
+    -- Função para criar Abas (Tabs)
+    function WindowWrapper:T(name, iconId)
         local Tab = Window:AddTab(name)
         local TabWrapper = {}
 
+        -- Contador para alternar entre Esquerda e Direita (Estética)
+        -- O script original cria muitas seções, então vamos jogar tudo na Esquerda 
+        -- ou alternar para organizar melhor. Aqui usarei AddLeftGroupbox para manter a ordem.
+        
+        -- Função para criar Seções (Groupbox)
         function TabWrapper:AddSection(sectionName)
             local Section = Tab:AddLeftGroupbox(sectionName)
             local SectionWrapper = {}
 
+            -- Função auxiliar para gerar IDs únicos (A Banana Lib exige IDs string)
+            local function GetID(title)
+                return title .. "_" .. tostring(math.random(1, 1000000))
+            end
+
+            -- Toggle (Interruptor)
             function SectionWrapper:AddToggle(config)
-                return Section:AddToggle(config.Title, {
+                -- O script Night Mystic passa {Title, Default, Callback}
+                -- A Banana Lib usa AddToggle("ID", {Title, Default, Callback})
+                Section:AddToggle(GetID(config.Title), {
                     Title = config.Title,
                     Default = config.Default or false,
+                    Description = config.Description or "", -- Adaptação caso tenha descrição
                     Callback = config.Callback
                 })
             end
 
+            -- Button (Botão)
             function SectionWrapper:AddButton(config)
-                return Section:AddButton({
+                Section:AddButton({
                     Title = config.Title,
+                    Description = config.Description, -- Opcional
                     Callback = config.Callback
                 })
             end
 
+            -- Dropdown (Lista de seleção)
+            function SectionWrapper:AddDropdown(config)
+                -- Verifica se é Multi Dropdown
+                if config.Multi then
+                    -- Multi Dropdown na Banana Lib
+                    local dropdown = Section:AddDropdown(GetID(config.Title), {
+                        Title = config.Title,
+                        Values = config.Values or {},
+                        Default = config.Default or {}, 
+                        Multi = true,
+                        Callback = config.Callback
+                    })
+                    
+                    -- Retorna um objeto fake com função Refresh para compatibilidade
+                    return {
+                        Refresh = function(self, newValues, keepSelection)
+                            dropdown:SetValues(newValues)
+                        end
+                    }
+                else
+                    -- Single Dropdown
+                    local dropdown = Section:AddDropdown(GetID(config.Title), {
+                        Title = config.Title,
+                        Values = config.Values or {},
+                        Default = config.Default or 1, -- Banana prefere index ou valor
+                        Multi = false,
+                        Callback = config.Callback
+                    })
+
+                    -- Wrapper para atualizar a lista (Refresh)
+                    return {
+                        Refresh = function(self, newValues, keepSelection)
+                            dropdown:SetValues(newValues)
+                            -- Se precisar resetar o valor:
+                            if not keepSelection and #newValues > 0 then
+                                dropdown:SetValue(newValues[1])
+                            end
+                        end
+                    }
+                end
+            end
+
+            -- Slider (Barra de valor)
             function SectionWrapper:AddSlider(config)
-                return Section:AddSlider({
+                Section:AddSlider({
                     Title = config.Title,
                     Min = config.Min or 0,
                     Max = config.Max or 100,
-                    Default = config.Default or 0,
+                    Default = config.Default or (config.Min or 0),
                     Callback = config.Callback
                 })
             end
 
-            function SectionWrapper:AddDropdown(config)
-                return Section:AddDropdown(config.Title, {
-                    Title = config.Title,
-                    Values = config.Values or {},
-                    Default = config.Default or 1,
-                    Multi = config.Multi or false,
-                    Callback = config.Callback
-                })
-            end
-
+            -- Input (Caixa de Texto)
             function SectionWrapper:AddInput(config)
-                return Section:AddInput(config.Title, {
+                Section:AddInput(GetID(config.Title), {
                     Title = config.Title,
-                    Placeholder = config.PlaceHolder or "Digite...",
+                    Default = config.Default,
+                    Placeholder = config.PlaceHolder or "Enter text...",
                     Callback = config.Callback
                 })
             end
 
+            -- Paragraph / Label (Texto informativo)
+            function SectionWrapper:AddParagraph(config)
+                -- Banana Lib usa Labels para textos simples
+                local label = Section:AddLabel(config.Title .. (config.Content and ("\n" .. config.Content) or ""))
+                
+                -- Retorna objeto para permitir atualização do texto (SetDesc)
+                return {
+                    SetDesc = function(self, newText)
+                        label:SetText(config.Title .. "\n" .. newText)
+                    end
+                }
+            end
+            
+            -- Label Simples (compatibilidade)
             function SectionWrapper:AddLabel(text)
                 return Section:AddLabel(text)
+            end
+
+            -- Separator (Separador visual)
+            function SectionWrapper:AddSeperator(text)
+                -- A Banana Lib não tem "Separator" nativo simples, usamos Label ou nova seção
+                -- Para manter fluxo, usamos um Label vazio ou com traços
+                Section:AddLabel("--- " .. text .. " ---")
+            end
+
+            -- Discord Button (Especial)
+            function SectionWrapper:AddDiscord(title, inviteCode)
+                Section:AddButton({
+                    Title = "Join " .. title,
+                    Callback = function()
+                        setclipboard("https://discord.gg/" .. inviteCode)
+                        Library:Notify({
+                            Title = "Discord",
+                            Description = "Invite copied to clipboard!",
+                            Duration = 3
+                        })
+                    end
+                })
             end
 
             return SectionWrapper
         end
         return TabWrapper
     end
-
-    function WindowWrapper:Notify(notif)
-        Library:Notify({
-            Title = notif.Title or "Aviso",
-            Description = notif.Content or "",
-            Duration = notif.Duration or 3
-        })
-    end
-
+    
     return WindowWrapper
 end
-
-return I
-
-
 
 if World1 then
 	Boss = {
@@ -641,117 +729,151 @@ statsSetings = function(I, e)
 	end;
 
 
+
+
+--==================================================
+-- VARIÁVEIS DE CONTROLE NECESSÁRIAS
+--==================================================
 _G = _G or {}
 
 _B = false
 PosMon = nil
 
 _G.BringRange = _G.BringRange or 235
-_G.MaxBringMobs = _G.MaxBringMobs or 3
+_G.MaxBringMobs = _G.MaxBringMobs or 3 -- LIMITE DE MOBS
 
+_G.FarmPriorityElf = _G.FarmPriorityElf or false
+_G.FarmMastery_S   = _G.FarmMastery_S or false
+
+local TweenService = game:GetService("TweenService")
+local TweenInfoBring = TweenInfo.new(
+    0.45, -- velocidade do tween
+    Enum.EasingStyle.Linear,
+    Enum.EasingDirection.Out
+)
+
+--==================================================
+-- FUNÇÃO: VERIFICA SE QUALQUER FARM ESTÁ ATIVO
+--==================================================
 local function FarmAtivo()
-    if _G.FarmPriorityElf or _G.FarmElfLevelCustom or _G.FarmMastery_S or _G.FarmMastery_G or _G.FarmMastery_Dev then
+    -- PRIORIDADE ABSOLUTA (ELF)
+    if _G.FarmPriorityElf or _G.FarmElfLevelCustom then
         return true
     end
 
-    if _G.StartFarm then
-        if _G.Level or _G.AutoFarm_Bone or _G.Auto_Cake_Prince or _G.AutoTyrant then
-            return true
-        end
-    end
+    -- AUTO MASTERY ALL SWORD (INDEPENDENTE DO START FARM)  
+    if _G.FarmMastery_S then  
+        return true  
+    end  
 
-    if _G.AutoFarm_Cake or 
-       (getgenv()).AutoMaterial or _G.SailBoat_Hydra or _G.WardenBoss or _G.AutoFactory or 
-       _G.HighestMirage or _G.HCM or _G.PGB or _G.UPGDrago or 
-       _G.Complete_Trials or _G.TpDrago_Prehis or _G.BuyDrago or _G.AutoFireFlowers or 
-       _G.DT_Uzoth or _G.AutoBerry or _G.Prehis_Find or _G.Prehis_Skills or 
-       _G.Prehis_DB or _G.Prehis_DE or _G.FarmBlazeEM or _G.Dojoo or _G.CollectPresent or 
-       _G.AutoLawKak or _G.TpLab or _G.AutoPhoenixF or _G.AutoFarmChest or 
-       _G.AutoHytHallow or _G.LongsWord or _G.BlackSpikey or _G.AutoHolyTorch or 
-       _G.TrainDrago or _G.AutoSaber or _G.CitizenQuest or _G.AutoEctoplasm or 
-       _G.KeysRen or _G.Auto_Rainbow_Haki or _G.obsFarm or _G.AutoBigmom or 
-       _G.Doughv2 or _G.AuraBoss or _G.Raiding or _G.Auto_Cavender or _G.TpPly or 
-       _G.Bartilo_Quest or _G.FarmEliteHunt or _G.AutoZou or _G.CraftVM or 
-       _G.FrozenTP or _G.TPDoor or _G.AcientOne or _G.AutoFarmNear or 
-       _G.AutoRaidCastle or _G.DarkBladev3 or _G.AutoFarmRaid or _G.Addealer or 
-       _G.TPNpc or _G.TwinHook or _G.FindMirage or _G.FarmChestM or _G.Auto or _G.AutoPoleV2 or _G.Auto_Def_DarkCoat or _G.Auto_Tushita or _G.AutoMatSoul or 
-       _G.AutoKenVTWO or _G.AutoSerpentBow or _G.AutoFMon or _G.Auto_Soul_Guitar or 
-       _G.TPGEAR or _G.AutoSaw or _G.AutoTridentW2 or _G.Auto_StartRaid or 
-       _G.AutoEvoRace or _G.AutoGetQuestBounty or _G.MarinesCoat or _G.TravelDres or 
-       _G.Defeating or _G.DummyMan or _G.Auto_Yama or _G.Auto_SwanGG or _G.SwanCoat or 
-       _G.AutoEcBoss or _G.Auto_Mink or _G.Auto_Human or _G.Auto_Skypiea or 
-       _G.Auto_Fish or _G.CDK_TS or _G.CDK_YM or _G.CDK or _G.AutoFarmGodChalice or 
-       _G.AutoFistDarkness or _G.AutoMiror or _G.Teleport or _G.AutoKilo or 
-       _G.AutoGetUsoap or _G.Praying or _G.TryLucky or _G.AutoColShad or 
-       _G.AutoUnHaki or _G.Auto_DonAcces or _G.AutoRipIngay or _G.DragoV3 or 
-       _G.DragoV1 or _G.SailBoats or NextIs or _G.FarmGodChalice or _G.IceBossRen or 
-       senth or senth2 or _G.Relic123 or _G.TwFruits or _G.Tp_LgS or 
-       _G.Tp_MasterA then
-        return true
-    end
-
-    return false
+    -- OUTROS FARMS (DEPENDENTES DO START FARM)  
+    return _G.StartFarm and (
+        _G.Level or  
+        _G.AutoFarm_Bone or  
+        _G.AutoFarm_Cake or  
+        _G.FarmMastery_Dev or  
+        _G.FarmMastery_G or  
+        (getgenv()).AutoMaterial or  
+        _G.AutoTyrant or
+        _G.SailBoat_Hydra or _G.WardenBoss or _G.AutoFactory or _G.HighestMirage or _G.HCM or _G.PGB or _G.Leviathan1 or _G.UPGDrago or _G.Complete_Trials or _G.TpDrago_Prehis or _G.BuyDrago or _G.AutoFireFlowers or _G.DT_Uzoth or _G.AutoBerry or _G.Prehis_Find or _G.Prehis_Skills or _G.Prehis_DB or _G.Prehis_DE or _G.FarmBlazeEM or _G.Dojoo or _G.CollectPresent or _G.AutoLawKak or _G.TpLab or _G.AutoPhoenixF or _G.AutoFarmChest or _G.AutoHytHallow or _G.LongsWord or _G.BlackSpikey or _G.AutoHolyTorch or _G.TrainDrago or _G.AutoSaber or _G.FarmMastery_Dev or _G.CitizenQuest or _G.AutoEctoplasm or _G.KeysRen or _G.Auto_Rainbow_Haki or _G.obsFarm or _G.AutoBigmom or _G.Doughv2 or _G.AuraBoss or _G.Raiding or _G.Auto_Cavender or _G.TpPly or _G.Bartilo_Quest or _G.Level or _G.FarmEliteHunt or _G.AutoZou or _G.AutoFarm_Bone or (getgenv()).AutoMaterial or _G.CraftVM or _G.FrozenTP or _G.TPDoor or _G.AcientOne or _G.AutoFarmNear or _G.AutoRaidCastle or _G.DarkBladev3 or _G.AutoFarmRaid or _G.Auto_Cake_Prince or _G.Addealer or _G.TPNpc or _G.TwinHook or _G.FindMirage or _G.FarmChestM or _G.Shark or _G.TerrorShark or _G.Piranha or _G.MobCrew or _G.SeaBeast1 or _G.FishBoat or _G.Auto or _G.AutoPoleV2 or _G.Auto_SuperHuman or _G.AutoDeathStep or _G.Auto_SharkMan_Karate or _G.Auto_Electric_Claw or _G.AutoDragonTalon or _G.Auto_Def_DarkCoat or _G.Auto_God_Human or _G.Auto_Tushita or _G.AutoMatSoul or _G.AutoKenVTWO or _G.AutoSerpentBow or _G.AutoFMon or _G.Auto_Soul_Guitar or _G.TPGEAR or _G.AutoSaw or _G.AutoTridentW2 or _G.Auto_StartRaid or _G.AutoEvoRace or _G.AutoGetQuestBounty or _G.MarinesCoat or _G.TravelDres or _G.Defeating or _G.DummyMan or _G.Auto_Yama or _G.Auto_SwanGG or _G.SwanCoat or _G.AutoEcBoss or _G.Auto_Mink or _G.Auto_Human or _G.Auto_Skypiea or _G.Auto_Fish or _G.CDK_TS or _G.CDK_YM or _G.CDK or _G.AutoFarmGodChalice or _G.AutoFistDarkness or _G.AutoMiror or _G.Teleport or _G.AutoKilo or _G.AutoGetUsoap or _G.Praying or _G.TryLucky or _G.AutoColShad or _G.AutoUnHaki or _G.Auto_DonAcces or _G.AutoRipIngay or _G.DragoV3 or _G.DragoV1 or _G.SailBoats or NextIs or _G.FarmGodChalice or _G.IceBossRen or senth or senth2 or _G.Lvthan or _G.beasthunter or _G.DangerLV or _G.Relic123 or _G.tweenKitsune or _G.Collect_Ember or _G.AutofindKitIs or _G.snaguine or _G.TwFruits or _G.tweenKitShrine or _G.Tp_LgS or _G.Tp_MasterA or _G.tweenShrine or _G.FarmMastery_G or _G.FarmMastery_S
+    )
 end
 
+--==================================================
+-- FUNÇÃO: IGNORA MOBS INDESEJADOS
+--==================================================
 local function IsRaidMob(mob)
     local n = mob.Name:lower()
-    if n:find("raid") or n:find("microchip") or n:find("island") then return true end
-    if mob:GetAttribute("IsRaid") or mob:GetAttribute("RaidMob") or mob:GetAttribute("IsBoss") then return true end
-    local hum = mob:FindFirstChild("Humanoid")
-    if hum and hum.WalkSpeed == 0 then return true end
+
+    if n:find("raid") or n:find("microchip") or n:find("island") then  
+        return true  
+    end  
+
+    if mob:GetAttribute("IsRaid")  
+        or mob:GetAttribute("RaidMob")  
+        or mob:GetAttribute("IsBoss") then  
+        return true  
+    end  
+
+    local hum = mob:FindFirstChild("Humanoid")  
+    if hum and hum.WalkSpeed == 0 then  
+        return true  
+    end  
+
+    if mob.Parent and tostring(mob.Parent):lower():find("_worldorigin") then  
+        return true  
+    end  
+
     return false
 end
 
+--==================================================
+-- FUNÇÃO PRINCIPAL: BRING
+--==================================================
 BringEnemy = function()
-    if not FarmAtivo() or not _B or not PosMon then return end
+    if not FarmAtivo() or not _B then return end
 
-    local plr = game.Players.LocalPlayer
-    local char = plr.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+    local plr = game.Players.LocalPlayer  
+    local char = plr.Character  
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")  
+    if not hrp then return end  
 
-    pcall(function()
-        sethiddenproperty(plr, "SimulationRadius", math.huge)
-    end)
+    -- Simulation Radius  
+    pcall(function()  
+        sethiddenproperty(plr, "SimulationRadius", math.huge)  
+    end)  
 
-    local targetPos = PosMon
-    local enemies = workspace.Enemies:GetChildren()
-    local count = 0
+    local targetPos = PosMon or hrp.Position  
+    local enemies = workspace.Enemies:GetChildren()  
+    local count = 0  
 
-    for _, mob in ipairs(enemies) do
-        if count >= _G.MaxBringMobs then break end
+    for _, mob in ipairs(enemies) do  
+        if count >= _G.MaxBringMobs then break end  
 
-        local hum = mob:FindFirstChild("Humanoid")
-        local root = mob:FindFirstChild("HumanoidRootPart")
+        local hum = mob:FindFirstChild("Humanoid")  
+        local root = mob:FindFirstChild("HumanoidRootPart")  
 
-        if hum and root and hum.Health > 0 and not IsRaidMob(mob) then
-            local dist = (root.Position - targetPos).Magnitude
+        if hum and root and hum.Health > 0 and not IsRaidMob(mob) then  
+            local dist = (root.Position - targetPos).Magnitude  
 
-            if dist <= _G.BringRange then
-                count = count + 1
-                root.CFrame = CFrame.new(targetPos)
-            end
-        end
+            if dist <= _G.BringRange and not root:GetAttribute("Tweening") then  
+                count += 1  
+                root:SetAttribute("Tweening", true)  
+
+                local tween = TweenService:Create(  
+                    root,  
+                    TweenInfoBring,  
+                    { CFrame = CFrame.new(targetPos) }  
+                )  
+
+                tween:Play()  
+                tween.Completed:Once(function()  
+                    if root then  
+                        root:SetAttribute("Tweening", false)  
+                    end  
+                end)  
+            end  
+        end  
     end
 end
 
+--==================================================
+-- LOOP CONTROLADOR
+--==================================================
 task.spawn(function()
-    while true do
-        if FarmAtivo() and _G.BringMobsUser and PosMon then
+    while task.wait(1) do
+        if FarmAtivo() and _G.BringMobsUser then
             _B = true
             BringEnemy()
-            task.wait(0.1)
-        else
-            _B = false
-            task.wait(0.5)
-        end
+            task.wait(3)
+            _B = false  
+            task.wait(5)  
+        else  
+            _B = false  
+            task.wait(1)  
+        end  
     end
 end)
-
-
-
-
-
 Useskills = function(I, e)
 		if I == "Melee" then
 			weaponSc("Melee");
@@ -2477,16 +2599,16 @@ local server   = V:T("Status And Server","rbxassetid://122223674767625")
 local g        = V:T("Shop","rbxassetid://134556077676632")
 local y        = V:T("Main Farm","rbxassetid://127561653320876")
 local CS_Tab   = V:T("Farm Mastery","rbxassetid://10709782497")
-local x        = V:T("Farm Others","rbxassetid://10734975692")
+local x        = V:T("Farm Others","rbxassetid://72448332143088")
 local t        = V:T("Sea Events","rbxassetid://96788654458681")
-local m        = V:T("Race Upgrade","rbxassetid://10734897102")
+local m        = V:T("Race Upgrade","rbxassetid://115164375298022")
 local v        = V:T("Dojo Quest & Drago Race","rbxassetid://91920478152016")
 local VI       = V:T("Visuals & ESP","rbxassetid://10723346959")
 local q        = V:T("Local Player","rbxassetid://98870151777863")
 local l        = V:T("Teleport","rbxassetid://10734886004")
 local R        = V:T("Get Items & Upgrade","rbxassetid://10709782582")
 local B        = V:T("Raid & Fruit","rbxassetid://10709790875")
-local c        = V:T("Settings & Misc","rbxassetid://10734950309")
+local c        = V:T("Settings & Misc","rbxassetid://127147149367603")
 
 -- SECTIONS (somente nomes alterados)
 local b    = y:AddSection("Auto Farm main");
@@ -6104,7 +6226,7 @@ T:AddToggle({
 
 -- NOVO: Toggle Use Portals Teleport
 T:AddToggle({
-    Title = "Use Portals Teleport Beta",
+    Title = "Use Portais Teleport",
     Description = "Ativa o uso de portais durante o teleporte",
     Default = GetSetting("UsePortals_Save", false),
     Callback = function(I)
