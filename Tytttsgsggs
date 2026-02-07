@@ -5953,9 +5953,9 @@ task.spawn(function()
     end
 end)
 
-b:AddToggle({
+T:AddToggle({
     Title = "Shoot Gun",
-    Default = GetSetting("FastAttack_Save", true),
+    Default = GetSetting("FastAttack_Save", false),
     Callback = function(v)
         _G.FastAttack = v
         _G.SaveData["FastAttack_Save"] = v
@@ -5964,7 +5964,7 @@ b:AddToggle({
 })
 
 _G = _G or {}
-_G.FastAttack = GetSetting("FastAttack_Save", true)
+_G.FastAttack = GetSetting("FastAttack_Save", false)
 _G.FastAttackDelay = 0.02
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -6122,7 +6122,7 @@ task.spawn(function()
     end
 end)
 
-b:AddToggle({
+T:AddToggle({
     Title = "Auto Active Ken",
     Default = GetSetting("AutoKen_Save", false),
     Callback = function(v)
