@@ -696,13 +696,13 @@ statsSetings = function(I, e)
 
 
 _G = _G or {}
-
 _B = false
 PosMon = nil
 
 _G.BringRange = _G.BringRange or 235
 _G.MaxBringMobs = _G.MaxBringMobs or 3
-_G.MobWalkSpeed = 225
+_G.MobWalkSpeed = 300 
+_G.BringCycleActive = true 
 
 local function FarmAtivo()
     if _G.FarmMastery_S or _G.FarmMastery_G or _G.FarmMastery_Dev then
@@ -722,18 +722,18 @@ local function FarmAtivo()
        _G.DT_Uzoth or _G.Prehis_Find or _G.Prehis_Skills or 
        _G.Prehis_DB or _G.Prehis_DE or _G.FarmBlazeEM or _G.Dojoo or _G.CollectPresent or 
        _G.AutoLawKak or _G.TpLab or _G.AutoPhoenixF or _G.AutoFarmChest or 
-       _G.AutoHytHallow or _G.LongsWord or _G.BlackSpikey or _G.AutoHolyTorch or 
+       _G.AutoHytHallow or _G.LongsWord or _G.BlackSpikey or 
        _G.TrainDrago or _G.AutoSaber or _G.CitizenQuest or _G.AutoEctoplasm or 
        _G.KeysRen or _G.Auto_Rainbow_Haki or _G.obsFarm or _G.AutoBigmom or 
-       _G.Doughv2 or _G.AuraBoss or _G.Raiding or _G.Auto_Cavender or _G.TpPly or 
+       _G.AuraBoss or _G.Raiding or _G.Auto_Cavender or _G.TpPly or 
        _G.Bartilo_Quest or _G.FarmEliteHunt or _G.AutoZou or _G.CraftVM or 
-       _G.FrozenTP or _G.TPDoor or _G.AcientOne or _G.AutoFarmNear or 
+       _G.TPDoor or _G.AcientOne or _G.AutoFarmNear or 
        _G.AutoRaidCastle or _G.AutoFarmRaid or _G.Addealer or 
-       _G.TPNpc or _G.TwinHook or _G.FindMirage or _G.FarmChestM or _G.Auto or _G.AutoPoleV2 or _G.Auto_Def_DarkCoat or _G.Auto_Tushita or _G.AutoMatSoul or 
+       _G.TPNpc or _G.TwinHook or _G.FarmChestM or _G.Auto or _G.AutoPoleV2 or _G.Auto_Def_DarkCoat or _G.Auto_Tushita or _G.AutoMatSoul or 
        _G.AutoKenVTWO or _G.AutoSerpentBow or _G.AutoFMon or _G.Auto_Soul_Guitar or 
-       _G.TPGEAR or _G.AutoSaw or _G.AutoTridentW2 or _G.Auto_StartRaid or 
+       _G.AutoSaw or _G.AutoTridentW2 or 
        _G.AutoEvoRace or _G.AutoGetQuestBounty or _G.MarinesCoat or _G.TravelDres or 
-       _G.Defeating or _G.DummyMan or _G.Auto_Yama or _G.Auto_SwanGG or _G.SwanCoat or 
+       _G.Defeating or _G.Auto_SwanGG or _G.SwanCoat or 
        _G.AutoEcBoss or _G.Auto_Mink or _G.Auto_Human or _G.Auto_Skypiea or 
        _G.Auto_Fish or _G.CDK_TS or _G.CDK_YM or _G.CDK or _G.AutoFarmGodChalice or 
        _G.AutoFistDarkness or _G.AutoMiror or _G.Teleport or _G.AutoKilo or 
@@ -758,7 +758,7 @@ local function IsRaidMob(mob)
 end
 
 BringEnemy = function()
-    if not FarmAtivo() or not _B or not PosMon then return end
+    if not FarmAtivo() or not _B or not PosMon or not _G.BringCycleActive then return end
 
     local plr = game.Players.LocalPlayer
     local char = plr.Character
@@ -785,6 +785,12 @@ BringEnemy = function()
             if dist <= _G.BringRange then
                 count = count + 1
                 
+                for _, part in pairs(mob:GetChildren()) do
+                    if part:IsA("BasePart") and part.CanCollide then
+                        part.CanCollide = false 
+                    end
+                end
+
                 if hum.WalkSpeed ~= _G.MobWalkSpeed then
                     hum.WalkSpeed = _G.MobWalkSpeed
                 end
@@ -811,6 +817,21 @@ task.spawn(function()
         end
     end
 end)
+
+task.spawn(function()
+    while true do
+        if _G.BringMobsUser then
+            _G.BringCycleActive = true
+            task.wait(3)
+            
+            _G.BringCycleActive = false
+            task.wait(5)
+        else
+            task.wait(1)
+        end
+    end
+end)
+
 
 
 
