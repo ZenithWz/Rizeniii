@@ -127,27 +127,25 @@ local Library = loadstring(game:HttpGet("https://luacrack.site/index.php/anhkhoa
 
 local I = {}
 
-function I:NewWindow(config)
+function I:NewWindow()
     local Window = Library:CreateWindow({
-        Title = config.Title or "Night Mystic",
-        Subtitle = config.SubTitle or "by araujozwx & Maurozzx",
+        Title = "NazuX Hub",
+        Subtitle = "Kaitun Hop",
         Image = "rbxassetid://72077522197705"
     })
 
     local WindowWrapper = {}
 
-    function WindowWrapper:T(name, iconId)
+    function WindowWrapper:T(name)
         local Tab = Window:AddTab(name)
-        
         local TabWrapper = {}
 
         function TabWrapper:AddSection(sectionName)
             local Section = Tab:AddLeftGroupbox(sectionName)
-            
             local SectionWrapper = {}
 
             function SectionWrapper:AddToggle(config)
-                Section:AddToggle(config.Title, {
+                return Section:AddToggle(config.Title, {
                     Title = config.Title,
                     Default = config.Default or false,
                     Callback = config.Callback
@@ -155,24 +153,14 @@ function I:NewWindow(config)
             end
 
             function SectionWrapper:AddButton(config)
-                Section:AddButton({
+                return Section:AddButton({
                     Title = config.Title,
-                    Callback = config.Callback
-                })
-            end
-
-            function SectionWrapper:AddDropdown(config)
-                Section:AddDropdown(config.Title, {
-                    Title = config.Title,
-                    Values = config.Values or {},
-                    Default = config.Default or 1,
-                    Multi = config.Multi or false,
                     Callback = config.Callback
                 })
             end
 
             function SectionWrapper:AddSlider(config)
-                Section:AddSlider({
+                return Section:AddSlider({
                     Title = config.Title,
                     Min = config.Min or 0,
                     Max = config.Max or 100,
@@ -181,54 +169,46 @@ function I:NewWindow(config)
                 })
             end
 
-            function SectionWrapper:AddInput(config)
-                Section:AddInput(config.Title, {
+            function SectionWrapper:AddDropdown(config)
+                return Section:AddDropdown(config.Title, {
                     Title = config.Title,
-                    Placeholder = config.PlaceHolder or "",
+                    Values = config.Values or {},
+                    Default = config.Default or 1,
+                    Multi = config.Multi or false,
                     Callback = config.Callback
                 })
             end
 
-            function SectionWrapper:AddParagraph(config)
-                Section:AddLabel(config.Title .. ": " .. (config.Desc or config.Content or ""))
+            function SectionWrapper:AddInput(config)
+                return Section:AddInput(config.Title, {
+                    Title = config.Title,
+                    Placeholder = config.PlaceHolder or "Digite...",
+                    Callback = config.Callback
+                })
             end
 
             function SectionWrapper:AddLabel(text)
-                Section:AddLabel(text)
-            end
-
-            function SectionWrapper:AddSeperator(text)
-                Section:AddLabel(text)
-            end
-
-            function SectionWrapper:AddDiscord(title, link)
-                Section:AddButton({
-                    Title = "Join " .. title,
-                    Callback = function() 
-                        setclipboard("https://discord.gg/"..link)
-                        Library:Notify({
-                            Title = "Discord",
-                            Description = "Link copiado para a área de transferência!",
-                            Duration = 3
-                        })
-                    end
-                })
-            end
-
-            function SectionWrapper:Notify(notificationConfig)
-                Library:Notify({
-                    Title = notificationConfig.Title or "Notificação",
-                    Description = notificationConfig.Content or notificationConfig.Description,
-                    Duration = notificationConfig.Duration or 3
-                })
+                return Section:AddLabel(text)
             end
 
             return SectionWrapper
         end
         return TabWrapper
     end
+
+    function WindowWrapper:Notify(notif)
+        Library:Notify({
+            Title = notif.Title or "Aviso",
+            Description = notif.Content or "",
+            Duration = notif.Duration or 3
+        })
+    end
+
     return WindowWrapper
 end
+
+return I
+
 
 
 if World1 then
