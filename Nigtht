@@ -702,9 +702,11 @@ PosMon = nil
 
 _G.BringRange = _G.BringRange or 235
 _G.MaxBringMobs = _G.MaxBringMobs or 3
+_G.MobWalkSpeed = 60 -- Velocidade que o mob vai andar até você (Padrão é 16, 60 é rápido)
 
 local function FarmAtivo()
-    if _G.FarmPriorityElf or _G.FarmElfLevelCustom or _G.FarmMastery_S or _G.FarmMastery_G or _G.FarmMastery_Dev then
+    -- Removidos: FarmPriorityElf, FarmElfLevelCustom
+    if _G.FarmMastery_S or _G.FarmMastery_G or _G.FarmMastery_Dev then
         return true
     end
 
@@ -714,8 +716,9 @@ local function FarmAtivo()
         end
     end
 
+    -- Removidos: SailBoat_Hydra, DarkBladev3, SailBoats
     if _G.AutoFarm_Cake or 
-       (getgenv()).AutoMaterial or _G.SailBoat_Hydra or _G.WardenBoss or _G.AutoFactory or 
+       (getgenv()).AutoMaterial or _G.WardenBoss or _G.AutoFactory or 
        _G.HighestMirage or _G.HCM or _G.PGB or _G.UPGDrago or 
        _G.Complete_Trials or _G.TpDrago_Prehis or _G.BuyDrago or _G.AutoFireFlowers or 
        _G.DT_Uzoth or _G.AutoBerry or _G.Prehis_Find or _G.Prehis_Skills or 
@@ -727,7 +730,7 @@ local function FarmAtivo()
        _G.Doughv2 or _G.AuraBoss or _G.Raiding or _G.Auto_Cavender or _G.TpPly or 
        _G.Bartilo_Quest or _G.FarmEliteHunt or _G.AutoZou or _G.CraftVM or 
        _G.FrozenTP or _G.TPDoor or _G.AcientOne or _G.AutoFarmNear or 
-       _G.AutoRaidCastle or _G.DarkBladev3 or _G.AutoFarmRaid or _G.Addealer or 
+       _G.AutoRaidCastle or _G.AutoFarmRaid or _G.Addealer or 
        _G.TPNpc or _G.TwinHook or _G.FindMirage or _G.FarmChestM or _G.Auto or _G.AutoPoleV2 or _G.Auto_Def_DarkCoat or _G.Auto_Tushita or _G.AutoMatSoul or 
        _G.AutoKenVTWO or _G.AutoSerpentBow or _G.AutoFMon or _G.Auto_Soul_Guitar or 
        _G.TPGEAR or _G.AutoSaw or _G.AutoTridentW2 or _G.Auto_StartRaid or 
@@ -738,7 +741,7 @@ local function FarmAtivo()
        _G.AutoFistDarkness or _G.AutoMiror or _G.Teleport or _G.AutoKilo or 
        _G.AutoGetUsoap or _G.Praying or _G.TryLucky or _G.AutoColShad or 
        _G.AutoUnHaki or _G.Auto_DonAcces or _G.AutoRipIngay or _G.DragoV3 or 
-       _G.DragoV1 or _G.SailBoats or NextIs or _G.FarmGodChalice or _G.IceBossRen or 
+       _G.DragoV1 or NextIs or _G.FarmGodChalice or _G.IceBossRen or 
        senth or senth2 or _G.Relic123 or _G.TwFruits or _G.Tp_LgS or 
        _G.Tp_MasterA then
         return true
@@ -764,6 +767,7 @@ BringEnemy = function()
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
+    -- Tenta garantir a Network Ownership para comandar o mob
     pcall(function()
         sethiddenproperty(plr, "SimulationRadius", math.huge)
     end)
@@ -783,7 +787,20 @@ BringEnemy = function()
 
             if dist <= _G.BringRange then
                 count = count + 1
-                root.CFrame = CFrame.new(targetPos)
+                
+                -- ALTERAÇÃO AQUI:
+                -- Em vez de TP instantâneo (root.CFrame), fazemos ele andar.
+                -- Definimos a velocidade para ser mais rápido (60) e mandamos ele ir até o ponto.
+                
+                if hum.WalkSpeed ~= _G.MobWalkSpeed then
+                    hum.WalkSpeed = _G.MobWalkSpeed
+                end
+                
+                hum:MoveTo(targetPos)
+                
+                -- Opcional: Se o mob travar muito longe ou bugar, 
+                -- descomente a linha abaixo para dar um leve "empurrão" se ele não se mexer:
+                -- if dist > 150 then root.CFrame = root.CFrame:Lerp(CFrame.new(targetPos), 0.1) end
             end
         end
     end
@@ -794,13 +811,14 @@ task.spawn(function()
         if FarmAtivo() and _G.BringMobsUser and PosMon then
             _B = true
             BringEnemy()
-            task.wait(0.1)
+            task.wait(0.1) -- Loop rápido para manter o MoveTo atualizado
         else
             _B = false
             task.wait(0.5)
         end
     end
 end)
+
 
 
 
