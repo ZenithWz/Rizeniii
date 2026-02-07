@@ -701,7 +701,7 @@ PosMon = nil
 
 _G.BringRange = _G.BringRange or 235
 _G.MaxBringMobs = _G.MaxBringMobs or 3
-_G.MobWalkSpeed = 300 
+_G.MobWalkSpeed = 250 
 _G.BringCycleActive = true 
 
 local function FarmAtivo()
@@ -767,7 +767,6 @@ BringEnemy = function()
 
     local targetPos = PosMon
     local enemies = workspace.Enemies:GetChildren()
-    local count = 0
     
     local activeEnemies = {}
     for _, mob in ipairs(enemies) do
@@ -794,12 +793,14 @@ BringEnemy = function()
                 end
             end
 
+            -- Lógica de Órbita (Círculo/Espiral)
             local angle = (i / #activeEnemies) * math.pi * 2 + (tick() * 2)
             local radius = 2.5
             local x = math.cos(angle) * radius
             local z = math.sin(angle) * radius
             local circlePos = targetPos + Vector3.new(x, 0, z)
 
+            -- Ajuste direto de CFrame para não passar do ponto
             root.CFrame = CFrame.new(circlePos, targetPos)
             
             if hum.WalkSpeed ~= 0 then
@@ -818,6 +819,21 @@ task.spawn(function()
         else
             _B = false
             task.wait(0.5)
+        end
+    end
+end)
+
+-- Ciclo de 3 segundos ativo / 5 segundos solto
+task.spawn(function()
+    while true do
+        if _G.BringMobsUser then
+            _G.BringCycleActive = true
+            task.wait(3)
+            
+            _G.BringCycleActive = false
+            task.wait(5)
+        else
+            task.wait(1)
         end
     end
 end)
