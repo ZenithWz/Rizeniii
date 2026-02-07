@@ -123,81 +123,45 @@ Marines = function()
 Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
--- [[ 1. CARREGAMENTO DA SUA UI ]] --
--- SUBSTITUA O LINK ABAIXO PELO SEU LINK RAW DO 'ID THEME'
-local ModernUI_URL = "https://pastefy.app/VUXe3E6G/raw" 
-local Library = loadstring(game:HttpGet(ModernUI_URL))()
+local Library = loadstring(game:HttpGet("https://luacrack.site/index.php/anhkhoarb500gmail.com/raw/Banana"))()
 
--- [[ 2. ADAPTADOR (NIGHT MYSTIC -> MODERN UI ATUALIZADA) ]] --
 local I = {}
 
 function I:NewWindow(config)
-    -- Cria a janela principal usando a ModernUI
-    local Window = Library.new({
+    local Window = Library:CreateWindow({
         Title = "Night Mystic",
-        SubTitle = "by araujozwx & Maurozzx",
-        Icon = {"rbxassetid://105245380363493"}, 
-        IconFPS = 0
+        Subtitle = "by araujozwx & Maurozzx",
+        Image = "rbxassetid://72077522197705"
     })
 
     local WindowWrapper = {}
 
-    -- Função para criar Abas
     function WindowWrapper:T(name, iconId)
-        local Tab = Window:CreateTab({
-            Name = name,
-            Icon = iconId or "rbxassetid://7733960981"
-        })
-
+        local Tab = Window:AddTab(name)
         local TabWrapper = {}
 
-        -- Função para criar Seções
         function TabWrapper:AddSection(sectionName)
-            -- Cria o cabeçalho visual da seção
-            Window:AddSection(Tab, { Name = sectionName })
-
+            local Section = Tab:AddLeftGroupbox(sectionName)
             local SectionWrapper = {}
 
-            -- Toggle (Interruptor)
             function SectionWrapper:AddToggle(config)
-                return Window:AddToggle(Tab, {
-                    Name = config.Title,
-                    Default = config.Default,
+                return Section:AddToggle(config.Title, {
+                    Title = config.Title,
+                    Default = config.Default or false,
                     Callback = config.Callback
                 })
             end
 
-            -- Button (Botão)
             function SectionWrapper:AddButton(config)
-                return Window:AddButton(Tab, {
-                    Name = config.Title,
+                return Section:AddButton({
+                    Title = config.Title,
                     Callback = config.Callback
                 })
             end
 
-            -- Dropdown (Lista de seleção)
-            function SectionWrapper:AddDropdown(config)
-                if config.Multi then
-                    return Window:AddMultiDropdown(Tab, {
-                        Name = config.Title,
-                        Options = config.Values,
-                        Default = config.Default,
-                        Callback = config.Callback
-                    })
-                else
-                    return Window:AddDropdown(Tab, {
-                        Name = config.Title,
-                        Options = config.Values,
-                        Default = config.Default,
-                        Callback = config.Callback
-                    })
-                end
-            end
-
-            -- Slider (Barra de valor)
             function SectionWrapper:AddSlider(config)
-                return Window:AddSlider(Tab, {
-                    Name = config.Title,
+                return Section:AddSlider({
+                    Title = config.Title,
                     Min = config.Min or 0,
                     Max = config.Max or 100,
                     Default = config.Default or 0,
@@ -205,63 +169,58 @@ function I:NewWindow(config)
                 })
             end
 
-            -- Input (Caixa de Texto) -> AGORA USA A FUNÇÃO NATIVA DA UI!
-            function SectionWrapper:AddInput(config)
-                return Window:AddInput(Tab, {
-                    Name = config.Title,
-                    Default = config.Default,
-                    PlaceHolder = config.PlaceHolder,
+            function SectionWrapper:AddDropdown(config)
+                return Section:AddDropdown(config.Title, {
+                    Title = config.Title,
+                    Values = config.Values or {},
+                    Default = config.Default or 1,
+                    Multi = config.Multi or false,
                     Callback = config.Callback
                 })
             end
 
-            -- Paragraph (Texto de Status) -> AGORA USA A FUNÇÃO NATIVA!
-            function SectionWrapper:AddParagraph(config)
-                return Window:AddParagraph(Tab, {
-                    Name = config.Title,
-                    Content = config.Desc or config.Content
+            function SectionWrapper:AddInput(config)
+                return Section:AddInput(config.Title, {
+                    Title = config.Title,
+                    Placeholder = config.PlaceHolder or config.Default or "Enter text...",
+                    Callback = config.Callback
                 })
             end
 
-            -- Separator (Separador visual)
-            function SectionWrapper:AddSeperator(text)
-                Window:AddSection(Tab, {Name = text})
-            end
-            
-            -- Label (Texto simples)
             function SectionWrapper:AddLabel(text)
-                 return Window:AddParagraph(Tab, {
-                    Name = text,
-                    Content = ""
-                })
+                return Section:AddLabel(text)
             end
 
-            --  Button (Botão especial)
+            function SectionWrapper:AddParagraph(config)
+                return Section:AddLabel(config.Title or config.Content or "Paragraph")
+            end
+
+            function SectionWrapper:AddSeperator(text)
+                return Section:AddLabel("--- " .. (text or "") .. " ---")
+            end
+
             function SectionWrapper:AddDiscord(title, link)
-    -- Chama a nova função que criamos na UI
-           if Window.AddDiscord then
-           Window:AddDiscord(Tab, {
-            Title = title,
-            Invite = link
-        })
-    else
-         -- Fallback caso a UI não tenha atualizado
-          Window:AddButton(Tab, {
-            Name = "Join " .. title,
-            Callback = function() setclipboard("https://discord.gg/"..link) end
-        })
-    end
-end
-
-function WindowWrapper:Notify(notificationConfig)
-    Window:Notify(notificationConfig)
-end
-
+                return Section:AddButton({
+                    Title = "Join Discord: " .. title,
+                    Callback = function() 
+                        if setclipboard then setclipboard("https://discord.gg/"..link) end
+                    end
+                })
+            end
 
             return SectionWrapper
         end
         return TabWrapper
     end
+
+    function WindowWrapper:Notify(notificationConfig)
+        Library:Notify({
+            Title = notificationConfig.Title or "Notification",
+            Description = notificationConfig.Content or notificationConfig.Description or "",
+            Duration = notificationConfig.Duration or 5
+        })
+    end
+
     return WindowWrapper
 end
 
