@@ -316,7 +316,7 @@ G.DistH = function(I, e)
 		return (Root.Position - (I:FindFirstChild("HumanoidRootPart")).Position).Magnitude > e;
 	end;
 -- ALTURA ÚNICA AJUSTÁVEL DO MOB
-_G.MobHeight = _G.MobHeight or 35
+_G.MobHeight = _G.MobHeight or 40
 
 G.Kill = function(I, e)
     if not (I and e) then return end
@@ -1127,7 +1127,7 @@ end);
 -- =======================
 
 -- [[ VARIÁVEIS PARA O SEU INPUT ]] --
-getgenv().TweenSpeedFar = 300   -- Velocidade Padrão (Longe)
+getgenv().TweenSpeedFar = 365   -- Velocidade Padrão (Longe)
 getgenv().TweenSpeedNear = 600  -- Velocidade Boost (Perto <= 15 studs)
 
 _tp = function(I)
@@ -6008,8 +6008,8 @@ T:AddInput({
 T:AddInput({
     Title = "Tween Speed",
     Description = "",
-    PlaceHolder = "370",
-    Default = "370",
+    PlaceHolder = "365",
+    Default = "365",
     Callback = function(I)
         if tonumber(I) then
             getgenv().TweenSpeedFar = tonumber(I)
@@ -10081,9 +10081,9 @@ end
 
 -- [[ INTERFACE DE SKILLS ]]
 if World2 or World3 then
-    o:AddSeperator("Configure Skills for Sea Events")
 
-    o:AddDropdown({
+
+    A:AddDropdown({
         Title = "Melee Skills",
         Multi = true,
         Values = {"Z", "X", "C"},
@@ -10095,7 +10095,7 @@ if World2 or World3 then
         end
     })
 
-    o:AddDropdown({
+   A:AddDropdown({
         Title = "Sword Skills",
         Multi = true,
         Values = {"Z", "X"},
@@ -10107,7 +10107,7 @@ if World2 or World3 then
         end
     })
 
-    o:AddDropdown({
+    A:AddDropdown({
         Title = "Gun Skills",
         Multi = true,
         Values = {"Z", "X"},
@@ -10119,7 +10119,7 @@ if World2 or World3 then
         end
     })
 
-    o:AddDropdown({
+    A:AddDropdown({
         Title = "Blox Fruit Skills",
         Multi = true,
         Values = {"Z", "X", "C", "V", "F"},
@@ -10311,15 +10311,8 @@ spawn(function()
 		end;
 	end;
 end); 
-zu:AddToggle({
-	Title = "Auto Attack Leviathan",
-	Description = "",
-	Default = false,
-	Callback = function(I)
-		_G.Leviathan1 = I;
-	end,
-});
-zu:AddSeperator("Kitsune Island / Event");
+
+zu:AddSeperator("Kitsune Island");
 zu:AddToggle({
     Title = "Auto Find Kitsune Island",
     Description = "turn on for finding & tween kitsune island",
@@ -11104,7 +11097,7 @@ E:AddToggle({
 -- Input para definir valor da WalkSpeed 
 E:AddInput({
     Title = "WalkSpeed Value",
-    Description = "Digite a velocidade desejada",
+    Description = "",
     PlaceHolder = "16",
     Default = tostring(desiredSpeed),
     Callback = function(Value)
@@ -11127,7 +11120,7 @@ E:AddToggle({
 })
 E:AddInput({
     Title = "JumpPower Value",
-    Description = "Digite o JumpPower desejado",
+    Description = "",
     PlaceHolder = "50",
     Default = tostring(desiredJump),
     Callback = function(Value)
