@@ -97,7 +97,7 @@ Marines = function()
 Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
-local I = (loadstring(game:HttpGet("https://pastefy.app/IMguyGTs/raw")))();
+local I = (loadstring(game:HttpGet("https://pastefy.app/ptc3FHT5/raw")))();
 
 if World1 then
 	Boss = {
@@ -2316,21 +2316,20 @@ local V=I:NewWindow();
 
 
 -- TABS (somente nomes alterados)
-local i        = V:T("info / Discord")
-local server   = V:T("Status And Server")
-local g        = V:T("Shop")
-local y        = V:T("Main Farm")
-local CS_Tab   = V:T("Farm Mastery")
-local x        = V:T("Farm Others")
-local t        = V:T("Sea Events")
-local m        = V:T("Race Upgrade")
-local v        = V:T("Dojo Quest & Drago Race")
-local VI       = V:T("Visuals & ESP")
+local y        = V:T("Tab Main")
+local c        = V:T("Tab Settings")
+local CS_Tab   = V:T("Tab Farm Mastery")
+local x        = V:T("Tab Quests/Items")
+local t        = V:T("Tab Sea Events")
+local m        = V:T("Tab Race Upgrade")
+local v        = V:T("Tab Dojo Quests")
+local VI       = V:T("Tab Esp")
 local q        = V:T("Local Player")
-local l        = V:T("Teleport")
-local R        = V:T("Get Items & Upgrade")
-local B        = V:T("Raid & Fruit")
-local c        = V:T("Settings & Misc")
+local l        = V:T("Tab Travel")
+local R        = V:T("Tab Get Items And Upgrade")
+local B        = V:T("Tab Raid And Fruit")
+local server   = V:T("Tab Server")
+local g        = V:T("Tab Shop")
 
 -- SECTIONS (somente nomes alterados)
 local b    = y:AddSection("Auto Farm main");
@@ -2365,7 +2364,6 @@ local kk    = c:AddSection("Misc & Codes");
 
 local p    = B:AddSection("Raid & Fruits");
 
-local Discord_Info = i:AddSection("discord server And information");
 
 -- Secção de Configurações manuais
 local ConfigSection = c:AddSection("Manual Save")
@@ -4348,20 +4346,6 @@ task.spawn(function()
     end
 end)
 
-
-Discord_Info:AddSeperator("information")
-
-Discord_Info:AddParagraph({
-    Title = "Script Information",
-    Content = [[Credits to Astral Hub for the reference to 
-the base structure, used with the developer's permission.
-The project has been extensively modified, reworked, and expanded with new systems.]]
-})
-
-Discord_Info:AddParagraph({
-    Title = "Thank you X2Velaric and x2Moodz", 
-    Content = "ﾠ" -- Adicionei um espaço só por segurança, mas vazio deve funcionar
-})
 
 b:AddSeperator("Farming")
 b:AddDropdown({
