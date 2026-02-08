@@ -97,7 +97,7 @@ Marines = function()
 Pirates = function()
 		replicated.Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
 	end;
-local I = (loadstring(game:HttpGet("https://pastefy.app/M37Xnp1T/raw")))();
+local I = (loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithWz/Rizeniii/refs/heads/main/Library2")))();
 
 if World1 then
 	Boss = {
