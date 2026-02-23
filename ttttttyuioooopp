@@ -10699,14 +10699,14 @@ A:AddToggle({
         end,
     });
 
-    local Waypoints = {
-        CFrame.new(706.584045, -0.241494, 3602.067383),
-        CFrame.new(547.449219, -0.241506, 4199.347656),
-        CFrame.new(-507.628632, -0.241501, 4138.640137)
-    }
-    local CurrentWaypointIndex = 1
-
     spawn(function()
+    local CurrentWaypointIndex = 1
+    local Sea2Waypoints = {
+        CFrame.new(706.584, -0.241, 3602.067),
+        CFrame.new(547.449, -0.241, 4199.347),
+        CFrame.new(-507.628, -0.241, 4138.640)
+    }
+
     while wait() do
         if _G.SailBoats then
             pcall(function()
@@ -10715,6 +10715,7 @@ A:AddToggle({
                 end
 
                 local Root = plr.Character.HumanoidRootPart
+                local hum = plr.Character.Humanoid
                 local I = CheckBoat()
 
                 if I and I:FindFirstChild("VehicleSeat") then
@@ -10727,70 +10728,60 @@ A:AddToggle({
                 end
 
                 if not I then
-                    local BoatDealerPos
-                    if World3 then
-                        BoatDealerPos = CFrame.new(-16927.451, 9.086, 433.864)
-                        TeleportToTarget(BoatDealerPos)
-                        if (BoatDealerPos.Position - Root.Position).Magnitude <= 15 then
-                            replicated.Remotes.CommF_:InvokeServer("BuyBoat", _G.SelectedBoat)
-                            task.wait(1) 
-                        end
-                    else
-                        BoatDealerPos = CFrame.new(-11.558, 10.258, 2957.538)
-                        if (Root.Position - BoatDealerPos.Position).Magnitude > 20 then
-                            _tp(BoatDealerPos)
-                        else
-                            replicated.Remotes.CommF_:InvokeServer("BuyBoat", _G.SelectedBoat)
-                            task.wait(2)
-                        end
+                    local BoatDealerPos = World3 and CFrame.new(-16927.451, 9.086, 433.864) or CFrame.new(-11.558, 10.258, 2957.538)
+                    _tp(BoatDealerPos)
+                    
+                    if (BoatDealerPos.Position - Root.Position).Magnitude <= 15 then
+                        replicated.Remotes.CommF_:InvokeServer("BuyBoat", _G.SelectedBoat)
+                        task.wait(1) 
                     end
 
-                elseif I and (not (CheckShark() and _G.Shark or CheckTerrorShark() and _G.TerrorShark or CheckFishCrew() and _G.MobCrew or CheckPiranha() and _G.Piranha) and (not (CheckEnemiesBoat() and _G.FishBoat) and (not (CheckSeaBeast() and _G.SeaBeast1) and (not (_G.PGB and CheckPirateGrandBrigade()) and (not (_G.HCM and CheckHauntedCrew()) and not (_G.Leviathan1 and CheckLeviathan())))))) then
-                    
-                    if plr.Character.Humanoid.Sit == false then
-                        local e = I.VehicleSeat.CFrame * CFrame.new(0, 1, 0)
-                        _tp(e)
-                    else
-                        if World3 then
-                            if _G.DangerSc == "Lv 1" then
-                                CFrameSelectedZone = CFrame.new(-21998.375, 30.0006084, -682.309143)
-                            elseif _G.DangerSc == "Lv 2" then
-                                CFrameSelectedZone = CFrame.new(-26779.5215, 30.0005474, -822.858032)
-                            elseif _G.DangerSc == "Lv 3" then
-                                CFrameSelectedZone = CFrame.new(-31171.957, 30.0001011, -2256.93774)
-                            elseif _G.DangerSc == "Lv 4" then
-                                CFrameSelectedZone = CFrame.new(-34054.6875, 30.2187767, -2560.12012)
-                            elseif _G.DangerSc == "Lv 5" then
-                                CFrameSelectedZone = CFrame.new(-38887.5547, 30.0004578, -2162.99023)
-                            elseif _G.DangerSc == "Lv 6" then
-                                CFrameSelectedZone = CFrame.new(-44541.7617, 30.0003204, -1244.8584)
-                            elseif _G.DangerSc == "Lv Infinite" then
-                                CFrameSelectedZone = CFrame.new(-10000000, 31, 37016.25)
-                            end
-                        end
+                elseif I then
+                    local EnemyDetected = (CheckShark() and _G.Shark) or (CheckTerrorShark() and _G.TerrorShark) or (CheckFishCrew() and _G.MobCrew) or (CheckPiranha() and _G.Piranha) or (CheckEnemiesBoat() and _G.FishBoat) or (CheckSeaBeast() and _G.SeaBeast1) or (_G.PGB and CheckPirateGrandBrigade()) or (_G.HCM and CheckHauntedCrew()) or (_G.Leviathan1 and CheckLeviathan())
 
-                        repeat
-                            wait()
+                    if EnemyDetected then
+                        if hum.Sit then
+                            hum.Sit = false
+                            task.wait(0.2)
+                        end
+                    else
+                        if hum.Sit == false then
+                            local e = I.VehicleSeat.CFrame * CFrame.new(0, 1, 0)
+                            _tp(e)
+                        else
+                            local CFrameSelectedZone
                             if World3 then
+                                if _G.DangerSc == "Lv 1" then
+                                    CFrameSelectedZone = CFrame.new(-21998.375, 30, -682.309)
+                                elseif _G.DangerSc == "Lv 2" then
+                                    CFrameSelectedZone = CFrame.new(-26779.521, 30, -822.858)
+                                elseif _G.DangerSc == "Lv 3" then
+                                    CFrameSelectedZone = CFrame.new(-31171.957, 30, -2256.937)
+                                elseif _G.DangerSc == "Lv 4" then
+                                    CFrameSelectedZone = CFrame.new(-34054.687, 30.218, -2560.120)
+                                elseif _G.DangerSc == "Lv 5" then
+                                    CFrameSelectedZone = CFrame.new(-38887.554, 30, -2162.990)
+                                elseif _G.DangerSc == "Lv 6" then
+                                    CFrameSelectedZone = CFrame.new(-44541.761, 30, -1244.858)
+                                elseif _G.DangerSc == "Lv Infinite" then
+                                    CFrameSelectedZone = CFrame.new(-10000000, 31, 37016.25)
+                                end
+                            else
+                                CFrameSelectedZone = Sea2Waypoints[CurrentWaypointIndex]
+                                if (Root.Position - CFrameSelectedZone.Position).Magnitude < 150 then
+                                    CurrentWaypointIndex = CurrentWaypointIndex + 1
+                                    if CurrentWaypointIndex > #Sea2Waypoints then CurrentWaypointIndex = 1 end
+                                end
+                            end
+
+                            if CFrameSelectedZone then
                                 if not _G.FishBoat and CheckEnemiesBoat() or not _G.PGB and CheckPirateGrandBrigade() or not _G.TerrorShark and CheckTerrorShark() then
                                     _tp(CFrameSelectedZone * CFrame.new(0, 150, 0))
                                 else
                                     _tp(CFrameSelectedZone)
                                 end
-                            else
-                                local driveTarget = I.PrimaryPart or I:FindFirstChild("VehicleSeat") or Root
-                                local targetCF = Waypoints[CurrentWaypointIndex]
-                                if (driveTarget.Position - targetCF.Position).Magnitude < 100 then
-                                    CurrentWaypointIndex = CurrentWaypointIndex + 1
-                                    if CurrentWaypointIndex > #Waypoints then
-                                        CurrentWaypointIndex = 1
-                                    end
-                                end
-                                _tp(Waypoints[CurrentWaypointIndex])
                             end
-                        until _G.SailBoats == false or CheckShark() and _G.Shark or CheckTerrorShark() and _G.TerrorShark or CheckFishCrew() and _G.MobCrew or CheckPiranha() and _G.Piranha or CheckSeaBeast() and _G.SeaBeast1 or CheckEnemiesBoat() and _G.FishBoat or _G.Leviathan1 and CheckLeviathan() or _G.HCM and CheckHauntedCrew() or _G.PGB and CheckPirateGrandBrigade() or (plr.Character:WaitForChild("Humanoid")).Sit == false
-                        
-                        plr.Character.Humanoid.Sit = false
+                        end
                     end
                 end
             end)
@@ -10874,16 +10865,13 @@ A:AddToggle({
 
         if v then
             _G.LastChooseWP = _G.ChooseWP
-
             _G.ChooseWP = "Blox Fruit"
-
             if SelectWeapon then
                 SelectWeapon:Set("Blox Fruit")
             end
         else
             if _G.LastChooseWP then
                 _G.ChooseWP = _G.LastChooseWP
-
                 if SelectWeapon then
                     SelectWeapon:Set(_G.LastChooseWP)
                 end
@@ -10891,7 +10879,6 @@ A:AddToggle({
         end
     end
 })
-
 
     A:AddSeperator("Sea Events Selection")
 
@@ -10950,6 +10937,7 @@ A:AddToggle({
         end
     end)
 end
+
 _G.SelectedSkills = _G.SelectedSkills or {
     ["Melee"] = {},
     ["Sword"] = {},
@@ -10960,7 +10948,6 @@ _G.SelectedSkills = _G.SelectedSkills or {
 local function GetActiveSkillsList(category, defaultActiveSkills, saveKey)
     local savedData = GetSetting(saveKey, nil)
     local formattedDict = {}
-
     if savedData and type(savedData) == "table" then
         for key, val in pairs(savedData) do
             if type(key) == "number" and type(val) == "string" then
@@ -10974,15 +10961,12 @@ local function GetActiveSkillsList(category, defaultActiveSkills, saveKey)
             formattedDict[skill] = true 
         end
     end
-    
     _G.SelectedSkills[category] = formattedDict
-    
     return formattedDict
 end
 
 if World2 or World3 then
     o:AddSeperator("Configure Skills for Sea Events")
-
     o:AddDropdown({
         Title = "Melee Skills",
         Multi = true,
@@ -10994,7 +10978,6 @@ if World2 or World3 then
             SaveSettings()
         end
     })
-
     o:AddDropdown({
         Title = "Sword Skills",
         Multi = true,
@@ -11006,7 +10989,6 @@ if World2 or World3 then
             SaveSettings()
         end
     })
-
     o:AddDropdown({
         Title = "Gun Skills",
         Multi = true,
@@ -11018,7 +11000,6 @@ if World2 or World3 then
             SaveSettings()
         end
     })
-
     o:AddDropdown({
         Title = "Blox Fruit Skills",
         Multi = true,
@@ -11037,11 +11018,9 @@ local function ExecuteSkills(category)
         weaponSc(category)
         return 
     end
-
     if _G.SelectedSkills[category] then
         weaponSc(category)
         task.wait(0.2)
-        
         local keys = {"Z", "X", "C", "V", "F"}
         for _, skill in ipairs(keys) do
             if _G.SelectedSkills[category][skill] then
@@ -11059,11 +11038,8 @@ task.spawn(function()
             local char = plr.Character
             local hrp = char and char:FindFirstChild("HumanoidRootPart")
             local hum = char and char:FindFirstChild("Humanoid")
-            
             if not hrp or not hum then return end
-            
             local maxEventDistance = 4500
-
             local seaEnemies = {
                 {Flag = _G.Shark, Name = "Shark", Check = CheckShark, KillType = "Normal"},
                 {Flag = _G.TerrorShark, Name = "Terrorshark", Check = CheckTerrorShark, KillType = "Sea"},
@@ -11071,16 +11047,11 @@ task.spawn(function()
                 {Flag = _G.MobCrew, Name = "Fish Crew Member", Check = CheckFishCrew, KillType = "Normal"},
                 {Flag = _G.HCM, Name = "Haunted Crew Member", Check = CheckHauntedCrew, KillType = "Normal"}
             }
-
             for _, enemyData in ipairs(seaEnemies) do
                 if enemyData.Flag and enemyData.Check() then
                     for _, K in pairs(workspace.Enemies:GetChildren()) do
                         if K.Name == enemyData.Name and G.Alive(K) and K:FindFirstChild("HumanoidRootPart") then
                             if (K.HumanoidRootPart.Position - hrp.Position).Magnitude <= maxEventDistance then
-                                if hum.Sit then
-                                    hum.Sit = false
-                                    task.wait(0.2)
-                                end
                                 repeat
                                     task.wait()
                                     if enemyData.KillType == "Sea" then
@@ -11094,103 +11065,43 @@ task.spawn(function()
                     end
                 end
             end
-
-            if _G.SeaBeast1 and workspace.SeaBeasts:FindFirstChild("SeaBeast1") then
+            if _G.SeaBeast1 and (workspace.SeaBeasts:FindFirstChild("SeaBeast1") or workspace.SeaBeasts:FindFirstChild("Sea Beast")) then
                 for _, e in pairs(workspace.SeaBeasts:GetChildren()) do
-                    if e:FindFirstChild("HumanoidRootPart") and e:FindFirstChild("Health") and e.Health.Value > 0 then
-                        if (e.HumanoidRootPart.Position - hrp.Position).Magnitude <= maxEventDistance then
-                            if hum.Sit then
-                                hum.Sit = false
-                                task.wait(0.2)
-                            end
+                    if e:FindFirstChild("HumanoidRootPart") and (e:FindFirstChild("Health") or e:FindFirstChild("HealthValue")) then
+                        local health = e:FindFirstChild("Health") or e:FindFirstChild("HealthValue")
+                        if health.Value > 0 and (e.HumanoidRootPart.Position - hrp.Position).Magnitude <= maxEventDistance then
                             repeat
                                 task.wait()
                                 task.spawn(function()
-                                    _tp(CFrame.new(e.HumanoidRootPart.Position.X, workspace.Map["WaterBase-Plane"].Position.Y + 200, e.HumanoidRootPart.Position.Z))
+                                    _tp(CFrame.new(e.HumanoidRootPart.Position.X, 200, e.HumanoidRootPart.Position.Z))
                                 end)
-                                
                                 if plr:DistanceFromCharacter(e.HumanoidRootPart.CFrame.Position) <= 500 then
                                     MousePos = e.HumanoidRootPart.Position
-                                    if CheckF() or _G.UseM1Fruit then
-                                        ExecuteSkills("Blox Fruit")
-                                    else
-                                        ExecuteSkills("Melee")
-                                        ExecuteSkills("Sword")
-                                        ExecuteSkills("Blox Fruit")
-                                        ExecuteSkills("Gun")
-                                    end
+                                    ExecuteSkills(_G.ChooseWP or "Melee")
                                 end
-                            until not _G.SeaBeast1 or not e.Parent or e.Health.Value <= 0
+                            until not _G.SeaBeast1 or not e.Parent or health.Value <= 0
                         end
                     end
                 end
             end
-
-            if _G.Leviathan1 and workspace.SeaBeasts:FindFirstChild("Leviathan") then
-                for _, e in pairs(workspace.SeaBeasts:GetChildren()) do
-                    local segment = e:FindFirstChild("Leviathan Segment")
-                    if e:FindFirstChild("HumanoidRootPart") and segment and e:FindFirstChild("Health") and e.Health.Value > 0 then
-                        if (e.HumanoidRootPart.Position - hrp.Position).Magnitude <= maxEventDistance then
-                            if hum.Sit then
-                                hum.Sit = false
-                                task.wait(0.2)
-                            end
-                            repeat
-                                task.wait()
-                                task.spawn(function()
-                                    _tp(CFrame.new(e.HumanoidRootPart.Position.X, workspace.Map["WaterBase-Plane"].Position.Y + 200, e.HumanoidRootPart.Position.Z))
-                                end)
-                                
-                                if plr:DistanceFromCharacter(e.HumanoidRootPart.CFrame.Position) <= 500 then
-                                    MousePos = segment.Position
-                                    if CheckF() or _G.UseM1Fruit then
-                                        ExecuteSkills("Blox Fruit")
-                                    else
-                                        ExecuteSkills("Melee")
-                                        ExecuteSkills("Sword")
-                                        ExecuteSkills("Blox Fruit")
-                                        ExecuteSkills("Gun")
-                                    end
-                                end
-                            until not _G.Leviathan1 or not e.Parent or e.Health.Value <= 0
-                        end
-                    end
-                end
-            end
-
             local boatConfigs = {
                 {Flag = _G.FishBoat, Check = CheckEnemiesBoat, Name = "FishBoat", Dist = 150, Offset = CFrame.new(0, -50, -25)},
                 {Flag = _G.PGB, Check = CheckPirateGrandBrigade, Name = "PirateBrigade", Dist = 150, Offset = CFrame.new(0, -30, -10)},
                 {Flag = _G.PGB, Check = CheckPirateGrandBrigade, Name = "PirateGrandBrigade", Dist = 150, Offset = CFrame.new(0, -50, -50)}
             }
-
             for _, boat in ipairs(boatConfigs) do
                 if boat.Flag and boat.Check() then
                     for _, e in pairs(workspace.Enemies:GetChildren()) do
-                        if e.Name == boat.Name and e:FindFirstChild("VehicleSeat") and e:FindFirstChild("Engine") and e.Health.Value > 0 then
+                        if e.Name == boat.Name and e:FindFirstChild("Engine") and e.Health.Value > 0 then
                             if (e.Engine.Position - hrp.Position).Magnitude <= maxEventDistance then
-                                if hum.Sit then
-                                    hum.Sit = false
-                                    task.wait(0.2)
-                                end
                                 repeat
                                     task.wait()
-                                    task.spawn(function()
-                                        _tp(e.Engine.CFrame * boat.Offset)
-                                    end)
-                                    
+                                    task.spawn(function() _tp(e.Engine.CFrame * boat.Offset) end)
                                     if plr:DistanceFromCharacter(e.Engine.CFrame.Position) <= boat.Dist then
                                         MousePos = e.Engine.Position
-                                        if CheckF() or _G.UseM1Fruit then
-                                            ExecuteSkills("Blox Fruit")
-                                        else
-                                            ExecuteSkills("Melee")
-                                            ExecuteSkills("Sword")
-                                            ExecuteSkills("Blox Fruit")
-                                            ExecuteSkills("Gun")
-                                        end
+                                        ExecuteSkills(_G.ChooseWP or "Melee")
                                     end
-                                until not boat.Flag or not e:FindFirstChild("VehicleSeat") or e.Health.Value <= 0
+                                until not boat.Flag or not e.Parent or e.Health.Value <= 0
                             end
                         end
                     end
