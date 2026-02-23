@@ -10730,14 +10730,19 @@ A:AddToggle({
                     local BoatDealerPos
                     if World3 then
                         BoatDealerPos = CFrame.new(-16927.451, 9.086, 433.864)
+                        TeleportToTarget(BoatDealerPos)
+                        if (BoatDealerPos.Position - Root.Position).Magnitude <= 15 then
+                            replicated.Remotes.CommF_:InvokeServer("BuyBoat", _G.SelectedBoat)
+                            task.wait(1) 
+                        end
                     else
                         BoatDealerPos = CFrame.new(-11.558, 10.258, 2957.538)
-                    end
-                    TeleportToTarget(BoatDealerPos)
-                    
-                    if (BoatDealerPos.Position - Root.Position).Magnitude <= 15 then
-                        replicated.Remotes.CommF_:InvokeServer("BuyBoat", _G.SelectedBoat)
-                        task.wait(1) 
+                        if (Root.Position - BoatDealerPos.Position).Magnitude > 20 then
+                            _tp(BoatDealerPos)
+                        else
+                            replicated.Remotes.CommF_:InvokeServer("BuyBoat", _G.SelectedBoat)
+                            task.wait(2)
+                        end
                     end
 
                 elseif I and (not (CheckShark() and _G.Shark or CheckTerrorShark() and _G.TerrorShark or CheckFishCrew() and _G.MobCrew or CheckPiranha() and _G.Piranha) and (not (CheckEnemiesBoat() and _G.FishBoat) and (not (CheckSeaBeast() and _G.SeaBeast1) and (not (_G.PGB and CheckPirateGrandBrigade()) and (not (_G.HCM and CheckHauntedCrew()) and not (_G.Leviathan1 and CheckLeviathan())))))) then
@@ -10746,40 +10751,42 @@ A:AddToggle({
                         local e = I.VehicleSeat.CFrame * CFrame.new(0, 1, 0)
                         _tp(e)
                     else
+                        if World3 then
+                            if _G.DangerSc == "Lv 1" then
+                                CFrameSelectedZone = CFrame.new(-21998.375, 30.0006084, -682.309143)
+                            elseif _G.DangerSc == "Lv 2" then
+                                CFrameSelectedZone = CFrame.new(-26779.5215, 30.0005474, -822.858032)
+                            elseif _G.DangerSc == "Lv 3" then
+                                CFrameSelectedZone = CFrame.new(-31171.957, 30.0001011, -2256.93774)
+                            elseif _G.DangerSc == "Lv 4" then
+                                CFrameSelectedZone = CFrame.new(-34054.6875, 30.2187767, -2560.12012)
+                            elseif _G.DangerSc == "Lv 5" then
+                                CFrameSelectedZone = CFrame.new(-38887.5547, 30.0004578, -2162.99023)
+                            elseif _G.DangerSc == "Lv 6" then
+                                CFrameSelectedZone = CFrame.new(-44541.7617, 30.0003204, -1244.8584)
+                            elseif _G.DangerSc == "Lv Infinite" then
+                                CFrameSelectedZone = CFrame.new(-10000000, 31, 37016.25)
+                            end
+                        end
+
                         repeat
                             wait()
                             if World3 then
-                                if _G.DangerSc == "Lv 1" then
-                                    CFrameSelectedZone = CFrame.new(-21998.375, 30.0006084, -682.309143)
-                                elseif _G.DangerSc == "Lv 2" then
-                                    CFrameSelectedZone = CFrame.new(-26779.5215, 30.0005474, -822.858032)
-                                elseif _G.DangerSc == "Lv 3" then
-                                    CFrameSelectedZone = CFrame.new(-31171.957, 30.0001011, -2256.93774)
-                                elseif _G.DangerSc == "Lv 4" then
-                                    CFrameSelectedZone = CFrame.new(-34054.6875, 30.2187767, -2560.12012)
-                                elseif _G.DangerSc == "Lv 5" then
-                                    CFrameSelectedZone = CFrame.new(-38887.5547, 30.0004578, -2162.99023)
-                                elseif _G.DangerSc == "Lv 6" then
-                                    CFrameSelectedZone = CFrame.new(-44541.7617, 30.0003204, -1244.8584)
-                                elseif _G.DangerSc == "Lv Infinite" then
-                                    CFrameSelectedZone = CFrame.new(-10000000, 31, 37016.25)
-                                end
-
                                 if not _G.FishBoat and CheckEnemiesBoat() or not _G.PGB and CheckPirateGrandBrigade() or not _G.TerrorShark and CheckTerrorShark() then
                                     _tp(CFrameSelectedZone * CFrame.new(0, 150, 0))
                                 else
                                     _tp(CFrameSelectedZone)
                                 end
                             else
+                                local driveTarget = I.PrimaryPart or I:FindFirstChild("VehicleSeat") or Root
                                 local targetCF = Waypoints[CurrentWaypointIndex]
-                                if (Root.Position - targetCF.Position).Magnitude < 100 then
+                                if (driveTarget.Position - targetCF.Position).Magnitude < 100 then
                                     CurrentWaypointIndex = CurrentWaypointIndex + 1
                                     if CurrentWaypointIndex > #Waypoints then
                                         CurrentWaypointIndex = 1
                                     end
                                 end
-                                CFrameSelectedZone = Waypoints[CurrentWaypointIndex]
-                                _tp(CFrameSelectedZone)
+                                _tp(Waypoints[CurrentWaypointIndex])
                             end
                         until _G.SailBoats == false or CheckShark() and _G.Shark or CheckTerrorShark() and _G.TerrorShark or CheckFishCrew() and _G.MobCrew or CheckPiranha() and _G.Piranha or CheckSeaBeast() and _G.SeaBeast1 or CheckEnemiesBoat() and _G.FishBoat or _G.Leviathan1 and CheckLeviathan() or _G.HCM and CheckHauntedCrew() or _G.PGB and CheckPirateGrandBrigade() or (plr.Character:WaitForChild("Humanoid")).Sit == false
                         
@@ -11192,6 +11199,7 @@ task.spawn(function()
         end)
     end
 end)
+
 
 if game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
 zu:AddSeperator("Frozen Dimension");
