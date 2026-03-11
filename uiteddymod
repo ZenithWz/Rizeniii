@@ -105,10 +105,6 @@ function Library:NewWindow(ConfigWindow)
 	local UIStroke = Instance.new("UIStroke")
 	local TabFrame = Instance.new("Frame")
 	local Line_2 = Instance.new("Frame")
-	local SearchFrame = Instance.new("Frame")
-	local UICorner_2 = Instance.new("UICorner")
-	local IconSearch = Instance.new("ImageLabel")
-	local SearchBox = Instance.new("TextBox")
 	local ScrollingTab = Instance.new("ScrollingFrame")
 	local UIPadding_2 = Instance.new("UIPadding")
 	local UIListLayout_2 = Instance.new("UIListLayout")
@@ -130,7 +126,7 @@ function Library:NewWindow(ConfigWindow)
 	DropShadowHolder.BackgroundTransparency = 1.000
 	DropShadowHolder.BorderSizePixel = 0
 	DropShadowHolder.Position = UDim2.new(0.5, 0, 0.5, 0)
-	DropShadowHolder.Size = UDim2.new(0, 480, 0, 300)
+	DropShadowHolder.Size = UDim2.new(0, 505, 0, 315)
 	DropShadowHolder.ZIndex = 0
 
 	DropShadow.Name = "DropShadow"
@@ -151,11 +147,11 @@ function Library:NewWindow(ConfigWindow)
 	Main.Parent = DropShadowHolder
 	Main.AnchorPoint = Vector2.new(0.5, 0.5)
 	Main.BackgroundColor3 = Color3.fromRGB(9,9,9)
-	Main.BackgroundTransparency = 0.350
+	Main.BackgroundTransparency = 0.250
 	Main.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	Main.BorderSizePixel = 0
 	Main.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Main.Size = UDim2.new(0, 480, 0, 300)
+	Main.Size = UDim2.new(0, 505, 0, 315)
 
 	UICorner.Parent = Main
 
@@ -407,54 +403,15 @@ function Library:NewWindow(ConfigWindow)
 	Line_2.Position = UDim2.new(1, -1, 0, 0)
 	Line_2.Size = UDim2.new(0, 1, 1, 0)
 
-	SearchFrame.Name = "SearchFrame"
-	SearchFrame.Parent = TabFrame
-	SearchFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	SearchFrame.BackgroundTransparency = 0.950
-	SearchFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-	SearchFrame.BorderSizePixel = 0
-	SearchFrame.Position = UDim2.new(0, 7, 0, 10)
-	SearchFrame.Size = UDim2.new(1, -14, 0, 30)
-
-	UICorner_2.CornerRadius = UDim.new(0, 3)
-	UICorner_2.Parent = SearchFrame
-
-	IconSearch.Name = "IconSearch"
-	IconSearch.Parent = SearchFrame
-	IconSearch.AnchorPoint = Vector2.new(0, 0.5)
-	IconSearch.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	IconSearch.BackgroundTransparency = 1.000
-	IconSearch.BorderColor3 = Color3.fromRGB(0, 0, 0)
-	IconSearch.BorderSizePixel = 0
-	IconSearch.Position = UDim2.new(0, 10, 0.5, 0)
-	IconSearch.Size = UDim2.new(0, 15, 0, 15)
-	IconSearch.Image = "rbxassetid://71309835376233"
-
-	SearchBox.Name = "SearchBox"
-	SearchBox.Parent = SearchFrame
-	SearchBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	SearchBox.BackgroundTransparency = 1.000
-	SearchBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
-	SearchBox.BorderSizePixel = 0
-	SearchBox.ClipsDescendants = true
-	SearchBox.Position = UDim2.new(0, 35, 0, 0)
-	SearchBox.Size = UDim2.new(1, -35, 1, 0)
-	SearchBox.Font = Enum.Font.GothamBold
-	SearchBox.PlaceholderText = "Search section or function"
-	SearchBox.Text = ""
-	SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-	SearchBox.TextSize = 13.000
-	SearchBox.TextXAlignment = Enum.TextXAlignment.Left
-
 	ScrollingTab.Name = "ScrollingTab"
 	ScrollingTab.Parent = TabFrame
 	ScrollingTab.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	ScrollingTab.BackgroundTransparency = 1.000
 	ScrollingTab.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	ScrollingTab.BorderSizePixel = 0
-	ScrollingTab.Position = UDim2.new(0, 0, 0, 50)
+	ScrollingTab.Position = UDim2.new(0, 0, 0, 5)
 	ScrollingTab.Selectable = false
-	ScrollingTab.Size = UDim2.new(1, 0, 1, -50)
+	ScrollingTab.Size = UDim2.new(1, 0, 1, -10)
 	ScrollingTab.ScrollBarThickness = 0
 	self:UpdateScrolling(ScrollingTab, UIListLayout_2)
 	UIPadding_2.Parent = ScrollingTab
@@ -518,6 +475,7 @@ function Library:NewWindow(ConfigWindow)
 	DropdownZone.Parent = Main
 	DropdownZone.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	DropdownZone.BackgroundTransparency = 1
+
 	DropdownZone.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	DropdownZone.BorderSizePixel = 0
 	DropdownZone.Size = UDim2.new(1, 0, 1, 0)
@@ -797,7 +755,7 @@ function Library:NewWindow(ConfigWindow)
 				Content.Parent = Toggle
 				Content.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				Content.BackgroundTransparency = 1.000
-				Content.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ content.BorderColor3 = Color3.fromRGB(0, 0, 0)
 				Content.BorderSizePixel = 0
 				Content.Position = UDim2.new(0, 10, 0, 22)
 				Content.Size = UDim2.new(1, -60, 1, 0)
