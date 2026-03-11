@@ -1,5 +1,4 @@
 local Library = {}
-
 function Library:TweenInstance(Instance, Time, OldValue, NewValue)
 	local rz_Tween = game:GetService("TweenService"):Create(Instance, TweenInfo.new(Time, Enum.EasingStyle.Quad),
 		{ [OldValue] = NewValue })
@@ -115,7 +114,6 @@ function Library:NewWindow(ConfigWindow)
 	local LayoutName = Instance.new("Frame")
 	local TextLabel = Instance.new("TextLabel")
 	local DropdownZone = Instance.new("Frame")
-	
 	TeddyUI_Premium.Name = "TeddyUI_Premium"
 	TeddyUI_Premium.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 	TeddyUI_Premium.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -126,7 +124,7 @@ function Library:NewWindow(ConfigWindow)
 	DropShadowHolder.BackgroundTransparency = 1.000
 	DropShadowHolder.BorderSizePixel = 0
 	DropShadowHolder.Position = UDim2.new(0.5, 0, 0.5, 0)
-	DropShadowHolder.Size = UDim2.new(0, 505, 0, 315)
+	DropShadowHolder.Size = UDim2.new(0, 520, 0, 320)
 	DropShadowHolder.ZIndex = 0
 
 	DropShadow.Name = "DropShadow"
@@ -146,12 +144,12 @@ function Library:NewWindow(ConfigWindow)
 	Main.Name = "Main"
 	Main.Parent = DropShadowHolder
 	Main.AnchorPoint = Vector2.new(0.5, 0.5)
-	Main.BackgroundColor3 = Color3.fromRGB(9,9,9)
-	Main.BackgroundTransparency = 0.250
+	Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	Main.BackgroundTransparency = 0
 	Main.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	Main.BorderSizePixel = 0
 	Main.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Main.Size = UDim2.new(0, 505, 0, 315)
+	Main.Size = UDim2.new(0, 520, 0, 320)
 
 	UICorner.Parent = Main
 
@@ -161,7 +159,7 @@ function Library:NewWindow(ConfigWindow)
 	Top.BackgroundTransparency = 1.000
 	Top.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	Top.BorderSizePixel = 0
-	Top.Size = UDim2.new(1, 0, 0, 40)
+	Top.Size = UDim2.new(1, 0, 0, 50)
 
 	Line.Name = "Line"
 	Line.Parent = Top
@@ -181,7 +179,7 @@ function Library:NewWindow(ConfigWindow)
 	NameHub.BackgroundTransparency = 1.000
 	NameHub.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	NameHub.BorderSizePixel = 0
-	NameHub.Position = UDim2.new(0, 50, 0, 5)
+	NameHub.Position = UDim2.new(0, 60, 0, 10)
 	NameHub.Size = UDim2.new(0, 470, 0, 20)
 	NameHub.Font = Enum.Font.GothamBold
 	NameHub.Text = ConfigWindow.Title
@@ -196,7 +194,7 @@ function Library:NewWindow(ConfigWindow)
 	LogoHub.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	LogoHub.BorderSizePixel = 0
 	LogoHub.Position = UDim2.new(0, 10, 0, 5)
-	LogoHub.Size = UDim2.new(0, 30, 0, 30)
+	LogoHub.Size = UDim2.new(0, 40, 0, 35)
 	LogoHub.Image = "rbxassetid://89646749075297"
 
 	Desc.Name = "Desc"
@@ -205,7 +203,7 @@ function Library:NewWindow(ConfigWindow)
 	Desc.BackgroundTransparency = 1.000
 	Desc.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	Desc.BorderSizePixel = 0
-	Desc.Position = UDim2.new(0, 50, 0, 20)
+	Desc.Position = UDim2.new(0, 60, 0, 27)
 	Desc.Size = UDim2.new(0, 470, 1, -30)
 	Desc.Font = Enum.Font.GothamBold
 	Desc.Text = ConfigWindow.Description
@@ -231,7 +229,7 @@ function Library:NewWindow(ConfigWindow)
 	UIListLayout.Padding = UDim.new(0, 6)
 
 	UIPadding.Parent = Frame
-	UIPadding.PaddingTop = UDim.new(0, 5)
+	UIPadding.PaddingTop = UDim.new(0, 10)
 
 	Minize.Name = "Minize"
 	Minize.Parent = Frame
@@ -296,78 +294,76 @@ function Library:NewWindow(ConfigWindow)
 	Close.Text = ""
 	Close.MouseButton1Down:Connect(function()
 		DropdownZone.Visible = true
-		local tat_ = Instance.new("Frame", DropdownZone);
-		tat_["BorderSizePixel"] = 0;
-		tat_["BackgroundColor3"] = Color3.fromRGB(19, 19, 19);
-		tat_["AnchorPoint"] = Vector2.new(0.5, 0.5);
-		tat_["Size"] = UDim2.new(0, 400, 0, 150);
-		tat_["Position"] = UDim2.new(0.5, 0, 0.5, 0);
-		tat_["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-		tat_["Name"] = [[Tat]];
+		local tat_ = Instance.new("Frame", DropdownZone)
+		tat_["BorderSizePixel"] = 0
+		tat_["BackgroundColor3"] = Color3.fromRGB(19, 19, 19)
+		tat_["AnchorPoint"] = Vector2.new(0.5, 0.5)
+		tat_["Size"] = UDim2.new(0, 400, 0, 150)
+		tat_["Position"] = UDim2.new(0.5, 0, 0.5, 0)
+		tat_["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+		tat_["Name"] = [[Tat]]
 
-		local suacc = Instance.new("UIStroke", tat_);
-		suacc["Transparency"] = 0.5;
-		suacc["Color"] = Color3.fromRGB(101, 101, 101);
+		local suacc = Instance.new("UIStroke", tat_)
+		suacc["Transparency"] = 0.5
+		suacc["Color"] = Color3.fromRGB(101, 101, 101)
 
-		local suacc = Instance.new("UICorner", tat_);
-		suacc["CornerRadius"] = UDim.new(0, 5);
+		local suacc_corner = Instance.new("UICorner", tat_)
+		suacc_corner["CornerRadius"] = UDim.new(0, 5)
 
-		local suacc2 = Instance.new("TextLabel", tat_);
-		suacc2["BorderSizePixel"] = 0;
-		suacc2["TextSize"] = 20;
-		suacc2["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-		suacc2["FontFace"] = Font.new([[rbxasset://fonts/families/Ubuntu.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-		suacc2["TextColor3"] = Color3.fromRGB(255, 255, 255);
-		suacc2["BackgroundTransparency"] = 1;
-		suacc2["Size"] = UDim2.new(0, 400, 0, 50);
-		suacc2["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-		suacc2["Text"] = [[Are you sure]];
+		local suacc2 = Instance.new("TextLabel", tat_)
+		suacc2["BorderSizePixel"] = 0
+		suacc2["TextSize"] = 20
+		suacc2["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+		suacc2["FontFace"] = Font.new([[rbxasset://fonts/families/Ubuntu.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+		suacc2["TextColor3"] = Color3.fromRGB(255, 255, 255)
+		suacc2["BackgroundTransparency"] = 1
+		suacc2["Size"] = UDim2.new(0, 400, 0, 50)
+		suacc2["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+		suacc2["Text"] = [[Are you sure]]
 
-		local btnyes = Instance.new("TextButton", tat_);
-		btnyes["BorderSizePixel"] = 0;
-		btnyes["TextSize"] = 25;
-		btnyes["TextColor3"] = Color3.fromRGB(255, 255, 255);
-		btnyes["BackgroundColor3"] = Color3.fromRGB(5, 5, 5);
-		btnyes["FontFace"] = Font.new([[rbxasset://fonts/families/Ubuntu.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-		btnyes["AnchorPoint"] = Vector2.new(0, 1);
-		btnyes["Size"] = UDim2.new(0, 150, 0, 50);
-		btnyes["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-		btnyes["Text"] = [[Yes]];
-		btnyes["Position"] = UDim2.new(0, 40, 1, -40);
+		local btnyes = Instance.new("TextButton", tat_)
+		btnyes["BorderSizePixel"] = 0
+		btnyes["TextSize"] = 25
+		btnyes["TextColor3"] = Color3.fromRGB(255, 255, 255)
+		btnyes["BackgroundColor3"] = Color3.fromRGB(5, 5, 5)
+		btnyes["FontFace"] = Font.new([[rbxasset://fonts/families/Ubuntu.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+		btnyes["AnchorPoint"] = Vector2.new(0, 1)
+		btnyes["Size"] = UDim2.new(0, 150, 0, 50)
+		btnyes["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+		btnyes["Text"] = [[Yes]]
+		btnyes["Position"] = UDim2.new(0, 40, 1, -40)
 		btnyes.MouseButton1Down:Connect(function()
 			TeddyUI_Premium:Destroy()
 		end)
 
-		local thuaaa = Instance.new("UICorner", btnyes);
+		local thuaaa_corner = Instance.new("UICorner", btnyes)
 
-		local thuaaa = Instance.new("UIStroke", btnyes);
-		thuaaa["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-		thuaaa["Color"] = Color3.fromRGB(39, 39, 39);
+		local thuaaa = Instance.new("UIStroke", btnyes)
+		thuaaa["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+		thuaaa["Color"] = Color3.fromRGB(39, 39, 39)
 
-		local btnno = Instance.new("TextButton", tat_);
-		btnno["BorderSizePixel"] = 0;
-		btnno["TextSize"] = 25;
-		btnno["TextColor3"] = Color3.fromRGB(255, 255, 255);
-		btnno["BackgroundColor3"] = Color3.fromRGB(5, 5, 5);
-		btnno["FontFace"] = Font.new([[rbxasset://fonts/families/Ubuntu.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-		btnno["AnchorPoint"] = Vector2.new(1, 1);
-		btnno["Size"] = UDim2.new(0, 150, 0, 50);
-		btnno["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-		btnno["Text"] = [[No]];
-		btnno["Position"] = UDim2.new(1, -40, 1, -40);
+		local btnno = Instance.new("TextButton", tat_)
+		btnno["BorderSizePixel"] = 0
+		btnno["TextSize"] = 25
+		btnno["TextColor3"] = Color3.fromRGB(255, 255, 255)
+		btnno["BackgroundColor3"] = Color3.fromRGB(5, 5, 5)
+		btnno["FontFace"] = Font.new([[rbxasset://fonts/families/Ubuntu.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+		btnno["AnchorPoint"] = Vector2.new(1, 1)
+		btnno["Size"] = UDim2.new(0, 150, 0, 50)
+		btnno["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+		btnno["Text"] = [[No]]
+		btnno["Position"] = UDim2.new(1, -40, 1, -40)
 
 		btnno.MouseButton1Down:Connect(function()
 			tat_:Destroy()
 			DropdownZone.Visible = false
 		end)
+		local thuaa_corner = Instance.new("UICorner", btnno)
 
-		local thuaa = Instance.new("UICorner", btnno);
-
-		local thuaa = Instance.new("UIStroke", btnno);
-		thuaa["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-		thuaa["Color"] = Color3.fromRGB(39, 39, 39);
+		local thuaa = Instance.new("UIStroke", btnno)
+		thuaa["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+		thuaa["Color"] = Color3.fromRGB(39, 39, 39)
 	end)
-	
 	Icon_3.Name = "Icon"
 	Icon_3.Parent = Close
 	Icon_3.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -391,8 +387,8 @@ function Library:NewWindow(ConfigWindow)
 	TabFrame.BackgroundTransparency = 1.000
 	TabFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	TabFrame.BorderSizePixel = 0
-	TabFrame.Position = UDim2.new(0, 0, 0, 40)
-	TabFrame.Size = UDim2.new(0, 130, 1, -40)
+	TabFrame.Position = UDim2.new(0, 0, 0, 50)
+	TabFrame.Size = UDim2.new(0, 144, 1, -50)
 
 	Line_2.Name = "Line"
 	Line_2.Parent = TabFrame
@@ -409,7 +405,7 @@ function Library:NewWindow(ConfigWindow)
 	ScrollingTab.BackgroundTransparency = 1.000
 	ScrollingTab.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	ScrollingTab.BorderSizePixel = 0
-	ScrollingTab.Position = UDim2.new(0, 0, 0, 5)
+	ScrollingTab.Position = UDim2.new(0, 0, 0, 10)
 	ScrollingTab.Selectable = false
 	ScrollingTab.Size = UDim2.new(1, 0, 1, -10)
 	ScrollingTab.ScrollBarThickness = 0
@@ -429,8 +425,8 @@ function Library:NewWindow(ConfigWindow)
 	LayoutFrame.BackgroundTransparency = 1.000
 	LayoutFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	LayoutFrame.BorderSizePixel = 0
-	LayoutFrame.Position = UDim2.new(0, 130, 0, 40)
-	LayoutFrame.Size = UDim2.new(1, -130, 1, -40)
+	LayoutFrame.Position = UDim2.new(0, 144, 0, 50)
+	LayoutFrame.Size = UDim2.new(1, -144, 1, -50)
 	LayoutFrame.ClipsDescendants = true
 
 	RealLayout.Name = "RealLayout"
@@ -475,16 +471,13 @@ function Library:NewWindow(ConfigWindow)
 	DropdownZone.Parent = Main
 	DropdownZone.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	DropdownZone.BackgroundTransparency = 1
-
 	DropdownZone.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	DropdownZone.BorderSizePixel = 0
 	DropdownZone.Size = UDim2.new(1, 0, 1, 0)
 	DropdownZone.Visible = false
 	self:MakeDraggable(Top, DropShadowHolder)
-	
 	local AllLayouts = 0
 	local Tab = {}
-	
 	function Tab:T(t)
 		local TabDisable = Instance.new("Frame")
 		local Choose_2 = Instance.new("Frame")
@@ -494,7 +487,6 @@ function Library:NewWindow(ConfigWindow)
 		local Layout = Instance.new("ScrollingFrame")
 		local UIPadding_3 = Instance.new("UIPadding")
 		local UIListLayout_3 = Instance.new("UIListLayout")
-		
 		TabDisable.Name = "TabDisable"
 		TabDisable.Parent = ScrollingTab
 		TabDisable.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -562,14 +554,12 @@ function Library:NewWindow(ConfigWindow)
 		UIListLayout_3.Parent = Layout
 		UIListLayout_3.SortOrder = Enum.SortOrder.LayoutOrder
 		UIListLayout_3.Padding = UDim.new(0, 10)
-		
 		if AllLayouts == 0 then
 			NameTab_2.TextTransparency = 0
 			Choose_2.Visible = true
 			UIPageLayout:JumpToIndex(0)
 			TextLabel.Text = t
 		end
-		
 		Click_Tab_2.Activated:Connect(function()
 			TextLabel.Text = t
 			for i, v in next, ScrollingTab:GetChildren() do
@@ -583,9 +573,7 @@ function Library:NewWindow(ConfigWindow)
 			Choose_2.Visible = true
 		end)
 		AllLayouts = AllLayouts + 1
-		
 		local TabFunc = {}
-		
 		function TabFunc:AddSection(RealNameSection)
 			local Section = Instance.new("Frame")
 			local UICorner_5 = Instance.new("UICorner")
@@ -597,7 +585,6 @@ function Library:NewWindow(ConfigWindow)
 			local SectionList = Instance.new("Frame")
 			local UIPadding_4 = Instance.new("UIPadding")
 			local UIListLayout_4 = Instance.new("UIListLayout")
-			
 			Section.Name = "Section"
 			Section.Parent = Layout
 			Section.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -668,9 +655,7 @@ function Library:NewWindow(ConfigWindow)
 			UIListLayout_4:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 				Section.Size = UDim2.new(1, 0, 0, UIListLayout_4.AbsoluteContentSize.Y + 55)
 			end)
-			
 			local SectionFunc = {}
-			
 			function SectionFunc:AddToggle(cftoggle)
 				local cftoggle = Library:MakeConfig({
 					Title = "Toggle < Missing Title >",
@@ -689,7 +674,6 @@ function Library:NewWindow(ConfigWindow)
 				local UICorner_8 = Instance.new("UICorner")
 				local Toggle_Click = Instance.new("TextButton")
 				local Content = Instance.new("TextLabel")
-				
 				Toggle.Name = "Toggle"
 				Toggle.Parent = SectionList
 				Toggle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -721,8 +705,8 @@ function Library:NewWindow(ConfigWindow)
 				ToggleCheck.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 				ToggleCheck.BorderColor3 = Color3.fromRGB(0, 0, 0)
 				ToggleCheck.BorderSizePixel = 0
-				ToggleCheck.Position = UDim2.new(1, -40, 0.5, 0)
-				ToggleCheck.Size = UDim2.new(0, 32, 0, 18)
+				ToggleCheck.Position = UDim2.new(1, -45, 0.5, 0)
+				ToggleCheck.Size = UDim2.new(0, 34, 0, 18)
 
 				UICorner_7.CornerRadius = UDim.new(1, 0)
 				UICorner_7.Parent = ToggleCheck
@@ -733,8 +717,8 @@ function Library:NewWindow(ConfigWindow)
 				Check.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
 				Check.BorderColor3 = Color3.fromRGB(0, 0, 0)
 				Check.BorderSizePixel = 0
-				Check.Position = UDim2.new(0, 3, 0.5, 0)
-				Check.Size = UDim2.new(0, 12, 0, 12)
+				Check.Position = UDim2.new(0, 2, 0.5, 0)
+				Check.Size = UDim2.new(0, 14, 0, 14)
 
 				UICorner_8.CornerRadius = UDim.new(1, 0)
 				UICorner_8.Parent = Check
@@ -755,7 +739,7 @@ function Library:NewWindow(ConfigWindow)
 				Content.Parent = Toggle
 				Content.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				Content.BackgroundTransparency = 1.000
- content.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				Content.BorderColor3 = Color3.fromRGB(0, 0, 0)
 				Content.BorderSizePixel = 0
 				Content.Position = UDim2.new(0, 10, 0, 22)
 				Content.Size = UDim2.new(1, -60, 1, 0)
@@ -766,18 +750,16 @@ function Library:NewWindow(ConfigWindow)
 				Content.TextXAlignment = Enum.TextXAlignment.Left
 				Content.TextYAlignment = Enum.TextYAlignment.Top
 				Library:UpdateContent(Content, Title_2, Toggle)
-				
 				local ToggleFunc = { Value = cftoggle.Default }
-				
 				function ToggleFunc:Set(Boolean)
 					if Boolean then
 						Library:TweenInstance(ToggleCheck, 0.3, "BackgroundColor3", Color3.fromRGB(0, 170, 255))
-						Library:TweenInstance(Check, 0.3, "Position", UDim2.new(0, 17, 0.5, 0))
+						Library:TweenInstance(Check, 0.3, "Position", UDim2.new(0, 18, 0.5, 0))
 						Library:TweenInstance(Check, 0.3, "BackgroundColor3", Color3.fromRGB(255, 255, 255))
 					else
 						Library:TweenInstance(ToggleCheck, 0.3, "BackgroundColor3", Color3.fromRGB(60, 60, 60))
 						Library:TweenInstance(Check, 0.3, "BackgroundColor3", Color3.fromRGB(200, 200, 200))
-						Library:TweenInstance(Check, 0.3, "Position", UDim2.new(0, 3, 0.5, 0))
+						Library:TweenInstance(Check, 0.3, "Position", UDim2.new(0, 2, 0.5, 0))
 					end
 					self.Value = Boolean
 					cftoggle.Callback(Boolean)
@@ -803,7 +785,6 @@ function Library:NewWindow(ConfigWindow)
 				local Button_Click = Instance.new("TextButton")
 				local Content_2 = Instance.new("TextLabel")
 				local ImageLabel = Instance.new("ImageLabel")
-				
 				Button.Name = "Button"
 				Button.Parent = SectionList
 				Button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -866,7 +847,6 @@ function Library:NewWindow(ConfigWindow)
 				ImageLabel.Size = UDim2.new(0, 24, 0, 24)
 				ImageLabel.Image = "rbxassetid://85905776508942"
 				Library:UpdateContent(Content_2, Title_3, Button)
-				
 				Button_Click.Activated:Connect(function()
 					Button.BackgroundTransparency = 0.970
 					cfbutton.Callback()
@@ -899,18 +879,12 @@ function Library:NewWindow(ConfigWindow)
 				local UICorner_24 = Instance.new("UICorner")
 				local Topbar = Instance.new("Frame")
 				local Title_10 = Instance.new("TextLabel")
-				local SearchFrame_2 = Instance.new("Frame")
-				local UICorner_25 = Instance.new("UICorner")
-				local UIStroke_4 = Instance.new("UIStroke")
-				local IconSearch_2 = Instance.new("ImageLabel")
-				local TextBox = Instance.new("TextBox")
 				local Click_Dropdown = Instance.new("TextButton")
 				local Icon_4 = Instance.new("ImageLabel")
 				local Real_List = Instance.new("ScrollingFrame")
 				local UICorner_26 = Instance.new("UICorner")
 				local UIListLayout_5 = Instance.new("UIListLayout")
 				local UIPadding_5 = Instance.new("UIPadding")
-				
 				Dropdown.Name = "Dropdown"
 				Dropdown.Parent = SectionList
 				Dropdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -1003,7 +977,6 @@ function Library:NewWindow(ConfigWindow)
 				ImageLabel_2.Size = UDim2.new(0, 15, 0, 15)
 				ImageLabel_2.Image = "rbxassetid://80845745785361"
 				Library:UpdateContent(Content_6, Title_8, Dropdown)
-				
 				DropdownList.Name = "DropdownList"
 				DropdownList.Parent = DropdownZone
 				DropdownList.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1036,53 +1009,13 @@ function Library:NewWindow(ConfigWindow)
 				Title_10.BorderColor3 = Color3.fromRGB(0, 0, 0)
 				Title_10.BorderSizePixel = 0
 				Title_10.Position = UDim2.new(0, 15, 0, 0)
-				Title_10.Size = UDim2.new(1, -200, 1, -5)
+				Title_10.Size = UDim2.new(1, -60, 1, -5)
 				Title_10.Font = Enum.Font.GothamBold
 				Title_10.Text = cfdropdown.Title
 				Title_10.TextColor3 = Color3.fromRGB(255, 255, 255)
 				Title_10.TextSize = 14.000
 				Title_10.TextWrapped = true
 				Title_10.TextXAlignment = Enum.TextXAlignment.Left
-
-				SearchFrame_2.Name = "SearchFrame"
-				SearchFrame_2.Parent = Topbar
-				SearchFrame_2.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-				SearchFrame_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
-				SearchFrame_2.BorderSizePixel = 0
-				SearchFrame_2.Position = UDim2.new(1, -150, 0, 8)
-				SearchFrame_2.Size = UDim2.new(0, 100, 0, 30)
-
-				UICorner_25.CornerRadius = UDim.new(0, 5)
-				UICorner_25.Parent = SearchFrame_2
-
-				UIStroke_4.Color = Color3.fromRGB(100, 100, 100)
-				UIStroke_4.Transparency = 0.7400000095367432
-				UIStroke_4.Parent = SearchFrame_2
-
-				IconSearch_2.Name = "IconSearch"
-				IconSearch_2.Parent = SearchFrame_2
-				IconSearch_2.AnchorPoint = Vector2.new(0, 0.5)
-				IconSearch_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-				IconSearch_2.BackgroundTransparency = 1.000
-				IconSearch_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
-				IconSearch_2.BorderSizePixel = 0
-				IconSearch_2.Position = UDim2.new(0, 10, 0.5, 0)
-				IconSearch_2.Size = UDim2.new(0, 15, 0, 15)
-				IconSearch_2.Image = "rbxassetid://71309835376233"
-
-				TextBox.Parent = SearchFrame_2
-				TextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-				TextBox.BackgroundTransparency = 1.000
-				TextBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
-				TextBox.BorderSizePixel = 0
-				TextBox.Position = UDim2.new(0, 35, 0, 0)
-				TextBox.Size = UDim2.new(1, -35, 1, 0)
-				TextBox.Font = Enum.Font.GothamBold
-				TextBox.PlaceholderText = "Search..."
-				TextBox.Text = ""
-				TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-				TextBox.TextSize = 12.000
-				TextBox.TextXAlignment = Enum.TextXAlignment.Left
 
 				Click_Dropdown.Name = "Click_Dropdown"
 				Click_Dropdown.Parent = Topbar
@@ -1117,7 +1050,6 @@ function Library:NewWindow(ConfigWindow)
 				Real_List.ScrollBarThickness = 0
 				Real_List.Size = UDim2.new(1, -20, 1, -60)
 				Library:UpdateScrolling(Real_List, UIListLayout_5)
-				
 				UICorner_26.CornerRadius = UDim.new(0, 5)
 				UICorner_26.Parent = Real_List
 
@@ -1133,7 +1065,6 @@ function Library:NewWindow(ConfigWindow)
 
 				local UICorner_29 = Instance.new("UICorner")
 				UICorner_29.Parent = DropdownZone
-				
 				Drop_Click.Activated:Connect(function()
 					DropdownZone.Visible = true
 					DropdownList.Visible = true
@@ -1145,9 +1076,7 @@ function Library:NewWindow(ConfigWindow)
 					wait(0.3)
 					DropdownZone.Visible = false
 				end)
-				
 				local DropFunc = { Value = cfdropdown.Default }
-				
 				function DropFunc:Set(cc)
 					DropFunc.Value = cc or DropFunc.Value
 					for i, v in next, Real_List:GetChildren() do
@@ -1176,7 +1105,6 @@ function Library:NewWindow(ConfigWindow)
 					local Option2_Click = Instance.new("TextButton")
 					local Title_12 = Instance.new("TextLabel")
 					local UIGradient_3 = Instance.new("UIGradient")
-					
 					Option2.Name = "Option 2"
 					Option2.Parent = Real_List
 					Option2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -1217,12 +1145,11 @@ function Library:NewWindow(ConfigWindow)
 					UIGradient_3.Rotation = 0.9900000095367432
 					UIGradient_3.Transparency = NumberSequence.new { NumberSequenceKeypoint.new(0.00, 0.50), NumberSequenceKeypoint.new(0.50, 0.49), NumberSequenceKeypoint.new(1.00, 0.44) }
 					UIGradient_3.Parent = Option2
-					
 					Option2_Click.Activated:Connect(function()
 						if cfdropdown.Multi then
 							if Option2.BackgroundTransparency < 0.950 then
-								for i, x in next, DropFunc.Value do
-									if x == Title_12.Text then
+								for i, v in next, DropFunc.Value do
+									if v == Title_12.Text then
 										table.remove(DropFunc.Value, i)
 									end
 								end
@@ -1274,7 +1201,6 @@ function Library:NewWindow(ConfigWindow)
 				local UICorner_18 = Instance.new("UICorner")
 				local RealTextBox = Instance.new("TextBox")
 				local WritingIcon = Instance.new("ImageLabel")
-				
 				Input.Name = "Input"
 				Input.Parent = SectionList
 				Input.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -1315,7 +1241,6 @@ function Library:NewWindow(ConfigWindow)
 				Content_5.TextXAlignment = Enum.TextXAlignment.Left
 				Content_5.TextYAlignment = Enum.TextYAlignment.Top
 				Library:UpdateContent(Content_5, Title_7, Input)
-				
 				TextboxFrame.Name = "TextboxFrame"
 				TextboxFrame.Parent = Input
 				TextboxFrame.AnchorPoint = Vector2.new(0, 0.5)
@@ -1353,13 +1278,11 @@ function Library:NewWindow(ConfigWindow)
 				WritingIcon.Position = UDim2.new(0, 10, 0.5, 0)
 				WritingIcon.Size = UDim2.new(0, 15, 0, 15)
 				WritingIcon.Image = "rbxassetid://126409600467363"
-				
 				RealTextBox.FocusLost:Connect(function()
 					cftextbox.Callback(RealTextBox.Text)
 				end)
 				cftextbox.Callback(RealTextBox.Text)
 			end
-			
 			function SectionFunc:AddSlider(cfslider)
 				local cfslider = Library:MakeConfig({
 					Title = "Slider < Missing Title >",
@@ -1384,7 +1307,6 @@ function Library:NewWindow(ConfigWindow)
 				local UICorner_13 = Instance.new("UICorner")
 				local SliderValue = Instance.new("TextBox")
 				local UICorner_14 = Instance.new("UICorner")
-				
 				Slider.Name = "Slider"
 				Slider.Parent = SectionList
 				Slider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -1477,10 +1399,8 @@ function Library:NewWindow(ConfigWindow)
 
 				UICorner_14.CornerRadius = UDim.new(0, 2)
 				UICorner_14.Parent = SliderValue
-				
 				local SliderFunc = {Value = cfslider.Default}
 				local Dragging = false
-				
 				local function Round(Number, Factor)
 					local Result = math.floor(Number / Factor + (math.sign(Number) * 0.5)) * Factor
 					if Result < 0 then
@@ -1488,7 +1408,6 @@ function Library:NewWindow(ConfigWindow)
 					end
 					return Result
 				end
-				
 				function SliderFunc:Set(Value)
 					Value = math.clamp(Round(Value, cfslider.Increment), cfslider.Min, cfslider.Max)
 					SliderFunc.Value = Value
@@ -1505,14 +1424,12 @@ function Library:NewWindow(ConfigWindow)
 						Dragging = true
 					end
 				end)
-				
 				SliderFrame.InputEnded:Connect(function(Input)
 					if Input.UserInputType == Enum.UserInputType.MouseButton1 then
 						Dragging = false
 						cfslider.Callback(SliderFunc.Value)
 					end
 				end)
-				
 				game:GetService("UserInputService").InputChanged:Connect(function(Input)
 					if Dragging and Input.UserInputType == Enum.UserInputType.MouseMovement then
 						local SizeScale = math.clamp(
@@ -1520,7 +1437,6 @@ function Library:NewWindow(ConfigWindow)
 						SliderFunc:Set(cfslider.Min + ((cfslider.Max - cfslider.Min) * SizeScale))
 					end
 				end)
-				
 				SliderValue:GetPropertyChangedSignal("Text"):Connect(function()
 					local Valid = SliderValue.Text:gsub("[^%d]", "")
 					if Valid ~= "" then
@@ -1530,7 +1446,6 @@ function Library:NewWindow(ConfigWindow)
 						SliderValue.Text = tostring(Valid)
 					end
 				end)
-				
 				SliderValue.FocusLost:Connect(function()
 					if SliderValue.Text ~= "" then
 						SliderFunc:Set(tonumber(SliderValue.Text))
@@ -1538,15 +1453,12 @@ function Library:NewWindow(ConfigWindow)
 						SliderFunc:Set(0)
 					end
 				end)
-				
 				SliderFunc:Set(tonumber(cfslider.Default))
 				return SliderFunc
 			end
-			
 			function SectionFunc:AddSeperator(args)
 				local Seperator = Instance.new("Frame")
 				local Title_5 = Instance.new("TextLabel")
-				
 				Seperator.Name = "Seperator"
 				Seperator.Parent = SectionList
 				Seperator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -1569,7 +1481,6 @@ function Library:NewWindow(ConfigWindow)
 				Title_5.TextSize = 13.000
 				Title_5.TextXAlignment = Enum.TextXAlignment.Left
 			end
-			
 			function SectionFunc:AddParagraph(cfpara)
 				local cfpara = Library:MakeConfig({
 					Title = "Paragraph < Missing Title >",
@@ -1580,7 +1491,6 @@ function Library:NewWindow(ConfigWindow)
 				local Title_6 = Instance.new("TextLabel")
 				local Content_4 = Instance.new("TextLabel")
 				local ParaFunc = {}
-				
 				Paragraph.Name = "Paragraph"
 				Paragraph.Parent = SectionList
 				Paragraph.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -1621,7 +1531,6 @@ function Library:NewWindow(ConfigWindow)
 				Content_4.TextXAlignment = Enum.TextXAlignment.Left
 				Content_4.TextYAlignment = Enum.TextYAlignment.Top
 				Library:UpdateContent(Content_4, Title_6, Paragraph)
-				
 				function ParaFunc:SetTitle(args)
 					Title_6.Text = args
 				end
@@ -1636,38 +1545,34 @@ function Library:NewWindow(ConfigWindow)
 
 		return TabFunc
 	end
-	
-	local G2L = {};
+	local G2L = {}
 
-	G2L["1"] = Instance.new("ScreenGui", game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"));
-	G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling;
+	G2L["1"] = Instance.new("ScreenGui", game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"))
+	G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling
 
-	G2L["2"] = Instance.new("ImageButton", G2L["1"]);
-	G2L["2"]["BorderSizePixel"] = 0;
+	G2L["2"] = Instance.new("ImageButton", G2L["1"])
+	G2L["2"]["BorderSizePixel"] = 0
 	G2L["2"].Visible = true
 	self:MakeDraggable(G2L["2"],G2L["2"])
-	
-	G2L["2"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
-	G2L["2"]["Image"] = [[rbxassetid://136103435617044]];
-	G2L["2"]["Size"] = UDim2.new(0, 50, 0, 50);
-	G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-	G2L["2"]["Position"] = UDim2.new(0.26651, 0, 0.43687, 0);
+	G2L["2"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+	G2L["2"]["Image"] = [[rbxassetid://136103435617044]]
+	G2L["2"]["Size"] = UDim2.new(0, 50, 0, 50)
+	G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+	G2L["2"]["Position"] = UDim2.new(0.26651, 0, 0.43687, 0)
 
-	G2L["3"] = Instance.new("UICorner", G2L["2"]);
-	G2L["3"]["CornerRadius"] = UDim.new(1, 0);
+	G2L["3"] = Instance.new("UICorner", G2L["2"])
+	G2L["3"]["CornerRadius"] = UDim.new(1, 0)
 
-	G2L["4"] = Instance.new("UIStroke", G2L["2"]);
-	G2L["4"]["Thickness"] = 2;
-	G2L["4"]["Color"] = Color3.fromRGB(0, 170, 255);
-	
+	G2L["4"] = Instance.new("UIStroke", G2L["2"])
+	G2L["4"]["Thickness"] = 2
+	G2L["4"]["Color"] = Color3.fromRGB(0, 170, 255)
+
 	G2L["2"].MouseButton1Click:Connect(function()
 		TeddyUI_Premium.Enabled = not TeddyUI_Premium.Enabled
 	end)
-	
 	Minize.MouseButton1Click:Connect(function()
 		TeddyUI_Premium.Enabled = false
 	end)
-	
 	return Tab
 end
 
